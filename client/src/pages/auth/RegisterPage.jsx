@@ -90,7 +90,7 @@ export default function RegisterPage() {
                   <div className="input-group">
                     {/* Selecting a district resets the area field */}
                     <label>District</label>
-                    <select className="input" value={form.district} onChange={(e) => { set("district", e.target.value); set("area", ""); }}>
+                    <select className="input" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, area: "" })}>
                       <option value="">Select district</option>
                       {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
                     </select>

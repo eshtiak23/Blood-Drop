@@ -62,7 +62,7 @@ export default function CreateRequestPage() {
             {/* Cascading district → area: selecting a district populates its areas */}
             <div className="input-group">
               <label>District</label>
-              <select className="input" value={form.district} onChange={(e) => { set("district", e.target.value); set("area", ""); }} required>
+              <select className="input" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, area: "" })} required>
                 <option value="">Select</option>{DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
