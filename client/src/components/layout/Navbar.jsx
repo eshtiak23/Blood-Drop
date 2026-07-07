@@ -54,14 +54,14 @@ export default function Navbar() {
         {/* Right side: Theme toggle + User menu or Login/Register */}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {/* Theme Toggle Button — switches between light and dark mode */}
-          <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} style={{ padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <button className="theme-toggle" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} style={{ padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
           {isAuthenticated ? (
             <>
               {/* Notification Bell — only shown on desktop */}
-              <button className="hide-mobile" onClick={() => navigate("/notifications")} style={{ position: "relative", padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <button className="hide-mobile notif-btn" onClick={() => navigate("/notifications")} style={{ position: "relative", padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Bell size={18} />
               </button>
               
