@@ -29,16 +29,11 @@ export default function ProfilePage() {
     <div className="container" style={{ padding: "32px 20px", maxWidth: 800 }}>
       <h1 style={{ fontSize: 24, fontWeight: 800 }}>My Profile</h1>
 
-      <div className="card animate-fadeIn" style={{ marginTop: 20, overflow: "hidden" }}>
-        {/* Red gradient banner */}
-        <div style={{ height: 80, background: "linear-gradient(135deg, var(--red), var(--red-dark))", position: "relative" }}>
-          <div style={{ position: "absolute", top: 8, right: 16, width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />
-        </div>
-
-        <div className="card-body" style={{ paddingTop: 0, marginTop: -40 }}>
-          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "end" }}>
+      <div className="card animate-fadeIn" style={{ marginTop: 20 }}>
+        <div className="card-body">
+          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "center" }}>
             {/* Profile Photo or Initials */}
-            <div style={{ width: 80, height: 80, borderRadius: "50%", border: "4px solid var(--bg-card)", overflow: "hidden", background: user.photo ? "none" : (c.bg || "var(--red-light)"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, fontWeight: 800, color: c.text || "var(--red)", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", overflow: "hidden", background: user.photo ? "none" : (c.bg || "var(--red-light)"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: c.text || "var(--red)", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
               {user.photo ? (
                 <img src={user.photo} alt={user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
@@ -47,7 +42,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Name, Role, Blood Group */}
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <h2 style={{ fontSize: 22, fontWeight: 700 }}>{user.name}</h2>
                 {user.isVerified && <span className="badge badge-green"><Shield size={12} /> Verified</span>}

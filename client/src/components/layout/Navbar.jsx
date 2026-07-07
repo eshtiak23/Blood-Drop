@@ -105,7 +105,7 @@ export default function Navbar() {
           )}
 
           {/* Mobile Hamburger Menu Button — only visible on small screens */}
-          <button className="mobile-menu-btn" onClick={() => setOpen(!open)} style={{ padding: 8, borderRadius: 8, display: "none", alignItems: "center", justifyContent: "center" }}>
+          <button className="mobile-menu-btn" onClick={() => setOpen(!open)} style={{ padding: 8, borderRadius: 8, display: "none", alignItems: "center", justifyContent: "center", color: "var(--text)" }}>
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>

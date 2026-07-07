@@ -287,6 +287,7 @@ textarea.input { min-height: 100px; resize: vertical; }
 .dark .dropdown-menu { background: var(--bg-card); border-color: var(--border); }
 .dark select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239B97B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
 .dark ::-webkit-scrollbar-thumb { background: var(--border); }
+.dark .mobile-menu-btn { color: #fff !important; }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
@@ -318,4 +319,7 @@ textarea.input { min-height: 100px; resize: vertical; }
   .badge { padding: 3px 8px; font-size: 11px; }
   .input { padding: 8px 12px; font-size: 13px; }
   .card { border-radius: var(--radius-sm); }
+  .avatar { width: 36px; height: 36px; font-size: 14px; }
+  .avatar-lg { width: 48px; height: 48px; font-size: 18px; }
+  .avatar-xl { width: 64px; height: 64px; font-size: 24px; }
 }

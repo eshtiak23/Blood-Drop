@@ -52,17 +52,11 @@ export default function DashboardPage() {
     <div className="container" style={{ padding: "32px 20px", maxWidth: 1100 }}>
 
       {/* ── Profile Card + Welcome ── */}
-      <div className="card animate-fadeIn" style={{ overflow: "hidden" }}>
-        {/* Red gradient banner */}
-        <div style={{ height: 100, background: "linear-gradient(135deg, var(--red), var(--red-dark))", position: "relative" }}>
-          <div style={{ position: "absolute", top: 10, right: 20, width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />
-          <div style={{ position: "absolute", bottom: -30, left: 30, width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
-        </div>
-
-        <div className="card-body" style={{ paddingTop: 0, marginTop: -40 }}>
-          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "end" }}>
+      <div className="card animate-fadeIn">
+        <div className="card-body">
+          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "center" }}>
             {/* Profile Photo or Initials Avatar */}
-            <div style={{ width: 80, height: 80, borderRadius: "50%", border: "4px solid var(--bg-card)", overflow: "hidden", background: user?.photo ? "none" : (c.bg || "var(--red-light)"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, fontWeight: 800, color: c.text || "var(--red)", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", overflow: "hidden", background: user?.photo ? "none" : (c.bg || "var(--red-light)"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: c.text || "var(--red)", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
               {user?.photo ? (
                 <img src={user.photo} alt={user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
@@ -71,7 +65,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Name, Role, Blood Group, Verified */}
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <h1 style={{ fontSize: 22, fontWeight: 800 }}>Welcome back, {user?.name?.split(" ")[0]} 👋</h1>
                 {user?.isVerified && <span className="badge badge-green"><Shield size={10} /> Verified</span>}
@@ -85,7 +79,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Edit Profile Button */}
-            <Link to="/settings" className="btn btn-secondary btn-sm" style={{ alignSelf: "start" }}>
+            <Link to="/settings" className="btn btn-secondary btn-sm">
               Edit Profile
             </Link>
           </div>
@@ -111,7 +105,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Stats Grid ── */}
-      <div className="grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 24 }}>
+      <div className="grid dash-stats" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 24 }}>
         {user?.role === "donor" && (
           <>
             <StatCard icon={<Heart size={20} color="var(--red)" />} label="Donations" value={user.totalDonations || 0} />
@@ -134,7 +128,7 @@ export default function DashboardPage() {
       {/* ── Quick Actions ── */}
       <div style={{ marginTop: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Quick Actions</h2>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div className="dash-actions" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {user?.role === "seeker" && (
             <Link to="/requests/create" className="btn btn-primary" style={{ gap: 8 }}>
               <Plus size={16} /> Create Request
@@ -153,7 +147,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Blood Stock Overview + Requests Side by Side ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 24 }}>
+      <div className="dash-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 24 }}>
 
         {/* Blood Stock */}
         {stats && (
@@ -228,10 +222,13 @@ export default function DashboardPage() {
       {/* Responsive: stack on mobile */}
       <style>{`
         @media(max-width:768px){
-          .grid[style*="repeat(4"]{grid-template-columns:repeat(2,1fr) !important;}
+          .dash-stats{grid-template-columns:repeat(2,1fr) !important;}
+          .dash-two-col{grid-template-columns:1fr !important;}
         }
-        @media(max-width:600px){
-          .container > div[style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:1fr !important;}
+        @media(max-width:480px){
+          .dash-stats{grid-template-columns:1fr !important;}
+          .dash-actions{flex-direction:column;}
+          .dash-actions .btn{width:100%;}
         }
       `}</style>
     </div>
