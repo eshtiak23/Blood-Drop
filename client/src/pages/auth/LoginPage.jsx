@@ -1,3 +1,9 @@
+/**
+ * LoginPage – Authenticates existing users (donors or seekers).
+ * Collects email + password, calls AuthContext.login(), then
+ * redirects to /dashboard on success. Displays inline errors
+ * for invalid credentials or network issues.
+ */
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -6,11 +12,13 @@ import { Heart, Eye, EyeOff, Loader2 } from "lucide-react";
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  // Form fields, password visibility toggle, loading spinner, and error message
   const [form, setForm] = useState({ email: "", password: "" });
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Validate then call AuthContext.login(); navigate on success, show error on failure
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); setError("");
@@ -43,7 +51,8 @@ export default function LoginPage() {
               <label>Password</label>
               <div style={{ position: "relative" }}>
                 <input className="input" type={show ? "text" : "password"} placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required style={{ paddingRight: 40 }} />
-                <button type="button" onClick={() => setShow(!show)} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", padding: 4 }}>
+                {/* Toggle password visibility */}
+              <button type="button" onClick={() => setShow(!show)} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", padding: 4 }}>
                   {show ? <EyeOff size={18} color="var(--text-muted)" /> : <Eye size={18} color="var(--text-muted)" />}
                 </button>
               </div>

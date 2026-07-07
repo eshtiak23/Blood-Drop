@@ -1,9 +1,14 @@
+/**
+ * BookmarksPage - Displays a list of donors the user has bookmarked for quick access.
+ * Users can view saved donors and remove bookmarks from this page.
+ */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getBookmarks, removeBookmark } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
 import { Bookmark, MapPin, Droplets, Trash2 } from "lucide-react";
 
+/** Returns blood group badge colors based on dark/light theme */
 function getBloodGroupColor(bloodGroup) {
   const c = BLOOD_GROUP_COLORS[bloodGroup];
   if (!c) return {};
@@ -16,6 +21,7 @@ export default function BookmarksPage() {
 
   useEffect(() => { setBookmarks(getBookmarks()); }, []);
 
+  /** Removes a donor from bookmarks and refreshes the list */
   const remove = (donorId) => { removeBookmark(donorId); setBookmarks(getBookmarks()); };
 
   return (

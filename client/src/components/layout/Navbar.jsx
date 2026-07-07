@@ -1,3 +1,19 @@
+/**
+ * Navbar.jsx — Top Navigation Bar
+ * 
+ * The navigation bar that stays at the top of every page. It's "sticky" —
+ * it stays visible when you scroll down.
+ * 
+ * What it shows depends on whether you're logged in:
+ * - NOT logged in: Shows "Home", "Find Donors", "Requests" links + Login/Register buttons
+ * - Logged in: Shows the same links + notification bell + your avatar with a dropdown menu
+ * 
+ * Features:
+ * - Dark/Light theme toggle (moon/sun icon)
+ * - Responsive: Desktop shows full nav, mobile shows a hamburger menu
+ * - Glass effect: Semi-transparent background with blur
+ */
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -5,22 +21,27 @@ import { useTheme } from "../../context/ThemeContext";
 import { Droplet, Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, User, Settings, LogOut, Bookmark, LogIn, UserPlus } from "lucide-react";
 
 export default function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();
-  const { theme, setTheme } = useTheme();
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();       // Get user info and auth functions
+  const { theme, setTheme } = useTheme();                    // Get theme state and toggle function
+  const navigate = useNavigate();                            // For programmatic page navigation
+  const [open, setOpen] = useState(false);                   // Controls mobile menu visibility
+  const [menuOpen, setMenuOpen] = useState(false);           // Controls user dropdown menu visibility
 
+  /** Log out and redirect to home page */
   const handleLogout = () => { logout(); navigate("/"); setMenuOpen(false); setOpen(false); };
 
   return (
+    /* Sticky header with glass effect (semi-transparent + blur) */
     <header className="glass" style={{ position: "sticky", top: 0, zIndex: 50, borderBottom: "1px solid var(--border)" }}>
       <div className="container" style={{ display: "flex", height: 64, alignItems: "center", justifyContent: "space-between" }}>
+        
+        {/* Logo + Brand Name */}
         <Link to="/" style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <img src="/Logo.png" alt="LifeDrop" style={{ height: 36, width: 36, objectFit: "contain", borderRadius: 8 }} />
           <span style={{ fontSize: 20, fontWeight: 800 }}>Life<span style={{ color: "#DC2626" }}>Drop</span></span>
         </Link>
 
+        {/* Desktop Navigation Links — hidden on mobile */}
         <nav style={{ display: "flex", gap: 28 }} className="desktop-nav">
           {[["/", "Home"], ["/donors", "Find Donors"], ["/requests", "Requests"]].map(([h, l]) => (
             <Link key={h} to={h} style={{ fontSize: 14, fontWeight: 500, color: "var(--text-secondary)", transition: "color 0.2s" }}
@@ -30,16 +51,21 @@ export default function Navbar() {
           ))}
         </nav>
 
+        {/* Right side: Theme toggle + User menu or Login/Register */}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {/* Theme Toggle Button — switches between light and dark mode */}
           <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} style={{ padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
           {isAuthenticated ? (
             <>
+              {/* Notification Bell — only shown on desktop */}
               <button className="hide-mobile" onClick={() => navigate("/notifications")} style={{ position: "relative", padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Bell size={18} />
               </button>
+              
+              {/* User Avatar Dropdown Menu */}
               <div className="dropdown">
                 <button onClick={() => setMenuOpen(!menuOpen)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 8px", borderRadius: 8, transition: "background 0.2s" }}>
                   <div className="avatar avatar-sm">{user?.name?.charAt(0)?.toUpperCase()}</div>
@@ -48,11 +74,13 @@ export default function Navbar() {
                 </button>
                 {menuOpen && (
                   <>
+                    {/* Invisible overlay to close dropdown when clicking outside */}
                     <div style={{ position: "fixed", inset: 0, zIndex: 99 }} onClick={() => setMenuOpen(false)} />
                     <div className="dropdown-menu" style={{ zIndex: 100, minWidth: 200 }}>
                       <button className="dropdown-item" onClick={() => { navigate("/dashboard"); setMenuOpen(false); }}><LayoutDashboard size={16} /> Dashboard</button>
                       <button className="dropdown-item" onClick={() => { navigate("/notifications"); setMenuOpen(false); }}><Bell size={16} /> Notifications</button>
                       <button className="dropdown-item" onClick={() => { navigate("/profile"); setMenuOpen(false); }}><User size={16} /> Profile</button>
+                      {/* Bookmarks — only shown for donors */}
                       {user?.role === "donor" && <button className="dropdown-item" onClick={() => { navigate("/bookmarks"); setMenuOpen(false); }}><Bookmark size={16} /> Bookmarks</button>}
                       <button className="dropdown-item" onClick={() => { navigate("/settings"); setMenuOpen(false); }}><Settings size={16} /> Settings</button>
                       <div className="dropdown-sep" />
@@ -63,23 +91,28 @@ export default function Navbar() {
               </div>
             </>
           ) : (
+            /* Login/Register buttons — only shown when NOT logged in */
             <div className="desktop-nav" style={{ display: "flex", gap: 8 }}>
               <button className="btn btn-ghost btn-sm" onClick={() => navigate("/login")}>Login</button>
               <button className="btn btn-primary btn-sm" onClick={() => navigate("/register")}>Register</button>
             </div>
           )}
 
+          {/* Mobile Hamburger Menu Button — only visible on small screens */}
           <button className="mobile-menu-btn" onClick={() => setOpen(!open)} style={{ padding: 8, borderRadius: 8, display: "none", alignItems: "center", justifyContent: "center" }}>
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
+      {/* Mobile Menu — slides down when hamburger is clicked */}
       {open && (
         <div className="mobile-menu" style={{ borderTop: "1px solid var(--border)", padding: "8px 16px 16px" }}>
+          {/* Navigation links */}
           {[["/", "Home"], ["/donors", "Find Donors"], ["/requests", "Requests"]].map(([h, l]) => (
             <Link key={h} to={h} onClick={() => setOpen(false)} style={{ display: "block", padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}>{l}</Link>
           ))}
+          {/* Auth section — different options based on login status */}
           <div style={{ borderTop: "1px solid var(--border)", marginTop: 8, paddingTop: 8 }}>
             {isAuthenticated ? (
               <>

@@ -1,7 +1,12 @@
+/**
+ * AdminDashboardPage - Admin panel showing platform stats (users, donors, requests)
+ * and a list of recent users with the ability to verify unverified donors.
+ */
 import { useState, useEffect } from "react";
 import { Users, Heart, AlertCircle, Shield, CheckCircle } from "lucide-react";
 import { getRequests } from "../../services/localStore";
 
+/** Reads all users from localStorage */
 function getUsers() {
   return JSON.parse(localStorage.getItem("ld_users") || "[]");
 }
@@ -10,6 +15,7 @@ export default function AdminDashboardPage() {
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
 
+  /** Loads users and computes dashboard stats on mount */
   useEffect(() => {
     const allUsers = getUsers();
     setUsers(allUsers.slice(0, 8));
@@ -22,6 +28,7 @@ export default function AdminDashboardPage() {
     });
   }, []);
 
+  /** Verifies a donor by updating localStorage and local state */
   const verifyDonor = (id) => {
     const allUsers = getUsers();
     const idx = allUsers.findIndex((u) => u._id === id);

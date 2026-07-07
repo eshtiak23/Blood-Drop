@@ -1,3 +1,10 @@
+/**
+ * RegisterPage – New user sign-up for the LifeDrop blood donor app.
+ * Users choose a role (Blood Seeker or Blood Donor). Donors provide
+ * additional profile info (blood group, district, area). On success
+ * the account is created via AuthContext.register() and the user
+ * is redirected to /dashboard.
+ */
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -7,13 +14,16 @@ import { Heart, Loader2 } from "lucide-react";
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  // Default role is "seeker"; toggled by the role selection buttons
   const [role, setRole] = useState("seeker");
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", phone: "", bloodGroup: "", district: "", area: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Derive area options from the selected district (empty until a district is chosen)
   const areas = form.district ? (AREAS[form.district] || []) : [];
 
+  // Validate passwords match, strip confirmPassword, then call AuthContext.register()
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -27,6 +37,7 @@ export default function RegisterPage() {
     finally { setLoading(false); }
   };
 
+  // Shorthand to update a single field in the form state
   const set = (k, v) => setForm({ ...form, [k]: v });
 
   return (
@@ -44,6 +55,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit}>
             {error && <div className="alert alert-error" style={{ marginBottom: 16 }}>{error}</div>}
 
+            {/* Role selector – toggles between seeker and donor */}
             <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
               <button type="button" className={`btn ${role === "seeker" ? "btn-primary" : "btn-secondary"}`} style={{ flex: 1 }} onClick={() => setRole("seeker")}>Blood Seeker</button>
               <button type="button" className={`btn ${role === "donor" ? "btn-primary" : "btn-secondary"}`} style={{ flex: 1 }} onClick={() => setRole("donor")}>Blood Donor</button>
@@ -64,6 +76,7 @@ export default function RegisterPage() {
               <div className="input-group"><label>Confirm</label><input className="input" type="password" placeholder="••••••••" value={form.confirmPassword} onChange={(e) => set("confirmPassword", e.target.value)} required /></div>
             </div>
 
+            {/* Donor-only fields: blood group and location selection */}
             {role === "donor" && (
               <>
                 <div className="input-group" style={{ marginBottom: 16 }}>
@@ -75,6 +88,7 @@ export default function RegisterPage() {
                 </div>
                 <div className="grid grid-2" style={{ marginBottom: 20 }}>
                   <div className="input-group">
+                    {/* Selecting a district resets the area field */}
                     <label>District</label>
                     <select className="input" value={form.district} onChange={(e) => { set("district", e.target.value); set("area", ""); }}>
                       <option value="">Select district</option>

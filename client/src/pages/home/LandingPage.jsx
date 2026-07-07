@@ -1,8 +1,14 @@
+/**
+ * LandingPage.jsx — Public landing page for LifeDrop blood donor management app.
+ * Displays hero banner, stats, how-it-works steps, features, blood groups,
+ * testimonials, FAQ accordion, and a call-to-action section.
+ */
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Droplets, Star, AlertTriangle, Droplet } from "lucide-react";
 import { STATS, TESTIMONIALS, FAQS, BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 
+/* ── Helper: Blood Group Color ── */
 function getBloodGroupColor(bloodGroup) {
   const c = BLOOD_GROUP_COLORS[bloodGroup];
   if (!c) return {};
@@ -10,10 +16,12 @@ function getBloodGroupColor(bloodGroup) {
   return { bg: isDark ? c.darkBg : c.bg, text: isDark ? c.darkText : c.text };
 }
 
+/* ── Hook: IntersectionObserver for scroll-triggered animations ── */
 function useInView(ref, threshold = 0.15) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     if (!ref.current) return;
+    // Observe element; once visible, mark as seen and stop observing
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold });
     obs.observe(ref.current);
     return () => obs.disconnect();
@@ -21,12 +29,14 @@ function useInView(ref, threshold = 0.15) {
   return visible;
 }
 
+/* ── Component: Fade-in wrapper with optional stagger delay ── */
 function AnimatedDiv({ children, delay = 0, style = {} }) {
   const ref = useRef(null);
   const visible = useInView(ref);
   return <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(24px)", transition: `all 0.5s ease ${delay}s`, ...style }}>{children}</div>;
 }
 
+/* ── Data: Feature cards ── */
 const FEATURES = [
   { title: "Find Donors Instantly", desc: "Search by blood group, location, and availability.", icon: Search },
   { title: "Emergency Requests", desc: "Create urgent blood requests and reach donors in minutes.", icon: AlertTriangle },
@@ -36,12 +46,14 @@ const FEATURES = [
   { title: "Safe & Secure", desc: "Your data is encrypted and privacy is prioritized.", icon: Lock },
 ];
 
+/* ── Main Component ── */
 export default function LandingPage() {
+  // Track which FAQ item is expanded (null = all collapsed)
   const [openFaq, setOpenFaq] = useState(null);
 
   return (
     <div>
-      {/* Hero */}
+      /* ── Hero ── */
       <section style={{ position: "relative", overflow: "hidden", background: "var(--bg-card)" }}>
         <div style={{ position: "absolute", top: -120, right: -120, width: 320, height: 320, borderRadius: "50%", background: "rgba(239,68,68,0.08)", filter: "blur(60px)" }} />
         <div style={{ position: "absolute", bottom: -120, left: -120, width: 320, height: 320, borderRadius: "50%", background: "rgba(239,68,68,0.06)", filter: "blur(60px)" }} />
@@ -86,7 +98,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats */}
+      /* ── Stats ── */
       <section style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-card)", padding: "32px 0" }}>
         <div className="container">
           <div className="grid grid-4">
@@ -102,7 +114,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How It Works */}
+      /* ── How It Works ── */
       <section className="section" style={{ background: "var(--bg-card)" }}>
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>How It Works</h2>
@@ -126,7 +138,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features */}
+      /* ── Features ── */
       <section className="section">
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>Why Choose LifeDrop?</h2>
@@ -149,7 +161,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Blood Groups */}
+      /* ── Blood Groups ── */
       <section className="section" style={{ background: "var(--bg-card)" }}>
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>Blood Groups We Serve</h2>
@@ -168,7 +180,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      /* ── Testimonials ── */
       <section className="section">
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>What People Say</h2>
@@ -192,13 +204,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FAQ */}
+      /* ── FAQ ── */
       <section className="section" style={{ background: "var(--bg-card)" }}>
         <div className="container" style={{ maxWidth: 700, margin: "0 auto" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800, textAlign: "center" }}>Frequently Asked Questions</h2>
           <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 12 }}>
             {FAQS.map((faq, i) => (
               <div key={i} style={{ borderRadius: "var(--radius)", border: "1px solid var(--border-light)", overflow: "hidden" }}>
+                {/* Toggle: clicking an open item closes it; clicking closed opens it */}
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "16px 20px", fontSize: 15, fontWeight: 600, textAlign: "left" }}>
                   {faq.question}
                   <ChevronDown size={18} style={{ transform: openFaq === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", flexShrink: 0, marginLeft: 12 }} />
@@ -212,7 +225,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      /* ── CTA ── */
       <section className="section">
         <div className="container">
           <div style={{ background: "linear-gradient(135deg, #EF4444, #B91C1C)", borderRadius: "var(--radius-xl)", padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
@@ -231,6 +244,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Responsive overrides for hero grid on mobile */}
       <style>{`
         .hero-grid { grid-template-columns: 1fr 1fr; }
         @media (max-width: 768px) {

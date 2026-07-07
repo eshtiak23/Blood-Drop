@@ -1,3 +1,9 @@
+/**
+ * DonorSearchPage — Main donor search interface.
+ * Allows users to find blood donors by blood group, district/area, or proximity
+ * using geolocation. Features collapsible filters, paginated results, and a
+ * contact modal for reaching out to donors.
+ */
 import { useState, useMemo } from "react";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
 import donors from "../../data/donors.json";
@@ -7,6 +13,7 @@ const RADIUS_OPTIONS = [10, 20, 30, 50, 100];
 const PER_PAGE = 12;
 const DONATION_COOLDOWN_MONTHS = 3;
 
+// Returns theme-aware bg/text colors for a blood group badge
 function getBloodGroupColor(bloodGroup) {
   const c = BLOOD_GROUP_COLORS[bloodGroup];
   if (!c) return {};
@@ -14,6 +21,7 @@ function getBloodGroupColor(bloodGroup) {
   return { bg: isDark ? c.darkBg : c.bg, text: isDark ? c.darkText : c.text };
 }
 
+// Calculates great-circle distance (km) between two GPS coords using the Haversine formula
 function haversineDistance(lat1, lng1, lat2, lng2) {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -24,10 +32,12 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// Formats distance for display: "1.2 km" for ≥1km, otherwise "800 m"
 function formatDistance(km) {
   return km >= 1 ? `${km.toFixed(1)} km` : `${Math.round(km * 1000)} m`;
 }
 
+// Returns true if the donor hasn't donated in the last 3 months (safe to donate again)
 function isDonationCooledDown(lastDonationDate) {
   if (!lastDonationDate) return true;
   const last = new Date(lastDonationDate);
@@ -115,6 +125,7 @@ export default function DonorSearchPage() {
         </div>
       )}
 
+      {/* ---- Search Filters (collapsible) ---- */}
       <button className="btn btn-secondary" style={{ marginTop: 20, width: "100%", justifyContent: "space-between" }} onClick={() => setSearchOpen(!searchOpen)}>
         <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <SlidersHorizontal size={16} /> Search Filters
@@ -194,6 +205,7 @@ export default function DonorSearchPage() {
         </p>
       )}
 
+      {/* ---- Donor Cards ---- */}
       <div style={{ marginTop: 8 }}>
         {pagedResults.length === 0 ? (
           <div className="empty-state">
@@ -249,6 +261,7 @@ export default function DonorSearchPage() {
               })}
             </div>
 
+            {/* ---- Pagination ---- */}
             {totalPages > 1 && (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 24 }}>
                 <button className="btn btn-secondary btn-sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
@@ -279,6 +292,7 @@ export default function DonorSearchPage() {
         )}
       </div>
 
+      {/* ---- Contact Modal ---- */}
       {selectedDonor && (
         <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setSelectedDonor(null)}>
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }} />

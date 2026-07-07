@@ -1,3 +1,7 @@
+/**
+ * NotificationsPage - Displays all user notifications with read/unread status.
+ * Supports marking individual/all notifications as read and deleting them.
+ */
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { getNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification } from "../../services/localStore";
@@ -7,6 +11,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  /** Reloads notifications from storage and updates unread count */
   const refresh = () => {
     const list = getNotifications();
     setNotifications(list);
@@ -19,6 +24,7 @@ export default function NotificationsPage() {
   const markAll = () => { markAllNotificationsRead(); refresh(); };
   const remove = (id) => { deleteNotification(id); refresh(); };
 
+  /** Maps notification type to an emoji icon */
   const icon = (type) => ({ blood_request: "🩸", request_accepted: "✅", request_completed: "🎉", donor_verified: "🛡️", reminder: "⏰" }[type] || "🔔");
 
   return (

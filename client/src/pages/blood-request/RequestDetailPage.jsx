@@ -1,3 +1,8 @@
+/**
+ * RequestDetailPage - Full detail view of a single blood request.
+ * Shows patient info, contact details, requester, and action buttons.
+ * Donors can accept open requests; requester/acceptor can mark as complete.
+ */
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -5,6 +10,7 @@ import { getRequests, acceptRequest, completeRequest } from "../../services/loca
 import { BLOOD_GROUP_COLORS, URGENCY, STATUS } from "../../data/constants";
 import { MapPin, Phone, Calendar, Clock, User, Hospital, CheckCircle, ArrowLeft } from "lucide-react";
 
+/** Returns themed background/text colors for a blood group badge. */
 function getBloodGroupColor(bloodGroup) {
   const c = BLOOD_GROUP_COLORS[bloodGroup];
   if (!c) return {};
@@ -25,8 +31,8 @@ export default function RequestDetailPage() {
   }, [id]);
 
   const handleAction = (action) => {
-    if (action === "accept") acceptRequest(id, user);
-    if (action === "complete") completeRequest(id);
+    if (action === "accept") acceptRequest(id, user);   // Donor accepts the request → status becomes "accepted"
+    if (action === "complete") completeRequest(id);       // Requester or accepted donor marks it done → status becomes "completed"
     const found = getRequests().find((r) => r._id === id);
     setRequest(found);
     setShowModal("");
@@ -35,7 +41,9 @@ export default function RequestDetailPage() {
   if (!request) return <div className="container" style={{ padding: 40, textAlign: "center" }}>Request not found</div>;
 
   const u = URGENCY.find((x) => x.value === request.urgency);
+  // Role-based action visibility: only donors can accept open requests
   const canAccept = user?.role === "donor" && request.status === "open";
+  // Only the original requester or the accepted donor can mark a request complete
   const canComplete = (user?._id === request.requester?._id || user?._id === request.acceptedBy?._id) && request.status === "accepted";
 
   return (
@@ -81,7 +89,9 @@ export default function RequestDetailPage() {
       </div>
 
       <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+        {/* Accept: shown only to donors when request is open */}
         {canAccept && <button className="btn btn-primary" onClick={() => setShowModal("accept")}><CheckCircle size={16} /> Accept Request</button>}
+        {/* Complete: shown to requester or accepted donor when request is accepted */}
         {canComplete && <button className="btn btn-success" onClick={() => setShowModal("complete")}><CheckCircle size={16} /> Mark Complete</button>}
       </div>
 

@@ -1,9 +1,15 @@
+/**
+ * RequestListPage - Displays a searchable/filterable list of blood requests.
+ * Allows users to browse open requests by blood group, district, and urgency.
+ * Each card links to the full detail view of that request.
+ */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { searchRequests } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
 import { MapPin, Clock, Plus, AlertCircle } from "lucide-react";
 
+/** Returns themed background/text colors for a blood group badge. */
 function getBloodGroupColor(bloodGroup) {
   const c = BLOOD_GROUP_COLORS[bloodGroup];
   if (!c) return {};
@@ -15,6 +21,7 @@ export default function RequestListPage() {
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", urgency: "" });
   const [requests, setRequests] = useState([]);
 
+  // Re-fetch filtered requests whenever any filter changes
   useEffect(() => { setRequests(searchRequests(filters)); }, [filters]);
 
   return (
@@ -27,6 +34,7 @@ export default function RequestListPage() {
         <Link to="/requests/create" className="btn btn-primary"><Plus size={16} /> Create Request</Link>
       </div>
 
+      {/* Filter bar: dropdowns narrow the request list by blood group, district, or urgency */}
       <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap" }}>
         <select className="input" style={{ flex: 1, minWidth: 140 }} value={filters.bloodGroup} onChange={(e) => setFilters({ ...filters, bloodGroup: e.target.value })}>
           <option value="">All Groups</option>{BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
@@ -48,6 +56,7 @@ export default function RequestListPage() {
               const u = URGENCY.find((x) => x.value === r.urgency);
               return (
                 <Link key={r._id} to={`/requests/${r._id}`} className="card" style={{ padding: 20 }}>
+                  {/* Status badges: blood group, urgency level, and current status (open/accepted/completed) */}
                   <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
                     <span className="badge" style={{ background: getBloodGroupColor(r.patientBloodGroup).bg, color: getBloodGroupColor(r.patientBloodGroup).text }}>{r.patientBloodGroup}</span>
                     <span className={`badge ${u?.color || "badge-gray"}`}>{u?.label}</span>

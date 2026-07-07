@@ -1,8 +1,13 @@
+/**
+ * ProfilePage - Displays the logged-in user's profile with personal and donation info.
+ * Shows verification status, blood group, location, and donation history.
+ */
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
 import { Mail, Phone, MapPin, Calendar, Droplets, Heart, Shield, Edit, Clock } from "lucide-react";
 
+/** Returns blood group badge colors based on dark/light theme */
 function getBloodGroupColor(bloodGroup) {
   const c = BLOOD_GROUP_COLORS[bloodGroup];
   if (!c) return {};

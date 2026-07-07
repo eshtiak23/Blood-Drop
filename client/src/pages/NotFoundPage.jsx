@@ -1,3 +1,6 @@
+/**
+ * NotFoundPage - 404 page shown when no route matches. Provides a link back to home.
+ */
 import { useNavigate } from "react-router-dom";
 import { Home } from "lucide-react";
 
