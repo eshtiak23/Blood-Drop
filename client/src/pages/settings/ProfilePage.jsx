@@ -3,11 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
 import { Mail, Phone, MapPin, Calendar, Droplets, Heart, Shield, Edit, Clock } from "lucide-react";
 
+function getBloodGroupColor(bloodGroup) {
+  const c = BLOOD_GROUP_COLORS[bloodGroup];
+  if (!c) return {};
+  const isDark = document.documentElement.classList.contains("dark");
+  return { bg: isDark ? c.darkBg : c.bg, text: isDark ? c.darkText : c.text };
+}
+
 export default function ProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   if (!user) return null;
-  const c = BLOOD_GROUP_COLORS[user.bloodGroup] || {};
+  const c = getBloodGroupColor(user.bloodGroup);
 
   return (
     <div className="container" style={{ padding: "32px 20px", maxWidth: 800 }}>
@@ -16,7 +23,7 @@ export default function ProfilePage() {
       <div className="card animate-fadeIn" style={{ marginTop: 20 }}>
         <div className="card-body">
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "start" }}>
-            <div className="avatar avatar-xl" style={{ background: c.bg || "var(--purple-light)", color: c.text || "var(--purple)" }}>{user.name?.charAt(0)?.toUpperCase()}</div>
+            <div className="avatar avatar-xl" style={{ background: c.bg || "var(--red-light)", color: c.text || "var(--red)" }}>{user.name?.charAt(0)?.toUpperCase()}</div>
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <h2 style={{ fontSize: 22, fontWeight: 700 }}>{user.name}</h2>
@@ -44,7 +51,7 @@ export default function ProfilePage() {
               <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Donation Info</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14, color: "var(--text-secondary)" }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 8 }}><Droplets size={14} /> {user.totalDonations || 0} total donations</span>
-                <span style={{ display: "flex", alignItems: "center", gap: 8, color: user.isAvailable ? "#059669" : "var(--text-muted)" }}><Heart size={14} /> {user.isAvailable ? "Available" : "Unavailable"}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 8, color: user.isAvailable ? "var(--green)" : "var(--text-muted)" }}><Heart size={14} /> {user.isAvailable ? "Available" : "Unavailable"}</span>
                 <span style={{ display: "flex", alignItems: "center", gap: 8 }}><Clock size={14} /> Last: {user.lastDonationDate ? new Date(user.lastDonationDate).toLocaleDateString() : "Never"}</span>
               </div>
             </div>

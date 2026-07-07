@@ -5,6 +5,13 @@ import { getRequests, acceptRequest, completeRequest } from "../../services/loca
 import { BLOOD_GROUP_COLORS, URGENCY, STATUS } from "../../data/constants";
 import { MapPin, Phone, Calendar, Clock, User, Hospital, CheckCircle, ArrowLeft } from "lucide-react";
 
+function getBloodGroupColor(bloodGroup) {
+  const c = BLOOD_GROUP_COLORS[bloodGroup];
+  if (!c) return {};
+  const isDark = document.documentElement.classList.contains("dark");
+  return { bg: isDark ? c.darkBg : c.bg, text: isDark ? c.darkText : c.text };
+}
+
 export default function RequestDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -36,7 +43,7 @@ export default function RequestDetailPage() {
       <button onClick={() => navigate(-1)} className="btn btn-ghost btn-sm" style={{ marginBottom: 16 }}><ArrowLeft size={16} /> Back</button>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-        <span className="badge" style={{ background: BLOOD_GROUP_COLORS[request.patientBloodGroup]?.bg, color: BLOOD_GROUP_COLORS[request.patientBloodGroup]?.text }}>{request.patientBloodGroup}</span>
+        <span className="badge" style={{ background: getBloodGroupColor(request.patientBloodGroup).bg, color: getBloodGroupColor(request.patientBloodGroup).text }}>{request.patientBloodGroup}</span>
         <span className={`badge ${u?.color || ""}`}>{u?.label}</span>
         <span className={`badge ${request.status === "open" ? "badge-green" : request.status === "completed" ? "badge-gray" : "badge-blue"}`}>{request.status}</span>
       </div>
@@ -60,7 +67,7 @@ export default function RequestDetailPage() {
           <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Contact Details</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)" }}><Phone size={14} /> {request.contactNumber}</span>
-            {request.description && <div style={{ background: "var(--purple-light)", padding: 12, borderRadius: 8, fontSize: 14 }}>{request.description}</div>}
+            {request.description && <div style={{ background: "var(--red-light)", padding: 12, borderRadius: 8, fontSize: 14 }}>{request.description}</div>}
             <div className="separator" />
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 8 }}>Requested by</div>

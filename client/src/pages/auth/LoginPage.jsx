@@ -54,7 +54,7 @@ export default function LoginPage() {
             </button>
 
             <p style={{ textAlign: "center", fontSize: 14, marginTop: 20, color: "var(--text-secondary)" }}>
-              Don't have an account? <Link to="/register" style={{ color: "var(--pink)", fontWeight: 600 }}>Register</Link>
+              Don't have an account? <Link to="/register" style={{ color: "var(--red)", fontWeight: 600 }}>Register</Link>
             </p>
           </form>
         </div>

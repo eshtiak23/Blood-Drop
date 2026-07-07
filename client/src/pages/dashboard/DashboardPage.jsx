@@ -33,13 +33,13 @@ export default function DashboardPage() {
       <div className="grid grid-4" style={{ marginTop: 24, gap: 16 }}>
         {user?.role === "donor" && (
           <>
-            <div className="card" style={{ padding: 20 }}><div style={{ display: "flex", justifyContent: "space-between" }}><div><div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Donations</div><div style={{ fontSize: 28, fontWeight: 800, marginTop: 4 }}>{user.totalDonations || 0}</div></div><Heart size={20} color="#DC2626" /></div></div>
-            <div className="card" style={{ padding: 20 }}><div style={{ display: "flex", justifyContent: "space-between" }}><div><div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Status</div><div style={{ fontSize: 28, fontWeight: 800, marginTop: 4, color: user.isAvailable ? "#059669" : "var(--text-muted)" }}>{user.isAvailable ? "Active" : "Off"}</div></div><Droplets size={20} color="var(--blue)" /></div></div>
+            <div className="card" style={{ padding: 20 }}><div style={{ display: "flex", justifyContent: "space-between" }}><div><div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Donations</div><div style={{ fontSize: 28, fontWeight: 800, marginTop: 4 }}>{user.totalDonations || 0}</div></div><Heart size={20} color="var(--red)" /></div></div>
+            <div className="card" style={{ padding: 20 }}><div style={{ display: "flex", justifyContent: "space-between" }}><div><div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Status</div><div style={{ fontSize: 28, fontWeight: 800, marginTop: 4, color: user.isAvailable ? "var(--green)" : "var(--text-muted)" }}>{user.isAvailable ? "Active" : "Off"}</div></div><Droplets size={20} color="var(--blue)" /></div></div>
           </>
         )}
         {stats && <>
-          <div className="card" style={{ padding: 20 }}><div style={{ display: "flex", justifyContent: "space-between" }}><div><div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Open Requests</div><div style={{ fontSize: 28, fontWeight: 800, marginTop: 4 }}>{Object.values(stats).reduce((a, b) => a + b, 0)}</div></div><AlertCircle size={20} color="var(--purple)" /></div></div>
-          <div className="card" style={{ padding: 20 }}><div style={{ display: "flex", justifyContent: "space-between" }}><div><div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Blood Groups</div><div style={{ fontSize: 28, fontWeight: 800, marginTop: 4 }}>{Object.values(stats).filter((v) => v > 0).length}</div></div><Users size={20} color="#DC2626" /></div></div>
+          <div className="card" style={{ padding: 20 }}><div style={{ display: "flex", justifyContent: "space-between" }}><div><div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Open Requests</div><div style={{ fontSize: 28, fontWeight: 800, marginTop: 4 }}>{Object.values(stats).reduce((a, b) => a + b, 0)}</div></div><AlertCircle size={20} color="var(--red)" /></div></div>
+          <div className="card" style={{ padding: 20 }}><div style={{ display: "flex", justifyContent: "space-between" }}><div><div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Blood Groups</div><div style={{ fontSize: 28, fontWeight: 800, marginTop: 4 }}>{Object.values(stats).filter((v) => v > 0).length}</div></div><Users size={20} color="var(--red)" /></div></div>
         </>}
       </div>
 
@@ -55,7 +55,7 @@ export default function DashboardPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: 8 }}>
             {Object.entries(stats).map(([group, count]) => (
               <div key={group} style={{ textAlign: "center", padding: "12px 8px", borderRadius: 12, border: "1px solid var(--border-light)", background: "var(--bg-card)" }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: "#DC2626" }}>{count}</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: "var(--red)" }}>{count}</div>
                 <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{group}</div>
               </div>
             ))}

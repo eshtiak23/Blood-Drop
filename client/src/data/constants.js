@@ -1,14 +1,14 @@
 export const BLOOD_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
 
 export const BLOOD_GROUP_COLORS = {
-  "A+": { bg: "#FDF2F8", text: "#DB2777" },
-  "A-": { bg: "#FCE7F3", text: "#BE185D" },
-  "B+": { bg: "#EFF6FF", text: "#2563EB" },
-  "B-": { bg: "#DBEAFE", text: "#1D4ED8" },
-  "AB+": { bg: "#F5F3FF", text: "#7C3AED" },
-  "AB-": { bg: "#EDE9FE", text: "#6D28D9" },
-  "O+": { bg: "#ECFDF5", text: "#059669" },
-  "O-": { bg: "#D1FAE5", text: "#047857" },
+  "A+": { bg: "#FDF2F8", text: "#DB2777", darkBg: "rgba(236,72,153,0.15)", darkText: "#F472B6" },
+  "A-": { bg: "#FCE7F3", text: "#BE185D", darkBg: "rgba(236,72,153,0.12)", darkText: "#EC4899" },
+  "B+": { bg: "#EFF6FF", text: "#2563EB", darkBg: "rgba(59,130,246,0.15)", darkText: "#60A5FA" },
+  "B-": { bg: "#DBEAFE", text: "#1D4ED8", darkBg: "rgba(59,130,246,0.12)", darkText: "#93C5FD" },
+  "AB+": { bg: "#F5F3FF", text: "#7C3AED", darkBg: "rgba(139,92,246,0.15)", darkText: "#A78BFA" },
+  "AB-": { bg: "#EDE9FE", text: "#6D28D9", darkBg: "rgba(139,92,246,0.12)", darkText: "#C4B5FD" },
+  "O+": { bg: "#ECFDF5", text: "#059669", darkBg: "rgba(5,150,105,0.15)", darkText: "#34D399" },
+  "O-": { bg: "#D1FAE5", text: "#047857", darkBg: "rgba(5,150,105,0.12)", darkText: "#6EE7B7" },
 };
 
 export const DISTRICTS = [

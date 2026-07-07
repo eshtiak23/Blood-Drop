@@ -4,6 +4,13 @@ import { searchRequests } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
 import { MapPin, Clock, Plus, AlertCircle } from "lucide-react";
 
+function getBloodGroupColor(bloodGroup) {
+  const c = BLOOD_GROUP_COLORS[bloodGroup];
+  if (!c) return {};
+  const isDark = document.documentElement.classList.contains("dark");
+  return { bg: isDark ? c.darkBg : c.bg, text: isDark ? c.darkText : c.text };
+}
+
 export default function RequestListPage() {
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", urgency: "" });
   const [requests, setRequests] = useState([]);
@@ -34,7 +41,7 @@ export default function RequestListPage() {
 
       <div style={{ marginTop: 24 }}>
         {requests.length === 0 ? (
-          <div className="empty-state"><div className="empty-state-icon"><AlertCircle size={28} color="var(--purple)" /></div><div className="empty-state-title">No blood requests</div><div className="empty-state-desc">Be the first to create a request</div></div>
+          <div className="empty-state"><div className="empty-state-icon"><AlertCircle size={28} color="var(--red)" /></div><div className="empty-state-title">No blood requests</div><div className="empty-state-desc">Be the first to create a request</div></div>
         ) : (
           <div className="grid grid-3">
             {requests.map((r) => {
@@ -42,7 +49,7 @@ export default function RequestListPage() {
               return (
                 <Link key={r._id} to={`/requests/${r._id}`} className="card" style={{ padding: 20 }}>
                   <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                    <span className="badge" style={{ background: BLOOD_GROUP_COLORS[r.patientBloodGroup]?.bg, color: BLOOD_GROUP_COLORS[r.patientBloodGroup]?.text }}>{r.patientBloodGroup}</span>
+                    <span className="badge" style={{ background: getBloodGroupColor(r.patientBloodGroup).bg, color: getBloodGroupColor(r.patientBloodGroup).text }}>{r.patientBloodGroup}</span>
                     <span className={`badge ${u?.color || "badge-gray"}`}>{u?.label}</span>
                     <span className={`badge ${r.status === "open" ? "badge-green" : r.status === "completed" ? "badge-gray" : "badge-blue"}`}>{r.status}</span>
                   </div>

@@ -1,10 +1,18 @@
 import { useState, useMemo } from "react";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
 import donors from "../../data/donors.json";
-import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 
 const RADIUS_OPTIONS = [10, 20, 30, 50, 100];
 const PER_PAGE = 12;
+const DONATION_COOLDOWN_MONTHS = 3;
+
+function getBloodGroupColor(bloodGroup) {
+  const c = BLOOD_GROUP_COLORS[bloodGroup];
+  if (!c) return {};
+  const isDark = document.documentElement.classList.contains("dark");
+  return { bg: isDark ? c.darkBg : c.bg, text: isDark ? c.darkText : c.text };
+}
 
 function haversineDistance(lat1, lng1, lat2, lng2) {
   const R = 6371;
@@ -20,6 +28,15 @@ function formatDistance(km) {
   return km >= 1 ? `${km.toFixed(1)} km` : `${Math.round(km * 1000)} m`;
 }
 
+function isDonationCooledDown(lastDonationDate) {
+  if (!lastDonationDate) return true;
+  const last = new Date(lastDonationDate);
+  const now = new Date();
+  const diffMs = now - last;
+  const diffMonths = diffMs / (1000 * 60 * 60 * 24 * 30);
+  return diffMonths >= DONATION_COOLDOWN_MONTHS;
+}
+
 export default function DonorSearchPage() {
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", area: "", radius: 10 });
   const [useLocation, setUseLocation] = useState(false);
@@ -28,6 +45,7 @@ export default function DonorSearchPage() {
   const [page, setPage] = useState(1);
   const [selectedDonor, setSelectedDonor] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const areas = filters.district ? (AREAS[filters.district] || []) : [];
 
   const filteredResults = useMemo(() => {
@@ -97,69 +115,78 @@ export default function DonorSearchPage() {
         </div>
       )}
 
-      <div className="card" style={{ marginTop: 20, padding: 20 }}>
-        <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-          <button className={`btn ${!useLocation ? "btn-primary" : "btn-secondary"} btn-sm`} onClick={() => { setUseLocation(false); setUserLocation(null); setPage(1); }}>
-            <Search size={14} /> District Search
-          </button>
-          <button className={`btn ${useLocation ? "btn-primary" : "btn-secondary"} btn-sm`} onClick={handleUseLocation}>
-            <Locate size={14} /> Search Near Me
-          </button>
-          {hasSearched && (
-            <button className="btn btn-ghost btn-sm" onClick={handleClearFilters}>
-              Clear Filters
+      <button className="btn btn-secondary" style={{ marginTop: 20, width: "100%", justifyContent: "space-between" }} onClick={() => setSearchOpen(!searchOpen)}>
+        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <SlidersHorizontal size={16} /> Search Filters
+        </span>
+        <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>{searchOpen ? "Close" : "Open"}</span>
+      </button>
+
+      {searchOpen && (
+        <div className="card animate-fadeIn" style={{ marginTop: 8, padding: 20 }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+            <button className={`btn ${!useLocation ? "btn-primary" : "btn-secondary"} btn-sm`} onClick={() => { setUseLocation(false); setUserLocation(null); setPage(1); }}>
+              <Search size={14} /> District Search
             </button>
+            <button className={`btn ${useLocation ? "btn-primary" : "btn-secondary"} btn-sm`} onClick={handleUseLocation}>
+              <Locate size={14} /> Search Near Me
+            </button>
+            {hasSearched && (
+              <button className="btn btn-ghost btn-sm" onClick={handleClearFilters}>
+                Clear Filters
+              </button>
+            )}
+          </div>
+
+          {useLocation ? (
+            <div className="grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: 12, alignItems: "end" }}>
+              <div className="input-group">
+                <label style={{ fontSize: 13 }}>Blood Group</label>
+                <select className="input" value={filters.bloodGroup} onChange={(e) => { setFilters({ ...filters, bloodGroup: e.target.value }); setPage(1); }}>
+                  <option value="">Any</option>
+                  {BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div className="input-group">
+                <label style={{ fontSize: 13 }}>Radius</label>
+                <select className="input" value={filters.radius} onChange={(e) => { setFilters({ ...filters, radius: Number(e.target.value) }); setPage(1); }}>
+                  {RADIUS_OPTIONS.map((r) => <option key={r} value={r}>{r} km</option>)}
+                </select>
+              </div>
+              <button className="btn btn-primary" onClick={handleSearch}>
+                <Navigation size={16} /> Search
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-4" style={{ gap: 12, alignItems: "end" }}>
+              <div className="input-group">
+                <label style={{ fontSize: 13 }}>Blood Group</label>
+                <select className="input" value={filters.bloodGroup} onChange={(e) => { setFilters({ ...filters, bloodGroup: e.target.value }); setPage(1); }}>
+                  <option value="">Any</option>
+                  {BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div className="input-group">
+                <label style={{ fontSize: 13 }}>District</label>
+                <select className="input" value={filters.district} onChange={(e) => { setFilters({ ...filters, district: e.target.value, area: "" }); setPage(1); }}>
+                  <option value="">Any</option>
+                  {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+              <div className="input-group">
+                <label style={{ fontSize: 13 }}>Area</label>
+                <select className="input" value={filters.area} onChange={(e) => { setFilters({ ...filters, area: e.target.value }); setPage(1); }} disabled={!filters.district}>
+                  <option value="">{filters.district ? "Any" : "Select district"}</option>
+                  {areas.map((a) => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+              <button className="btn btn-primary" onClick={handleSearch}>
+                <Search size={16} /> Search
+              </button>
+            </div>
           )}
         </div>
-
-        {useLocation ? (
-          <div className="grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: 12, alignItems: "end" }}>
-            <div className="input-group">
-              <label style={{ fontSize: 13 }}>Blood Group</label>
-              <select className="input" value={filters.bloodGroup} onChange={(e) => { setFilters({ ...filters, bloodGroup: e.target.value }); setPage(1); }}>
-                <option value="">Any</option>
-                {BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
-              </select>
-            </div>
-            <div className="input-group">
-              <label style={{ fontSize: 13 }}>Radius</label>
-              <select className="input" value={filters.radius} onChange={(e) => { setFilters({ ...filters, radius: Number(e.target.value) }); setPage(1); }}>
-                {RADIUS_OPTIONS.map((r) => <option key={r} value={r}>{r} km</option>)}
-              </select>
-            </div>
-            <button className="btn btn-primary" onClick={handleSearch}>
-              <Navigation size={16} /> Search
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-4" style={{ gap: 12, alignItems: "end" }}>
-            <div className="input-group">
-              <label style={{ fontSize: 13 }}>Blood Group</label>
-              <select className="input" value={filters.bloodGroup} onChange={(e) => { setFilters({ ...filters, bloodGroup: e.target.value }); setPage(1); }}>
-                <option value="">Any</option>
-                {BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
-              </select>
-            </div>
-            <div className="input-group">
-              <label style={{ fontSize: 13 }}>District</label>
-              <select className="input" value={filters.district} onChange={(e) => { setFilters({ ...filters, district: e.target.value, area: "" }); setPage(1); }}>
-                <option value="">Any</option>
-                {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
-              </select>
-            </div>
-            <div className="input-group">
-              <label style={{ fontSize: 13 }}>Area</label>
-              <select className="input" value={filters.area} onChange={(e) => { setFilters({ ...filters, area: e.target.value }); setPage(1); }} disabled={!filters.district}>
-                <option value="">{filters.district ? "Any" : "Select district"}</option>
-                {areas.map((a) => <option key={a} value={a}>{a}</option>)}
-              </select>
-            </div>
-            <button className="btn btn-primary" onClick={handleSearch}>
-              <Search size={16} /> Search
-            </button>
-          </div>
-        )}
-      </div>
+      )}
 
       {pagedResults.length > 0 && (
         <p style={{ marginTop: 16, fontSize: 14, color: "var(--text-secondary)" }}>
@@ -177,10 +204,12 @@ export default function DonorSearchPage() {
         ) : (
           <>
             <div className="grid grid-3">
-              {pagedResults.map((d) => (
+              {pagedResults.map((d) => {
+                const canDonate = isDonationCooledDown(d.lastDonationDate);
+                return (
                 <div key={d.id} className="card" style={{ padding: 20, transition: "all 0.3s" }}>
                   <div style={{ display: "flex", alignItems: "start", gap: 12 }}>
-                    <div className="avatar" style={{ background: BLOOD_GROUP_COLORS[d.bloodGroup]?.bg || "#f3f4f6", color: BLOOD_GROUP_COLORS[d.bloodGroup]?.text || "var(--text)" }}>
+                    <div className="avatar" style={{ background: getBloodGroupColor(d.bloodGroup).bg || "var(--border-light)", color: getBloodGroupColor(d.bloodGroup).text || "var(--text)" }}>
                       {d.name?.charAt(0)?.toUpperCase()}
                     </div>
                     <div style={{ flex: 1 }}>
@@ -192,7 +221,7 @@ export default function DonorSearchPage() {
                           </div>
                         </div>
                         {d.bloodGroup && (
-                          <span className="badge" style={{ background: BLOOD_GROUP_COLORS[d.bloodGroup]?.bg, color: BLOOD_GROUP_COLORS[d.bloodGroup]?.text }}>
+                          <span className="badge" style={{ background: getBloodGroupColor(d.bloodGroup).bg, color: getBloodGroupColor(d.bloodGroup).text }}>
                             {d.bloodGroup}
                           </span>
                         )}
@@ -201,14 +230,14 @@ export default function DonorSearchPage() {
                         <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Droplets size={12} /> {d.totalDonations} donations</span>
                         <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Calendar size={12} /> {d.lastDonationDate ? new Date(d.lastDonationDate).toLocaleDateString() : "Never"}</span>
                         {d.distance != null && (
-                          <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--pink)", fontWeight: 600 }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--red)", fontWeight: 600 }}>
                             <Navigation size={12} /> {formatDistance(d.distance)}
                           </span>
                         )}
                       </div>
                       <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap", alignItems: "center" }}>
                         {d.isVerified && <span className="badge badge-green"><Shield size={10} /> Verified</span>}
-                        <span className={`badge ${d.isAvailable ? "badge-green" : "badge-gray"}`}>{d.isAvailable ? "Available" : "Unavailable"}</span>
+                        <span className={`badge ${canDonate ? "badge-green" : "badge-gray"}`}>{canDonate ? "Available" : "Not Available"}</span>
                         <button className="btn btn-primary btn-sm" style={{ marginLeft: "auto", padding: "4px 12px", fontSize: 12 }} onClick={() => setSelectedDonor(d)}>
                           <Phone size={12} /> Contact
                         </button>
@@ -216,7 +245,8 @@ export default function DonorSearchPage() {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {totalPages > 1 && (
@@ -253,11 +283,11 @@ export default function DonorSearchPage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setSelectedDonor(null)}>
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }} />
           <div className="card animate-fadeIn" style={{ position: "relative", width: "100%", maxWidth: 420, padding: 0, overflow: "hidden" }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ background: `linear-gradient(135deg, ${BLOOD_GROUP_COLORS[selectedDonor.bloodGroup]?.bg || "#f3f4f6"}, ${BLOOD_GROUP_COLORS[selectedDonor.bloodGroup]?.bg || "#f3f4f6"})`, padding: "28px 24px 20px", textAlign: "center" }}>
-              <button onClick={() => setSelectedDonor(null)} style={{ position: "absolute", top: 12, right: 12, background: "rgba(255,255,255,0.7)", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            <div style={{ background: getBloodGroupColor(selectedDonor.bloodGroup).bg || "var(--border-light)", padding: "28px 24px 20px", textAlign: "center" }}>
+              <button onClick={() => setSelectedDonor(null)} style={{ position: "absolute", top: 12, right: 12, background: "var(--bg-card)", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                 <X size={16} />
               </button>
-              <div className="avatar avatar-xl" style={{ background: BLOOD_GROUP_COLORS[selectedDonor.bloodGroup]?.bg || "#f3f4f6", color: BLOOD_GROUP_COLORS[selectedDonor.bloodGroup]?.text || "var(--text)", margin: "0 auto 12px", fontSize: 36, width: 72, height: 72 }}>
+              <div className="avatar avatar-xl" style={{ background: getBloodGroupColor(selectedDonor.bloodGroup).bg || "var(--border-light)", color: getBloodGroupColor(selectedDonor.bloodGroup).text || "var(--text)", margin: "0 auto 12px", fontSize: 36, width: 72, height: 72 }}>
                 {selectedDonor.name?.charAt(0)?.toUpperCase()}
               </div>
               <div style={{ fontWeight: 700, fontSize: 20 }}>{selectedDonor.name}</div>
@@ -265,14 +295,14 @@ export default function DonorSearchPage() {
                 <MapPin size={13} /> {selectedDonor.area}, {selectedDonor.district}
               </div>
               <div style={{ marginTop: 12 }}>
-                <span className="badge" style={{ background: BLOOD_GROUP_COLORS[selectedDonor.bloodGroup]?.bg, color: BLOOD_GROUP_COLORS[selectedDonor.bloodGroup]?.text, fontSize: 16, padding: "6px 20px" }}>{selectedDonor.bloodGroup}</span>
+                <span className="badge" style={{ background: getBloodGroupColor(selectedDonor.bloodGroup).bg, color: getBloodGroupColor(selectedDonor.bloodGroup).text, fontSize: 16, padding: "6px 20px" }}>{selectedDonor.bloodGroup}</span>
               </div>
             </div>
 
             <div style={{ padding: 20 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--bg-secondary)" }}>
-                  <Phone size={16} color="var(--pink)" />
+                  <Phone size={16} color="var(--red)" />
                   <div>
                     <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Phone</div>
                     <a href={`tel:${selectedDonor.phone}`} style={{ fontWeight: 600, color: "var(--text)", textDecoration: "none" }}>{selectedDonor.phone}</a>
@@ -286,29 +316,25 @@ export default function DonorSearchPage() {
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--bg-secondary)" }}>
-                  <Droplets size={16} color="var(--purple)" />
+                  <Droplets size={16} color="var(--red)" />
                   <div>
                     <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Total Donations</div>
                     <div style={{ fontWeight: 600 }}>{selectedDonor.totalDonations} times</div>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--bg-secondary)" }}>
-                  <Clock size={16} color="var(--lavender-dark)" />
+                  <Clock size={16} color="var(--text-muted)" />
                   <div>
                     <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Last Donation</div>
                     <div style={{ fontWeight: 600 }}>{selectedDonor.lastDonationDate ? new Date(selectedDonor.lastDonationDate).toLocaleDateString() : "Never donated"}</div>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--bg-secondary)" }}>
-                  <CheckCircle size={16} color={selectedDonor.isAvailable ? "#059669" : "var(--text-muted)"} />
-                  <div>
-                    <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Availability</div>
-                    <div style={{ fontWeight: 600, color: selectedDonor.isAvailable ? "#059669" : "var(--text-muted)" }}>{selectedDonor.isAvailable ? "Available to donate" : "Currently unavailable"}</div>
-                  </div>
+                  {(() => { const canDonate = isDonationCooledDown(selectedDonor.lastDonationDate); return (<><CheckCircle size={16} color={canDonate ? "#059669" : "var(--text-muted)"} /><div><div style={{ fontSize: 12, color: "var(--text-muted)" }}>Availability</div><div style={{ fontWeight: 600, color: canDonate ? "#059669" : "var(--text-muted)" }}>{canDonate ? "Available to donate" : "Not Available (donated within 3 months)"}</div></div></>); })()}
                 </div>
               </div>
 
-              <a href={`tel:${selectedDonor.phone}`} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", marginTop: 20, padding: "12px 0", borderRadius: "var(--radius-sm)", background: "var(--pink)", color: "#fff", fontWeight: 600, fontSize: 15, textDecoration: "none", border: "none", cursor: "pointer" }}>
+              <a href={`tel:${selectedDonor.phone}`} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", marginTop: 20, padding: "12px 0", borderRadius: "var(--radius-sm)", background: "var(--red)", color: "#fff", fontWeight: 600, fontSize: 15, textDecoration: "none", border: "none", cursor: "pointer" }}>
                 <Phone size={16} /> Call Donor
               </a>
             </div>

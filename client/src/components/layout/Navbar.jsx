@@ -24,7 +24,7 @@ export default function Navbar() {
         <nav style={{ display: "flex", gap: 28 }} className="desktop-nav">
           {[["/", "Home"], ["/donors", "Find Donors"], ["/requests", "Requests"]].map(([h, l]) => (
             <Link key={h} to={h} style={{ fontSize: 14, fontWeight: 500, color: "var(--text-secondary)", transition: "color 0.2s" }}
-              onMouseEnter={(e) => e.target.style.color = "var(--pink)"}
+              onMouseEnter={(e) => e.target.style.color = "var(--red)"}
               onMouseLeave={(e) => e.target.style.color = "var(--text-secondary)"}
             >{l}</Link>
           ))}
@@ -87,7 +87,7 @@ export default function Navbar() {
                 <Link to="/notifications" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Bell size={16} /> Notifications</Link>
                 <Link to="/profile" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><User size={16} /> Profile</Link>
                 <Link to="/settings" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Settings size={16} /> Settings</Link>
-                <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8, color: "#EF4444", width: "100%" }}><LogOut size={16} /> Logout</button>
+                <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8, color: "var(--red)", width: "100%" }}><LogOut size={16} /> Logout</button>
               </>
             ) : (
               <>
