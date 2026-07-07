@@ -53,7 +53,7 @@ export default function LandingPage() {
 
   return (
     <div>
-      /* ── Hero ── */
+      {/* ── Hero ── */}
       <section style={{ position: "relative", overflow: "hidden", background: "var(--bg-card)" }}>
         <div style={{ position: "absolute", top: -120, right: -120, width: 320, height: 320, borderRadius: "50%", background: "rgba(239,68,68,0.08)", filter: "blur(60px)" }} />
         <div style={{ position: "absolute", bottom: -120, left: -120, width: 320, height: 320, borderRadius: "50%", background: "rgba(239,68,68,0.06)", filter: "blur(60px)" }} />
@@ -98,7 +98,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      /* ── Stats ── */
+      {/* ── Stats ── */}
       <section style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-card)", padding: "32px 0" }}>
         <div className="container">
           <div className="grid grid-4">
@@ -114,7 +114,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      /* ── How It Works ── */
+      {/* ── How It Works ── */}
       <section className="section" style={{ background: "var(--bg-card)" }}>
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>How It Works</h2>
@@ -138,7 +138,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      /* ── Features ── */
+      {/* ── Features ── */}
       <section className="section">
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>Why Choose LifeDrop?</h2>
@@ -161,7 +161,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      /* ── Blood Groups ── */
+      {/* ── Blood Groups ── */}
       <section className="section" style={{ background: "var(--bg-card)" }}>
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>Blood Groups We Serve</h2>
@@ -180,7 +180,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      /* ── Testimonials ── */
+      {/* ── Testimonials ── */}
       <section className="section">
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>What People Say</h2>
@@ -204,7 +204,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      /* ── FAQ ── */
+      {/* ── FAQ ── */}
       <section className="section" style={{ background: "var(--bg-card)" }}>
         <div className="container" style={{ maxWidth: 700, margin: "0 auto" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800, textAlign: "center" }}>Frequently Asked Questions</h2>
@@ -225,7 +225,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      /* ── CTA ── */
+      {/* ── CTA ── */}
       <section className="section">
         <div className="container">
           <div style={{ background: "linear-gradient(135deg, #EF4444, #B91C1C)", borderRadius: "var(--radius-xl)", padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
