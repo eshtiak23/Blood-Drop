@@ -68,7 +68,13 @@ export default function Navbar() {
               {/* User Avatar Dropdown Menu */}
               <div className="dropdown">
                 <button onClick={() => setMenuOpen(!menuOpen)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 8px", borderRadius: 8, transition: "background 0.2s" }}>
-                  <div className="avatar avatar-sm">{user?.name?.charAt(0)?.toUpperCase()}</div>
+                  <div className="avatar avatar-sm" style={user?.photo ? { padding: 0, overflow: "hidden" } : {}}>
+                    {user?.photo ? (
+                      <img src={user.photo} alt={user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      user?.name?.charAt(0)?.toUpperCase()
+                    )}
+                  </div>
                   <span style={{ fontSize: 14, fontWeight: 500 }} className="desktop-nav">{user?.name?.split(" ")[0]}</span>
                   <ChevronDown size={14} className="desktop-nav" />
                 </button>
