@@ -258,12 +258,12 @@ export default function LandingPage() {
 
       {/* Responsive overrides for hero grid on mobile */}
       <style>{`
-        .hero-grid { grid-template-columns: 1fr 1fr; }
+        .hero-grid { grid-template-columns: auto 1fr; min-height: 480px; }
         .hero-banner-wrap {
           position: relative;
           width: 100%;
-          max-width: 480px;
-          aspect-ratio: 4 / 3;
+          height: 100%;
+          min-height: 420px;
           border-radius: var(--radius-xl);
           overflow: hidden;
           box-shadow: 0 20px 60px rgba(239,68,68,0.15), 0 4px 20px rgba(0,0,0,0.08);
@@ -282,16 +282,16 @@ export default function LandingPage() {
         }
         .hero-banner-dots {
           position: absolute;
-          bottom: 14px;
+          bottom: 16px;
           left: 50%;
           transform: translateX(-50%);
           display: flex;
-          gap: 8px;
+          gap: 10px;
           z-index: 2;
         }
         .hero-banner-dot {
-          width: 10px;
-          height: 10px;
+          width: 12px;
+          height: 12px;
           border-radius: 50%;
           background: rgba(255,255,255,0.4);
           border: 2px solid rgba(255,255,255,0.6);
@@ -302,14 +302,13 @@ export default function LandingPage() {
         .hero-banner-dot-active {
           background: #EF4444;
           border-color: #EF4444;
-          box-shadow: 0 0 8px rgba(239,68,68,0.5);
-          transform: scale(1.2);
+          box-shadow: 0 0 10px rgba(239,68,68,0.6);
+          transform: scale(1.3);
         }
         @media (max-width: 768px) {
-          .hero-grid { grid-template-columns: 1fr !important; padding: 48px 16px !important; text-align: center; }
-          .hero-grid h1 { font-size: 32px !important; }
-          .hero-grid > div:first-child > div:last-child { justify-content: center; }
-          .hero-banner-wrap { max-width: 100%; margin: 0 auto; }
+          .hero-grid { grid-template-columns: 1fr !important; min-height: auto !important; padding: 48px 16px !important; text-align: center; gap: 32px !important; }
+          .hero-grid > div:first-child { order: 2; }
+          .hero-banner-wrap { order: 1; min-height: 280px; }
         }
       `}</style>
     </div>
