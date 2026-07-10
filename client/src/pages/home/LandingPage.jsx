@@ -83,24 +83,22 @@ export default function LandingPage() {
     <div>
       {/* ── Hero ── */}
       <section style={{ position: "relative", overflow: "hidden", background: "var(--bg-card)" }}>
-        <div style={{ position: "absolute", top: -120, right: -120, width: 320, height: 320, borderRadius: "50%", background: "rgba(239,68,68,0.08)", filter: "blur(60px)" }} />
-        <div style={{ position: "absolute", bottom: -120, left: -120, width: 320, height: 320, borderRadius: "50%", background: "rgba(239,68,68,0.06)", filter: "blur(60px)" }} />
         <div className="hero-section">
           {/* Banner images */}
           <div className="hero-banner-wrap">
             {banners.map((src, i) => (
               <img key={src} src={src} alt={`LifeDrop banner ${i + 1}`} className={`hero-banner-img ${i === bannerIdx ? "hero-banner-active" : ""}`} />
             ))}
+            {/* Buttons overlay on top of the image */}
+            <div className="hero-buttons-overlay">
+              <Link to="/requests/create" className="btn btn-primary btn-lg">Request Blood <ArrowRight size={18} /></Link>
+              <Link to="/donors" className="btn btn-secondary btn-lg">Find Donors</Link>
+            </div>
             <div className="hero-banner-dots">
               {banners.map((_, i) => (
                 <button key={i} onClick={() => setBannerIdx(i)} className={`hero-banner-dot ${i === bannerIdx ? "hero-banner-dot-active" : ""}`} aria-label={`Slide ${i + 1}`} />
               ))}
             </div>
-          </div>
-          {/* Buttons at the bottom */}
-          <div className="hero-buttons">
-            <Link to="/requests/create" className="btn btn-primary btn-lg">Request Blood <ArrowRight size={18} /></Link>
-            <Link to="/donors" className="btn btn-secondary btn-lg">Find Donors</Link>
           </div>
         </div>
       </section>
@@ -278,6 +276,17 @@ export default function LandingPage() {
         .hero-banner-active {
           opacity: 1;
         }
+        .hero-buttons-overlay {
+          position: absolute;
+          top: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 12px;
+          z-index: 2;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
         .hero-banner-dots {
           position: absolute;
           bottom: 16px;
@@ -303,21 +312,15 @@ export default function LandingPage() {
           box-shadow: 0 0 10px rgba(239,68,68,0.6);
           transform: scale(1.3);
         }
-        .hero-buttons {
-          display: flex;
-          justify-content: center;
-          gap: 12px;
-          padding: 32px 20px 48px;
-          flex-wrap: wrap;
-        }
         @media (max-width: 768px) {
           .hero-banner-wrap { height: 300px; }
-          .hero-buttons { padding: 24px 16px 36px; }
+          .hero-buttons-overlay { top: 16px; gap: 8px; }
+          .hero-buttons-overlay .btn { padding: 10px 20px; font-size: 14px; }
         }
         @media (max-width: 480px) {
           .hero-banner-wrap { height: 220px; }
-          .hero-buttons { flex-direction: column; align-items: center; }
-          .hero-buttons .btn { width: 100%; max-width: 280px; }
+          .hero-buttons-overlay { top: 12px; flex-direction: column; align-items: center; }
+          .hero-buttons-overlay .btn { width: 200px; }
         }
       `}</style>
     </div>
