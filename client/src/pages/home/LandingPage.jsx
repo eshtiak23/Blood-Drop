@@ -85,25 +85,23 @@ export default function LandingPage() {
       <section style={{ position: "relative", overflow: "hidden", background: "var(--bg-card)" }}>
         <div style={{ position: "absolute", top: -120, right: -120, width: 320, height: 320, borderRadius: "50%", background: "rgba(239,68,68,0.08)", filter: "blur(60px)" }} />
         <div style={{ position: "absolute", bottom: -120, left: -120, width: 320, height: 320, borderRadius: "50%", background: "rgba(239,68,68,0.06)", filter: "blur(60px)" }} />
-        <div className="container hero-grid" style={{ display: "grid", gap: 48, alignItems: "center", padding: "80px 20px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-              <Link to="/requests/create" className="btn btn-primary btn-lg">Request Blood <ArrowRight size={18} /></Link>
-              <Link to="/donors" className="btn btn-secondary btn-lg">Find Donors</Link>
+        <div className="hero-section">
+          {/* Banner images */}
+          <div className="hero-banner-wrap">
+            {banners.map((src, i) => (
+              <img key={src} src={src} alt={`LifeDrop banner ${i + 1}`} className={`hero-banner-img ${i === bannerIdx ? "hero-banner-active" : ""}`} />
+            ))}
+            <div className="hero-banner-dots">
+              {banners.map((_, i) => (
+                <button key={i} onClick={() => setBannerIdx(i)} className={`hero-banner-dot ${i === bannerIdx ? "hero-banner-dot-active" : ""}`} aria-label={`Slide ${i + 1}`} />
+              ))}
             </div>
           </div>
-          <AnimatedDiv delay={0.2} style={{ display: "flex", justifyContent: "center" }}>
-            <div className="hero-banner-wrap">
-              {banners.map((src, i) => (
-                <img key={src} src={src} alt={`LifeDrop banner ${i + 1}`} className={`hero-banner-img ${i === bannerIdx ? "hero-banner-active" : ""}`} />
-              ))}
-              <div className="hero-banner-dots">
-                {banners.map((_, i) => (
-                  <button key={i} onClick={() => setBannerIdx(i)} className={`hero-banner-dot ${i === bannerIdx ? "hero-banner-dot-active" : ""}`} aria-label={`Slide ${i + 1}`} />
-                ))}
-              </div>
-            </div>
-          </AnimatedDiv>
+          {/* Buttons at the bottom */}
+          <div className="hero-buttons">
+            <Link to="/requests/create" className="btn btn-primary btn-lg">Request Blood <ArrowRight size={18} /></Link>
+            <Link to="/donors" className="btn btn-secondary btn-lg">Find Donors</Link>
+          </div>
         </div>
       </section>
 
@@ -258,22 +256,22 @@ export default function LandingPage() {
 
       {/* Responsive overrides for hero grid on mobile */}
       <style>{`
-        .hero-grid { grid-template-columns: auto 1fr; min-height: 480px; }
+        .hero-section {
+          width: 100%;
+        }
         .hero-banner-wrap {
           position: relative;
           width: 100%;
-          height: 100%;
-          min-height: 420px;
-          border-radius: var(--radius-xl);
+          height: 500px;
           overflow: hidden;
-          box-shadow: 0 20px 60px rgba(239,68,68,0.15), 0 4px 20px rgba(0,0,0,0.08);
         }
         .hero-banner-img {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain;
+          background: var(--bg);
           opacity: 0;
           transition: opacity 0.8s ease-in-out;
         }
@@ -305,10 +303,21 @@ export default function LandingPage() {
           box-shadow: 0 0 10px rgba(239,68,68,0.6);
           transform: scale(1.3);
         }
+        .hero-buttons {
+          display: flex;
+          justify-content: center;
+          gap: 12px;
+          padding: 32px 20px 48px;
+          flex-wrap: wrap;
+        }
         @media (max-width: 768px) {
-          .hero-grid { grid-template-columns: 1fr !important; min-height: auto !important; padding: 48px 16px !important; text-align: center; gap: 32px !important; }
-          .hero-grid > div:first-child { order: 2; }
-          .hero-banner-wrap { order: 1; min-height: 280px; }
+          .hero-banner-wrap { height: 300px; }
+          .hero-buttons { padding: 24px 16px 36px; }
+        }
+        @media (max-width: 480px) {
+          .hero-banner-wrap { height: 220px; }
+          .hero-buttons { flex-direction: column; align-items: center; }
+          .hero-buttons .btn { width: 100%; max-width: 280px; }
         }
       `}</style>
     </div>
