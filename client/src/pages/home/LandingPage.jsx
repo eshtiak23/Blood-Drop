@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Droplets, Star, AlertTriangle, Droplet } from "lucide-react";
 import { STATS, TESTIMONIALS, FAQS, BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
+import { getAllFeedback } from "../../services/localStore";
 
 /* ── Helper: Blood Group Color ── */
 function getBloodGroupColor(bloodGroup) {
@@ -50,6 +51,24 @@ const FEATURES = [
 export default function LandingPage() {
   // Track which FAQ item is expanded (null = all collapsed)
   const [openFaq, setOpenFaq] = useState(null);
+  // User-submitted feedback from localStorage
+  const [userFeedback, setUserFeedback] = useState([]);
+
+  useEffect(() => {
+    const fb = getAllFeedback();
+    // Convert feedback to the same shape as TESTIMONIALS so they render together
+    setUserFeedback(fb.map((f) => ({
+      name: f.userName,
+      role: "LifeDrop User",
+      content: f.comment,
+      rating: f.rating,
+      isUserFeedback: true,
+      userPhoto: f.userPhoto,
+    })));
+  }, []);
+
+  // Merge static testimonials with user feedback (user feedback shows first)
+  const allTestimonials = [...userFeedback, ...TESTIMONIALS];
 
   return (
     <div>
@@ -185,13 +204,16 @@ export default function LandingPage() {
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>What People Say</h2>
           <div className="grid grid-3" style={{ marginTop: 48 }}>
-            {TESTIMONIALS.map((t, i) => (
-              <AnimatedDiv key={t.name} delay={i * 0.1}>
-                <div style={{ padding: 28, borderRadius: "var(--radius)", border: "1px solid var(--border-light)", background: "var(--bg-card)", textAlign: "left" }}>
-                  <div style={{ display: "flex", gap: 2 }}>{[...Array(5)].map((_, j) => <Star key={j} size={14} fill="#FBBF24" color="#FBBF24" />)}</div>
+            {allTestimonials.map((t, i) => (
+              <AnimatedDiv key={t.name + i} delay={i * 0.1}>
+                <div style={{ padding: 28, borderRadius: "var(--radius)", border: "1px solid var(--border-light)", background: "var(--bg-card)", textAlign: "left", position: "relative", overflow: "hidden" }}>
+                  {t.isUserFeedback && <div style={{ position: "absolute", top: 12, right: 12, fontSize: 10, fontWeight: 600, color: "var(--red)", background: "var(--red-light)", padding: "2px 8px", borderRadius: 10 }}>User Review</div>}
+                  <div style={{ display: "flex", gap: 2 }}>{[...Array(5)].map((_, j) => <Star key={j} size={14} fill={j < (t.rating || 5) ? "#FBBF24" : "none"} color={j < (t.rating || 5) ? "#FBBF24" : "var(--text-muted)"} />)}</div>
                   <p style={{ fontSize: 14, color: "var(--text-secondary)", marginTop: 14, lineHeight: 1.7 }}>"{t.content}"</p>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16 }}>
-                    <div className="avatar" style={{ background: "linear-gradient(135deg, #EF4444, #DC2626)", color: "white" }}>{t.name.charAt(0)}</div>
+                    <div className="avatar" style={{ background: t.isUserFeedback && t.userPhoto ? "none" : "linear-gradient(135deg, #EF4444, #DC2626)", color: "white", overflow: t.userPhoto ? "hidden" : "visible" }}>
+                      {t.userPhoto ? <img src={t.userPhoto} alt={t.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : t.name.charAt(0)}
+                    </div>
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 600 }}>{t.name}</div>
                       <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{t.role}</div>
