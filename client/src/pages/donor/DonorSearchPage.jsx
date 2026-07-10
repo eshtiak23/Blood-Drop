@@ -5,9 +5,11 @@
  * contact modal for reaching out to donors.
  */
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
 import donors from "../../data/donors.json";
-import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, ChevronLeft, ChevronRight, SlidersHorizontal, LogIn } from "lucide-react";
 
 const RADIUS_OPTIONS = [10, 20, 30, 50, 100];
 const PER_PAGE = 12;
@@ -48,6 +50,8 @@ function isDonationCooledDown(lastDonationDate) {
 }
 
 export default function DonorSearchPage() {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", area: "", radius: 10 });
   const [useLocation, setUseLocation] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
@@ -250,7 +254,14 @@ export default function DonorSearchPage() {
                       <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap", alignItems: "center" }}>
                         {d.isVerified && <span className="badge badge-green"><Shield size={10} /> Verified</span>}
                         <span className={`badge ${canDonate ? "badge-green" : "badge-gray"}`}>{canDonate ? "Available" : "Not Available"}</span>
-                        <button className="btn btn-primary btn-sm" style={{ marginLeft: "auto", padding: "4px 12px", fontSize: 12 }} onClick={() => setSelectedDonor(d)}>
+                        <button className="btn btn-primary btn-sm" style={{ marginLeft: "auto", padding: "4px 12px", fontSize: 12 }} onClick={() => {
+                          if (!isAuthenticated) {
+                            alert("Please log in to view donor contact information.");
+                            navigate("/login");
+                            return;
+                          }
+                          setSelectedDonor(d);
+                        }}>
                           <Phone size={12} /> Contact
                         </button>
                       </div>

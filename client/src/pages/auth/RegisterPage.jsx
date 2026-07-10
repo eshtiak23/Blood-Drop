@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { BLOOD_GROUPS, DISTRICTS, AREAS } from "../../data/constants";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart, Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -18,6 +18,8 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", phone: "", bloodGroup: "", district: "", area: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Derive area options from the selected district (empty until a district is chosen)
   const areas = form.district ? (AREAS[form.district] || []) : [];
@@ -65,8 +67,22 @@ export default function RegisterPage() {
             </div>
 
             <div className="grid grid-2" style={{ marginBottom: 16 }}>
-              <div className="input-group"><label>Password</label><input className="input" type="password" placeholder="••••••••" value={form.password} onChange={(e) => set("password", e.target.value)} required /></div>
-              <div className="input-group"><label>Confirm</label><input className="input" type="password" placeholder="••••••••" value={form.confirmPassword} onChange={(e) => set("confirmPassword", e.target.value)} required /></div>
+              <div className="input-group"><label>Password</label>
+                <div style={{ position: "relative" }}>
+                  <input className="input" type={showPass ? "text" : "password"} placeholder="••••••••" value={form.password} onChange={(e) => set("password", e.target.value)} required style={{ paddingRight: 40 }} />
+                  <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", padding: 4, background: "none", border: "none", cursor: "pointer" }}>
+                    {showPass ? <EyeOff size={16} color="var(--text-muted)" /> : <Eye size={16} color="var(--text-muted)" />}
+                  </button>
+                </div>
+              </div>
+              <div className="input-group"><label>Confirm</label>
+                <div style={{ position: "relative" }}>
+                  <input className="input" type={showConfirm ? "text" : "password"} placeholder="••••••••" value={form.confirmPassword} onChange={(e) => set("confirmPassword", e.target.value)} required style={{ paddingRight: 40 }} />
+                  <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", padding: 4, background: "none", border: "none", cursor: "pointer" }}>
+                    {showConfirm ? <EyeOff size={16} color="var(--text-muted)" /> : <Eye size={16} color="var(--text-muted)" />}
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Blood group, district, and area — shown for all users */}
