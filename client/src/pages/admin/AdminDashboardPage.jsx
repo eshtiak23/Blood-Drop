@@ -22,9 +22,9 @@ export default function AdminDashboardPage() {
     const requests = getRequests();
     setStats({
       totalUsers: allUsers.length,
-      totalDonors: allUsers.filter((u) => u.role === "donor").length,
+      totalDonors: allUsers.filter((u) => u.role !== "admin").length,
       openRequests: requests.filter((r) => r.status === "open").length,
-      pendingVerifications: allUsers.filter((u) => u.role === "donor" && !u.isVerified).length,
+      pendingVerifications: allUsers.filter((u) => u.role !== "admin" && !u.isVerified).length,
     });
   }, []);
 
@@ -61,8 +61,8 @@ export default function AdminDashboardPage() {
                   <div><div style={{ fontWeight: 600, fontSize: 14 }}>{u.name}</div><div style={{ fontSize: 12, color: "var(--text-muted)" }}>{u.email}</div></div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span className={`badge ${u.role === "admin" ? "badge-red" : u.role === "donor" ? "badge-blue" : "badge-gray"}`}>{u.role}</span>
-                  {u.role === "donor" && !u.isVerified && <button className="btn btn-success btn-sm" onClick={() => verifyDonor(u._id)}><CheckCircle size={12} /> Verify</button>}
+                  <span className={`badge ${u.role === "admin" ? "badge-red" : "badge-blue"}`}>{u.role}</span>
+                  {u.role !== "admin" && !u.isVerified && <button className="btn btn-success btn-sm" onClick={() => verifyDonor(u._id)}><CheckCircle size={12} /> Verify</button>}
                 </div>
               </div>
             ))

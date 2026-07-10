@@ -1,9 +1,9 @@
 /**
  * DashboardPage — Main user dashboard after login.
  * 
- * Shows a personalized welcome with profile card, stats, quick actions,
- * blood stock overview, and recent requests. Content changes based on
- * whether the user is a donor, seeker, or admin.
+ * Everyone is both a blood donor AND a seeker — no role separation.
+ * Shows: profile card, stats, donation logging, feedback/reviews,
+ * blood stock overview, recent requests, and quick actions.
  * 
  * Profile photo is stored as base64 in localStorage (no server needed).
  */
@@ -11,9 +11,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { searchRequests, getMyRequests } from "../../services/localStore";
+import { searchRequests, getMyRequests, addDonationLog, getDonationLogs, addFeedback, getMyFeedback, deleteFeedback } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
-import { Droplets, Heart, AlertCircle, Search, Plus, Users, MapPin, Phone, Mail, Shield, Clock, TrendingUp, Activity, ArrowRight, Calendar } from "lucide-react";
+import {
+  Droplets, Heart, AlertCircle, Search, Plus, Users, MapPin, Phone, Mail,
+  Shield, Clock, TrendingUp, Activity, ArrowRight, Calendar, Star,
+  Building2, MessageSquare, Trash2, CheckCircle, Loader2, X
+} from "lucide-react";
 
 /** Returns theme-aware blood group badge colors */
 function getBloodGroupColor(bloodGroup) {
@@ -24,9 +28,23 @@ function getBloodGroupColor(bloodGroup) {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [stats, setStats] = useState(null);
   const [nearbyRequests, setNearbyRequests] = useState([]);
+
+  // Donation logging state
+  const [donationForm, setDonationForm] = useState({ donationDate: "", hospital: "" });
+  const [donationLogs, setDonationLogs] = useState([]);
+  const [donationSaving, setDonationSaving] = useState(false);
+  const [donationSaved, setDonationSaved] = useState(false);
+
+  // Feedback state
+  const [feedbackForm, setFeedbackForm] = useState({ rating: 5, comment: "" });
+  const [feedbackList, setFeedbackList] = useState([]);
+  const [myFeedback, setMyFeedback] = useState([]);
+  const [feedbackSaving, setFeedbackSaving] = useState(false);
+  const [feedbackSaved, setFeedbackSaved] = useState(false);
+  const [feedbackError, setFeedbackError] = useState("");
 
   useEffect(() => {
     const all = searchRequests();
@@ -36,17 +54,63 @@ export default function DashboardPage() {
     all.filter((r) => r.status === "open").forEach((r) => { stock[r.patientBloodGroup] = (stock[r.patientBloodGroup] || 0) + 1; });
     setStats(stock);
 
-    // Show requests relevant to the user's role
-    if (user?.role === "donor" && user?.district) {
+    // Show requests relevant to the user's district
+    if (user?.district) {
       setNearbyRequests(all.filter((r) => r.district === user.district && r.status === "open").slice(0, 3));
     }
-    if (user?.role === "seeker") {
-      setNearbyRequests(getMyRequests(user._id).slice(0, 3));
-    }
+
+    // Load donation logs
+    if (user?._id) setDonationLogs(getDonationLogs(user._id));
+
+    // Load feedback
+    setFeedbackList(JSON.parse(localStorage.getItem("ld_feedback") || "[]").slice(0, 10));
+    if (user?._id) setMyFeedback(getMyFeedback(user._id));
   }, [user]);
 
+  /** Log a blood donation — updates user stats and saves the log */
+  const handleDonationLog = (e) => {
+    e.preventDefault();
+    if (!donationForm.donationDate || !donationForm.hospital) return;
+    setDonationSaving(true);
+    setTimeout(() => {
+      addDonationLog(donationForm, user);
+      const newTotal = (user.totalDonations || 0) + 1;
+      updateUser({ totalDonations: newTotal, lastDonationDate: donationForm.donationDate });
+      setDonationLogs(getDonationLogs(user._id));
+      setDonationForm({ donationDate: "", hospital: "" });
+      setDonationSaving(false);
+      setDonationSaved(true);
+      setTimeout(() => setDonationSaved(false), 2000);
+    }, 300);
+  };
+
+  /** Submit feedback / review */
+  const handleFeedback = (e) => {
+    e.preventDefault();
+    if (!feedbackForm.comment.trim()) return;
+    setFeedbackSaving(true);
+    setFeedbackError("");
+    try {
+      addFeedback(feedbackForm, user);
+      setFeedbackList(JSON.parse(localStorage.getItem("ld_feedback") || "[]").slice(0, 10));
+      setMyFeedback(getMyFeedback(user._id));
+      setFeedbackForm({ rating: 5, comment: "" });
+      setFeedbackSaved(true);
+      setTimeout(() => setFeedbackSaved(false), 2000);
+    } catch (err) {
+      setFeedbackError(err.message);
+    }
+    setFeedbackSaving(false);
+  };
+
+  /** Delete own feedback */
+  const handleDeleteFeedback = (fbId) => {
+    deleteFeedback(fbId);
+    setFeedbackList(JSON.parse(localStorage.getItem("ld_feedback") || "[]").slice(0, 10));
+    setMyFeedback(getMyFeedback(user._id));
+  };
+
   const c = getBloodGroupColor(user?.bloodGroup);
-  const bloodColor = BLOOD_GROUP_COLORS[user?.bloodGroup];
 
   return (
     <div className="container" style={{ padding: "32px 20px", maxWidth: 1100 }}>
@@ -64,14 +128,13 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Name, Role, Blood Group, Verified */}
+            {/* Name, Blood Group, Verified */}
             <div style={{ flex: 1, minWidth: 200 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <h1 style={{ fontSize: 22, fontWeight: 800 }}>Welcome back, {user?.name?.split(" ")[0]} 👋</h1>
                 {user?.isVerified && <span className="badge badge-green"><Shield size={10} /> Verified</span>}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 13, color: "var(--text-secondary)", textTransform: "capitalize" }}>{user?.role}</span>
                 {user?.bloodGroup && (
                   <span className="badge" style={{ background: c.bg, color: c.text, fontSize: 12, padding: "2px 10px" }}>{user?.bloodGroup}</span>
                 )}
@@ -106,17 +169,13 @@ export default function DashboardPage() {
 
       {/* ── Stats Grid ── */}
       <div className="grid dash-stats" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 24 }}>
-        {user?.role === "donor" && (
-          <>
-            <StatCard icon={<Heart size={20} color="var(--red)" />} label="Donations" value={user.totalDonations || 0} />
-            <StatCard
-              icon={<Activity size={20} color={user.isAvailable ? "var(--green)" : "var(--text-muted)"} />}
-              label="Status"
-              value={user.isAvailable ? "Active" : "Off"}
-              valueColor={user.isAvailable ? "var(--green)" : "var(--text-muted)"}
-            />
-          </>
-        )}
+        <StatCard icon={<Heart size={20} color="var(--red)" />} label="Donations" value={user?.totalDonations || 0} />
+        <StatCard
+          icon={<Activity size={20} color={user?.isAvailable ? "var(--green)" : "var(--text-muted)"} />}
+          label="Status"
+          value={user?.isAvailable ? "Active" : "Off"}
+          valueColor={user?.isAvailable ? "var(--green)" : "var(--text-muted)"}
+        />
         {stats && (
           <>
             <StatCard icon={<AlertCircle size={20} color="var(--red)" />} label="Open Requests" value={Object.values(stats).reduce((a, b) => a + b, 0)} />
@@ -129,11 +188,9 @@ export default function DashboardPage() {
       <div style={{ marginTop: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Quick Actions</h2>
         <div className="dash-actions" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {user?.role === "seeker" && (
-            <Link to="/requests/create" className="btn btn-primary" style={{ gap: 8 }}>
-              <Plus size={16} /> Create Request
-            </Link>
-          )}
+          <Link to="/requests/create" className="btn btn-primary" style={{ gap: 8 }}>
+            <Plus size={16} /> Create Request
+          </Link>
           <Link to="/donors" className="btn btn-secondary" style={{ gap: 8 }}>
             <Search size={16} /> Find Donors
           </Link>
@@ -143,6 +200,107 @@ export default function DashboardPage() {
           <Link to="/profile" className="btn btn-ghost" style={{ gap: 8 }}>
             My Profile <ArrowRight size={14} />
           </Link>
+        </div>
+      </div>
+
+      {/* ── Log Donation + Feedback Side by Side ── */}
+      <div className="dash-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 24 }}>
+
+        {/* Log Donation */}
+        <div className="card">
+          <div className="card-body">
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <Droplets size={18} color="var(--red)" />
+              <h2 style={{ fontSize: 16, fontWeight: 700 }}>Log Donation</h2>
+            </div>
+            <form onSubmit={handleDonationLog}>
+              <div className="input-group" style={{ marginBottom: 12 }}>
+                <label style={{ fontSize: 13 }}>Donation Date</label>
+                <input className="input" type="date" value={donationForm.donationDate} onChange={(e) => setDonationForm({ ...donationForm, donationDate: e.target.value })} required />
+              </div>
+              <div className="input-group" style={{ marginBottom: 12 }}>
+                <label style={{ fontSize: 13 }}>Hospital Name</label>
+                <input className="input" placeholder="e.g. Dhaka Medical College" value={donationForm.hospital} onChange={(e) => setDonationForm({ ...donationForm, hospital: e.target.value })} required />
+              </div>
+              <button className="btn btn-primary btn-sm" type="submit" disabled={donationSaving} style={{ width: "100%" }}>
+                {donationSaving ? <Loader2 size={14} className="animate-pulse" /> : <CheckCircle size={14} />}
+                {donationSaved ? "Saved!" : "Log Donation"}
+              </button>
+            </form>
+
+            {/* Recent donation logs */}
+            {donationLogs.length > 0 && (
+              <div style={{ marginTop: 16, borderTop: "1px solid var(--border-light)", paddingTop: 12 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 8 }}>Recent Logs</div>
+                {donationLogs.slice(0, 3).map((log) => (
+                  <div key={log._id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", fontSize: 13 }}>
+                    <Building2 size={12} color="var(--text-muted)" />
+                    <span style={{ flex: 1 }}>{log.hospital}</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{new Date(log.donationDate).toLocaleDateString()}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Feedback / Reviews */}
+        <div className="card">
+          <div className="card-body">
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <MessageSquare size={18} color="var(--red)" />
+              <h2 style={{ fontSize: 16, fontWeight: 700 }}>Feedback & Reviews</h2>
+            </div>
+
+            {/* Feedback form */}
+            <form onSubmit={handleFeedback}>
+              {feedbackError && <div className="alert alert-error" style={{ marginBottom: 12, fontSize: 13 }}>{feedbackError}</div>}
+              <div className="input-group" style={{ marginBottom: 12 }}>
+                <label style={{ fontSize: 13 }}>Your Rating</label>
+                <div style={{ display: "flex", gap: 4 }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} type="button" onClick={() => setFeedbackForm({ ...feedbackForm, rating: star })} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                      <Star size={20} fill={star <= feedbackForm.rating ? "#F59E0B" : "none"} color={star <= feedbackForm.rating ? "#F59E0B" : "var(--text-muted)"} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="input-group" style={{ marginBottom: 12 }}>
+                <label style={{ fontSize: 13 }}>Your Review</label>
+                <textarea className="input" rows={2} placeholder="Share your experience with LifeDrop..." value={feedbackForm.comment} onChange={(e) => setFeedbackForm({ ...feedbackForm, comment: e.target.value })} required />
+              </div>
+              <button className="btn btn-primary btn-sm" type="submit" disabled={feedbackSaving} style={{ width: "100%" }}>
+                {feedbackSaving ? <Loader2 size={14} className="animate-pulse" /> : <MessageSquare size={14} />}
+                {feedbackSaved ? "Submitted!" : "Submit Feedback"}
+              </button>
+            </form>
+
+            {/* Recent feedback list */}
+            {feedbackList.length > 0 && (
+              <div style={{ marginTop: 16, borderTop: "1px solid var(--border-light)", paddingTop: 12, maxHeight: 220, overflowY: "auto" }}>
+                {feedbackList.map((fb) => (
+                  <div key={fb._id} style={{ padding: "8px 0", borderBottom: "1px solid var(--border-light)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--red-light)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "var(--red)", flexShrink: 0 }}>
+                        {fb.userPhoto ? <img src={fb.userPhoto} alt="" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} /> : fb.userName?.charAt(0)?.toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600 }}>{fb.userName}</div>
+                        <div style={{ display: "flex", gap: 2 }}>
+                          {[1, 2, 3, 4, 5].map((s) => <Star key={s} size={10} fill={s <= fb.rating ? "#F59E0B" : "none"} color={s <= fb.rating ? "#F59E0B" : "var(--text-muted)"} />)}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{new Date(fb.createdAt).toLocaleDateString()}</span>
+                      {fb.userId === user?._id && (
+                        <button onClick={() => handleDeleteFeedback(fb._id)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, color: "var(--text-muted)" }}><Trash2 size={12} /></button>
+                      )}
+                    </div>
+                    <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4, marginLeft: 36 }}>{fb.comment}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -178,13 +336,13 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Recent Requests */}
+        {/* Nearby Requests */}
         <div className="card">
           <div className="card-body">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <Clock size={18} color="var(--red)" />
-                <h2 style={{ fontSize: 16, fontWeight: 700 }}>{user?.role === "donor" ? "Nearby Requests" : "My Requests"}</h2>
+                <h2 style={{ fontSize: 16, fontWeight: 700 }}>Nearby Requests</h2>
               </div>
               <Link to="/requests" style={{ fontSize: 13, color: "var(--red)", fontWeight: 600, textDecoration: "none" }}>View All</Link>
             </div>

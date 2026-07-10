@@ -41,8 +41,8 @@ export default function RequestDetailPage() {
   if (!request) return <div className="container" style={{ padding: 40, textAlign: "center" }}>Request not found</div>;
 
   const u = URGENCY.find((x) => x.value === request.urgency);
-  // Role-based action visibility: only donors can accept open requests
-  const canAccept = user?.role === "donor" && request.status === "open";
+  // Any logged-in user can accept open requests (everyone is both donor and seeker)
+  const canAccept = request.status === "open";
   // Only the original requester or the accepted donor can mark a request complete
   const canComplete = (user?._id === request.requester?._id || user?._id === request.acceptedBy?._id) && request.status === "accepted";
 

@@ -79,7 +79,8 @@ export function AuthProvider({ children }) {
     const newUser = {
       _id: "u" + Date.now(),           // Unique ID based on timestamp
       ...data,
-      isAvailable: true,                // Donors start as available
+      role: "user",                     // Everyone is both donor and seeker
+      isAvailable: true,                // Start as available to donate
       totalDonations: 0,                // Start with zero donations
       isVerified: false,                // Needs admin verification
       isActive: true,

@@ -17,6 +17,8 @@
 const REQUESTS_KEY = "ld_requests";
 const NOTIFICATIONS_KEY = "ld_notifications";
 const BOOKMARKS_KEY = "ld_bookmarks";
+const DONATION_LOGS_KEY = "ld_donation_logs";
+const FEEDBACK_KEY = "ld_feedback";
 
 // ── Generic localStorage helpers ──
 
@@ -169,4 +171,79 @@ export function removeBookmark(donorId) {
 /** Check if a specific donor is bookmarked (returns true/false) */
 export function isBookmarked(donorId) {
   return get(BOOKMARKS_KEY).some((b) => b.donorId === donorId);
+}
+
+// ── Donation Logs ──
+
+/** Get all donation logs for the current user */
+export function getDonationLogs(userId) {
+  return get(DONATION_LOGS_KEY).filter((l) => l.userId === userId);
+}
+
+/**
+ * Log a new blood donation.
+ * Records the date, hospital name, and user info.
+ * The caller should also update the user's totalDonations and lastDonationDate.
+ */
+export function addDonationLog(data, user) {
+  const logs = get(DONATION_LOGS_KEY);
+  const newLog = {
+    _id: "dl" + Date.now(),
+    userId: user._id,
+    userName: user.name,
+    donationDate: data.donationDate,
+    hospital: data.hospital,
+    bloodGroup: user.bloodGroup,
+    createdAt: new Date().toISOString(),
+  };
+  logs.unshift(newLog);
+  set(DONATION_LOGS_KEY, logs);
+  return newLog;
+}
+
+/** Delete a donation log */
+export function deleteDonationLog(logId) {
+  const logs = get(DONATION_LOGS_KEY).filter((l) => l._id !== logId);
+  set(DONATION_LOGS_KEY, logs);
+}
+
+// ── Feedback / Reviews ──
+
+/** Get all feedback entries */
+export function getAllFeedback() {
+  return get(FEEDBACK_KEY);
+}
+
+/** Get feedback left by a specific user */
+export function getMyFeedback(userId) {
+  return get(FEEDBACK_KEY).filter((f) => f.userId === userId);
+}
+
+/**
+ * Submit feedback / a review.
+ * Each user can submit multiple feedbacks but only one per day.
+ */
+export function addFeedback(data, user) {
+  const list = get(FEEDBACK_KEY);
+  const today = new Date().toISOString().slice(0, 10);
+  const alreadyToday = list.find((f) => f.userId === user._id && f.createdAt.slice(0, 10) === today);
+  if (alreadyToday) throw new Error("You can only submit one feedback per day");
+  const fb = {
+    _id: "fb" + Date.now(),
+    userId: user._id,
+    userName: user.name,
+    userPhoto: user.photo || null,
+    rating: data.rating,
+    comment: data.comment,
+    createdAt: new Date().toISOString(),
+  };
+  list.unshift(fb);
+  set(FEEDBACK_KEY, list);
+  return fb;
+}
+
+/** Delete a feedback entry (only own feedback) */
+export function deleteFeedback(feedbackId) {
+  const list = get(FEEDBACK_KEY).filter((f) => f._id !== feedbackId);
+  set(FEEDBACK_KEY, list);
 }

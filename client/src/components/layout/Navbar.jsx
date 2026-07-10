@@ -86,8 +86,8 @@ export default function Navbar() {
                       <button className="dropdown-item" onClick={() => { navigate("/dashboard"); setMenuOpen(false); }}><LayoutDashboard size={16} /> Dashboard</button>
                       <button className="dropdown-item" onClick={() => { navigate("/notifications"); setMenuOpen(false); }}><Bell size={16} /> Notifications</button>
                       <button className="dropdown-item" onClick={() => { navigate("/profile"); setMenuOpen(false); }}><User size={16} /> Profile</button>
-                      {/* Bookmarks — only shown for donors */}
-                      {user?.role === "donor" && <button className="dropdown-item" onClick={() => { navigate("/bookmarks"); setMenuOpen(false); }}><Bookmark size={16} /> Bookmarks</button>}
+                      {/* Bookmarks — shown for all users */}
+                      <button className="dropdown-item" onClick={() => { navigate("/bookmarks"); setMenuOpen(false); }}><Bookmark size={16} /> Bookmarks</button>
                       <button className="dropdown-item" onClick={() => { navigate("/settings"); setMenuOpen(false); }}><Settings size={16} /> Settings</button>
                       <div className="dropdown-sep" />
                       <button className="dropdown-item danger" onClick={handleLogout}><LogOut size={16} /> Logout</button>
