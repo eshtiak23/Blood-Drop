@@ -84,12 +84,11 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section style={{ position: "relative", overflow: "hidden", background: "var(--bg-card)" }}>
         <div className="hero-section">
-          {/* Banner images */}
           <div className="hero-banner-wrap">
             {banners.map((src, i) => (
               <img key={src} src={src} alt={`LifeDrop banner ${i + 1}`} className={`hero-banner-img ${i === bannerIdx ? "hero-banner-active" : ""}`} />
             ))}
-            {/* Buttons overlay on top of the image */}
+            {/* Buttons on the picture */}
             <div className="hero-buttons-overlay">
               <Link to="/requests/create" className="btn btn-primary btn-lg">Request Blood <ArrowRight size={18} /></Link>
               <Link to="/donors" className="btn btn-secondary btn-lg">Find Donors</Link>
@@ -260,7 +259,7 @@ export default function LandingPage() {
         .hero-banner-wrap {
           position: relative;
           width: 100%;
-          height: 500px;
+          height: 520px;
           overflow: hidden;
         }
         .hero-banner-img {
@@ -268,8 +267,7 @@ export default function LandingPage() {
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: contain;
-          background: var(--bg);
+          object-fit: cover;
           opacity: 0;
           transition: opacity 0.8s ease-in-out;
         }
@@ -278,7 +276,7 @@ export default function LandingPage() {
         }
         .hero-buttons-overlay {
           position: absolute;
-          top: 24px;
+          top: 20px;
           left: 50%;
           transform: translateX(-50%);
           display: flex;
@@ -313,14 +311,14 @@ export default function LandingPage() {
           transform: scale(1.3);
         }
         @media (max-width: 768px) {
-          .hero-banner-wrap { height: 300px; }
-          .hero-buttons-overlay { top: 16px; gap: 8px; }
+          .hero-banner-wrap { height: 320px; }
+          .hero-buttons-overlay { top: 12px; gap: 8px; }
           .hero-buttons-overlay .btn { padding: 10px 20px; font-size: 14px; }
         }
         @media (max-width: 480px) {
-          .hero-banner-wrap { height: 220px; }
-          .hero-buttons-overlay { top: 12px; flex-direction: column; align-items: center; }
-          .hero-buttons-overlay .btn { width: 200px; }
+          .hero-banner-wrap { height: 240px; }
+          .hero-buttons-overlay { top: 10px; gap: 6px; }
+          .hero-buttons-overlay .btn { padding: 8px 16px; font-size: 13px; }
         }
       `}</style>
     </div>
