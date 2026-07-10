@@ -53,6 +53,9 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(null);
   // User-submitted feedback from localStorage
   const [userFeedback, setUserFeedback] = useState([]);
+  // Banner carousel index
+  const [bannerIdx, setBannerIdx] = useState(0);
+  const banners = ["/banner1.png", "/banner2.png"];
 
   useEffect(() => {
     const fb = getAllFeedback();
@@ -66,6 +69,12 @@ export default function LandingPage() {
       userPhoto: f.userPhoto,
     })));
   }, []);
+
+  // Auto-rotate banner every 4 seconds
+  useEffect(() => {
+    const timer = setInterval(() => setBannerIdx((i) => (i + 1) % banners.length), 4000);
+    return () => clearInterval(timer);
+  }, [banners.length]);
 
   // Merge static testimonials with user feedback (user feedback shows first)
   const allTestimonials = [...userFeedback, ...TESTIMONIALS];
@@ -99,18 +108,26 @@ export default function LandingPage() {
             </AnimatedDiv>
           </div>
           <AnimatedDiv delay={0.2} style={{ display: "flex", justifyContent: "center" }}>
-              <div style={{ position: "relative", width: 340, height: 340 }}>
-              <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.15))", filter: "blur(40px)" }} />
-              <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-                <div style={{ width: 180, height: 180, borderRadius: "50%", background: "var(--bg-card)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 20px 60px rgba(239,68,68,0.2)", border: "3px solid rgba(239,68,68,0.1)" }}>
-                  <img src="/Logo.png" alt="LifeDrop" style={{ width: 120, height: 120, objectFit: "contain" }} />
-                </div>
-                <div style={{ position: "absolute", top: 10, right: 20, width: 48, height: 48, borderRadius: "50%", background: "var(--bg-card)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                  <span style={{ fontSize: 24 }}>🩸</span>
-                </div>
-                <div style={{ position: "absolute", bottom: 20, left: 10, width: 48, height: 48, borderRadius: "50%", background: "var(--bg-card)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                  <span style={{ fontSize: 24 }}>❤️</span>
-                </div>
+            <div className="hero-banner-wrap">
+              {/* Banner images with crossfade */}
+              {banners.map((src, i) => (
+                <img
+                  key={src}
+                  src={src}
+                  alt={`LifeDrop banner ${i + 1}`}
+                  className={`hero-banner-img ${i === bannerIdx ? "hero-banner-active" : ""}`}
+                />
+              ))}
+              {/* Dots */}
+              <div className="hero-banner-dots">
+                {banners.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setBannerIdx(i)}
+                    className={`hero-banner-dot ${i === bannerIdx ? "hero-banner-dot-active" : ""}`}
+                    aria-label={`Slide ${i + 1}`}
+                  />
+                ))}
               </div>
             </div>
           </AnimatedDiv>
@@ -269,11 +286,57 @@ export default function LandingPage() {
       {/* Responsive overrides for hero grid on mobile */}
       <style>{`
         .hero-grid { grid-template-columns: 1fr 1fr; }
+        .hero-banner-wrap {
+          position: relative;
+          width: 100%;
+          max-width: 480px;
+          aspect-ratio: 4 / 3;
+          border-radius: var(--radius-xl);
+          overflow: hidden;
+          box-shadow: 0 20px 60px rgba(239,68,68,0.15), 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .hero-banner-img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0;
+          transition: opacity 0.8s ease-in-out;
+        }
+        .hero-banner-active {
+          opacity: 1;
+        }
+        .hero-banner-dots {
+          position: absolute;
+          bottom: 14px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 8px;
+          z-index: 2;
+        }
+        .hero-banner-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.4);
+          border: 2px solid rgba(255,255,255,0.6);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          padding: 0;
+        }
+        .hero-banner-dot-active {
+          background: #EF4444;
+          border-color: #EF4444;
+          box-shadow: 0 0 8px rgba(239,68,68,0.5);
+          transform: scale(1.2);
+        }
         @media (max-width: 768px) {
           .hero-grid { grid-template-columns: 1fr !important; padding: 48px 16px !important; text-align: center; }
           .hero-grid h1 { font-size: 32px !important; }
           .hero-grid > div:first-child > div:last-child { justify-content: center; }
-          .hero-grid > div:last-child { display: none !important; }
+          .hero-banner-wrap { max-width: 100%; margin: 0 auto; }
         }
       `}</style>
     </div>
