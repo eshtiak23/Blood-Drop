@@ -87,20 +87,20 @@ function AppContent() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/donors" element={<DonorSearchPage />} />
           <Route path="/donors/:id" element={<DonorProfilePage />} />
-          <Route path="/requests" element={<RequestListPage />} />
-          <Route path="/requests/:id" element={<RequestDetailPage />} />
-
-          {/* Public-only pages — redirect to dashboard if already logged in */}
-          <Route path="/login" element={<Public><LoginPage /></Public>} />
-          <Route path="/register" element={<Public><RegisterPage /></Public>} />
 
           {/* Protected pages — must be logged in */}
           <Route path="/dashboard" element={<Protected><DashboardPage /></Protected>} />
           <Route path="/notifications" element={<Protected><NotificationsPage /></Protected>} />
           <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
           <Route path="/settings" element={<Protected><SettingsPage /></Protected>} />
+          <Route path="/requests" element={<Protected><RequestListPage /></Protected>} />
+          <Route path="/requests/:id" element={<Protected><RequestDetailPage /></Protected>} />
           <Route path="/requests/create" element={<Protected><CreateRequestPage /></Protected>} />
           <Route path="/bookmarks" element={<Protected><BookmarksPage /></Protected>} />
+
+          {/* Public-only pages — redirect to dashboard if already logged in */}
+          <Route path="/login" element={<Public><LoginPage /></Public>} />
+          <Route path="/register" element={<Public><RegisterPage /></Public>} />
 
           {/* Admin-only page — must be logged in as admin */}
           <Route path="/admin" element={<AdminOnly><AdminDashboardPage /></AdminOnly>} />

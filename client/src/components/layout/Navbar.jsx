@@ -5,33 +5,47 @@
  * it stays visible when you scroll down.
  * 
  * What it shows depends on whether you're logged in:
- * - NOT logged in: Shows "Home", "Find Donors", "Requests" links + Login/Register buttons
+ * - NOT logged in: Shows "Home", "Find Donors" links + Login/Register buttons
  * - Logged in: Shows the same links + notification bell + your avatar with a dropdown menu
  * 
  * Features:
+ * - Active page glow effect (works in dark and light themes)
  * - Dark/Light theme toggle (moon/sun icon)
  * - Responsive: Desktop shows full nav, mobile shows a hamburger menu
  * - Glass effect: Semi-transparent background with blur
  */
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { Droplet, Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, User, Settings, LogOut, Bookmark, LogIn, UserPlus } from "lucide-react";
 
 export default function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();       // Get user info and auth functions
-  const { theme, setTheme } = useTheme();                    // Get theme state and toggle function
-  const navigate = useNavigate();                            // For programmatic page navigation
-  const [open, setOpen] = useState(false);                   // Controls mobile menu visibility
-  const [menuOpen, setMenuOpen] = useState(false);           // Controls user dropdown menu visibility
+  const { user, isAuthenticated, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   /** Log out and redirect to home page */
   const handleLogout = () => { logout(); navigate("/"); setMenuOpen(false); setOpen(false); };
 
+  /** Check if a nav link is active (matches current path) */
+  const isActive = (path) => {
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.startsWith(path);
+  };
+
+  /** Navigation links with their paths */
+  const navLinks = [
+    ["/", "Home"],
+    ["/donors", "Find Donors"],
+    ["/requests", "Requests"],
+  ];
+
   return (
-    /* Sticky header with glass effect (semi-transparent + blur) */
     <header className="glass" style={{ position: "sticky", top: 0, zIndex: 50, borderBottom: "1px solid var(--border)" }}>
       <div className="container" style={{ display: "flex", height: 64, alignItems: "center", justifyContent: "space-between" }}>
         
@@ -42,18 +56,25 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Navigation Links — hidden on mobile */}
-        <nav style={{ display: "flex", gap: 28 }} className="desktop-nav">
-          {[["/", "Home"], ["/donors", "Find Donors"], ["/requests", "Requests"]].map(([h, l]) => (
-            <Link key={h} to={h} style={{ fontSize: 14, fontWeight: 500, color: "var(--text-secondary)", transition: "color 0.2s" }}
-              onMouseEnter={(e) => e.target.style.color = "var(--red)"}
-              onMouseLeave={(e) => e.target.style.color = "var(--text-secondary)"}
-            >{l}</Link>
-          ))}
+        <nav style={{ display: "flex", gap: 4 }} className="desktop-nav">
+          {navLinks.map(([path, label]) => {
+            const active = isActive(path);
+            return (
+              <Link key={path} to={path} className={active ? "nav-link active" : "nav-link"}
+                style={{
+                  fontSize: 14, fontWeight: 500, padding: "8px 16px", borderRadius: 8,
+                  transition: "all 0.3s ease", position: "relative",
+                  color: active ? "var(--red)" : "var(--text-secondary)",
+                  background: active ? "var(--red-light)" : "transparent",
+                }}
+              >{label}</Link>
+            );
+          })}
         </nav>
 
         {/* Right side: Theme toggle + User menu or Login/Register */}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {/* Theme Toggle Button — switches between light and dark mode */}
+          {/* Theme Toggle Button */}
           <button className="theme-toggle" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} style={{ padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
@@ -80,13 +101,11 @@ export default function Navbar() {
                 </button>
                 {menuOpen && (
                   <>
-                    {/* Invisible overlay to close dropdown when clicking outside */}
                     <div style={{ position: "fixed", inset: 0, zIndex: 99 }} onClick={() => setMenuOpen(false)} />
                     <div className="dropdown-menu" style={{ zIndex: 100, minWidth: 200 }}>
                       <button className="dropdown-item" onClick={() => { navigate("/dashboard"); setMenuOpen(false); }}><LayoutDashboard size={16} /> Dashboard</button>
                       <button className="dropdown-item" onClick={() => { navigate("/notifications"); setMenuOpen(false); }}><Bell size={16} /> Notifications</button>
                       <button className="dropdown-item" onClick={() => { navigate("/profile"); setMenuOpen(false); }}><User size={16} /> Profile</button>
-                      {/* Bookmarks — shown for all users */}
                       <button className="dropdown-item" onClick={() => { navigate("/bookmarks"); setMenuOpen(false); }}><Bookmark size={16} /> Bookmarks</button>
                       <button className="dropdown-item" onClick={() => { navigate("/settings"); setMenuOpen(false); }}><Settings size={16} /> Settings</button>
                       <div className="dropdown-sep" />
@@ -97,14 +116,13 @@ export default function Navbar() {
               </div>
             </>
           ) : (
-            /* Login/Register buttons — only shown when NOT logged in */
             <div className="desktop-nav" style={{ display: "flex", gap: 8 }}>
               <button className="btn btn-ghost btn-sm" onClick={() => navigate("/login")}>Login</button>
               <button className="btn btn-primary btn-sm" onClick={() => navigate("/register")}>Register</button>
             </div>
           )}
 
-          {/* Mobile Hamburger Menu Button — only visible on small screens */}
+          {/* Mobile Hamburger Menu Button */}
           <button className="mobile-menu-btn" onClick={() => setOpen(!open)} style={{ padding: 8, borderRadius: 8, display: "none", alignItems: "center", justifyContent: "center", color: "var(--text)" }}>
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -114,11 +132,20 @@ export default function Navbar() {
       {/* Mobile Menu — slides down when hamburger is clicked */}
       {open && (
         <div className="mobile-menu" style={{ borderTop: "1px solid var(--border)", padding: "8px 16px 16px" }}>
-          {/* Navigation links */}
-          {[["/", "Home"], ["/donors", "Find Donors"], ["/requests", "Requests"]].map(([h, l]) => (
-            <Link key={h} to={h} onClick={() => setOpen(false)} style={{ display: "block", padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}>{l}</Link>
-          ))}
-          {/* Auth section — different options based on login status */}
+          {navLinks.map(([path, label]) => {
+            const active = isActive(path);
+            return (
+              <Link key={path} to={path} onClick={() => setOpen(false)}
+                className={active ? "nav-link active" : "nav-link"}
+                style={{
+                  display: "block", padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8,
+                  color: active ? "var(--red)" : "var(--text)",
+                  background: active ? "var(--red-light)" : "transparent",
+                  transition: "all 0.2s",
+                }}
+              >{label}</Link>
+            );
+          })}
           <div style={{ borderTop: "1px solid var(--border)", marginTop: 8, paddingTop: 8 }}>
             {isAuthenticated ? (
               <>
