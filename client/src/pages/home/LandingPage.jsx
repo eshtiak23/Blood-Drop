@@ -86,47 +86,20 @@ export default function LandingPage() {
         <div style={{ position: "absolute", top: -120, right: -120, width: 320, height: 320, borderRadius: "50%", background: "rgba(239,68,68,0.08)", filter: "blur(60px)" }} />
         <div style={{ position: "absolute", bottom: -120, left: -120, width: 320, height: 320, borderRadius: "50%", background: "rgba(239,68,68,0.06)", filter: "blur(60px)" }} />
         <div className="container hero-grid" style={{ display: "grid", gap: 48, alignItems: "center", padding: "80px 20px" }}>
-          <div>
-            <AnimatedDiv>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--red-light)", padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600, color: "var(--red)" }}>
-                <Droplet size={14} fill="currentColor" /> Saving Lives Together
-              </div>
-            </AnimatedDiv>
-            <AnimatedDiv delay={0.1}>
-              <h1 style={{ fontSize: 48, fontWeight: 800, lineHeight: 1.1, marginTop: 20 }}>
-                Every Drop <span className="text-gradient">Counts</span><br />Every Life <span style={{ color: "var(--red)" }}>Matters</span>
-              </h1>
-            </AnimatedDiv>
-            <AnimatedDiv delay={0.2}>
-              <p style={{ fontSize: 17, color: "var(--text-secondary)", marginTop: 16, maxWidth: 480 }}>Connect with blood donors instantly. Find the right blood group, in the right location, at the right time.</p>
-            </AnimatedDiv>
-            <AnimatedDiv delay={0.3}>
-              <div style={{ display: "flex", gap: 12, marginTop: 28, flexWrap: "wrap" }}>
-                <Link to="/requests/create" className="btn btn-primary btn-lg">Request Blood <ArrowRight size={18} /></Link>
-                <Link to="/donors" className="btn btn-secondary btn-lg">Find Donors</Link>
-              </div>
-            </AnimatedDiv>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+              <Link to="/requests/create" className="btn btn-primary btn-lg">Request Blood <ArrowRight size={18} /></Link>
+              <Link to="/donors" className="btn btn-secondary btn-lg">Find Donors</Link>
+            </div>
           </div>
           <AnimatedDiv delay={0.2} style={{ display: "flex", justifyContent: "center" }}>
             <div className="hero-banner-wrap">
-              {/* Banner images with crossfade */}
               {banners.map((src, i) => (
-                <img
-                  key={src}
-                  src={src}
-                  alt={`LifeDrop banner ${i + 1}`}
-                  className={`hero-banner-img ${i === bannerIdx ? "hero-banner-active" : ""}`}
-                />
+                <img key={src} src={src} alt={`LifeDrop banner ${i + 1}`} className={`hero-banner-img ${i === bannerIdx ? "hero-banner-active" : ""}`} />
               ))}
-              {/* Dots */}
               <div className="hero-banner-dots">
                 {banners.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setBannerIdx(i)}
-                    className={`hero-banner-dot ${i === bannerIdx ? "hero-banner-dot-active" : ""}`}
-                    aria-label={`Slide ${i + 1}`}
-                  />
+                  <button key={i} onClick={() => setBannerIdx(i)} className={`hero-banner-dot ${i === bannerIdx ? "hero-banner-dot-active" : ""}`} aria-label={`Slide ${i + 1}`} />
                 ))}
               </div>
             </div>
