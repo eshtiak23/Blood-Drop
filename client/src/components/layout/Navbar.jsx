@@ -19,7 +19,7 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { Droplet, Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, User, Settings, LogOut, Bookmark, LogIn, UserPlus } from "lucide-react";
+import { Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, User, Settings, LogOut, Bookmark, LogIn, UserPlus } from "lucide-react";
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();

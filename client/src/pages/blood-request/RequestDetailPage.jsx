@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getRequests, acceptRequest, completeRequest } from "../../services/localStore";
-import { BLOOD_GROUP_COLORS, URGENCY, STATUS } from "../../data/constants";
+import { BLOOD_GROUP_COLORS, URGENCY } from "../../data/constants";
 import { MapPin, Phone, Calendar, Clock, User, Hospital, CheckCircle, ArrowLeft } from "lucide-react";
 
 /** Returns themed background/text colors for a blood group badge. */

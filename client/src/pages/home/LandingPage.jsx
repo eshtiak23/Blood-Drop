@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Droplets, Star, AlertTriangle, Droplet, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Star, AlertTriangle, Droplet, ChevronLeft, ChevronRight } from "lucide-react";
 import { STATS, TESTIMONIALS, FAQS, BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 import { getAllFeedback } from "../../services/localStore";
 

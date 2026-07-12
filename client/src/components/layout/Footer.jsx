@@ -14,7 +14,7 @@
  */
 
 import { Link } from "react-router-dom";
-import { Droplet, Mail, Phone, MapPin, Heart, ArrowUp, Globe, MessageCircle, Share2, Code } from "lucide-react";
+import { Mail, Phone, MapPin, Heart, ArrowUp, Globe, MessageCircle, Share2, Code } from "lucide-react";
 
 export default function Footer() {
   /** Smooth scroll to top of page */

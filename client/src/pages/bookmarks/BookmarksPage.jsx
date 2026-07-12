@@ -52,7 +52,7 @@ export default function BookmarksPage() {
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
                     <span style={{ fontSize: 13, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 4 }}><Droplets size={12} /> {d.totalDonations || 0} donations</span>
-                    <button className="btn btn-ghost btn-sm" style={{ color: "var(--red)" }} onClick={() => remove(d._id)}><Trash2 size={14} /> Remove</button>
+                    <button className="btn btn-ghost btn-sm" style={{ color: "var(--red)" }} onClick={() => remove(b.donorId)}><Trash2 size={14} /> Remove</button>
                   </div>
                 </div>
               );

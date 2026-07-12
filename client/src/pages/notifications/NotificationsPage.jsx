@@ -3,7 +3,6 @@
  * Supports marking individual/all notifications as read and deleting them.
  */
 import { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
 import { getNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification } from "../../services/localStore";
 import { Bell, Check, Trash2, CheckCheck } from "lucide-react";
 

@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
 import donors from "../../data/donors.json";
-import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, ChevronLeft, ChevronRight, SlidersHorizontal, LogIn } from "lucide-react";
+import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 
 const RADIUS_OPTIONS = [10, 20, 30, 50, 100];
 const PER_PAGE = 12;
@@ -173,7 +173,7 @@ export default function DonorSearchPage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-4" style={{ gap: 12, alignItems: "end" }}>
+            <div className="grid grid-4 donor-search-grid" style={{ gap: 12, alignItems: "end" }}>
               <div className="input-group">
                 <label style={{ fontSize: 13 }}>Blood Group</label>
                 <select className="input" value={filters.bloodGroup} onChange={(e) => { setFilters({ ...filters, bloodGroup: e.target.value }); setPage(1); }}>
@@ -369,8 +369,8 @@ export default function DonorSearchPage() {
 
       <style>{`
         @media(max-width:768px){
-          .grid{grid-template-columns:1fr !important;}
-          .grid-4{grid-template-columns:repeat(2,1fr) !important;}
+          .donor-search-grid{grid-template-columns:1fr !important;}
+          .donor-search-grid .grid-4{grid-template-columns:repeat(2,1fr) !important;}
         }
         @media(max-width:480px){
           .grid-4{grid-template-columns:1fr !important;}

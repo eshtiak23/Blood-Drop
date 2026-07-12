@@ -14,8 +14,8 @@
 import { useState, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { BLOOD_GROUPS, DISTRICTS, AREAS } from "../../data/constants";
-import { Moon, Sun, Lock, LogOut, Camera, User, Phone, MapPin, Save, Loader2 } from "lucide-react";
+import { DISTRICTS, AREAS } from "../../data/constants";
+import { Moon, Lock, LogOut, Camera, User, Save, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function SettingsPage() {

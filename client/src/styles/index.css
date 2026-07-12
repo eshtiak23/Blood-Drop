@@ -11,6 +11,13 @@
   --yellow: #D97706;
   --yellow-light: #FFFBEB;
   --yellow-dark: #B45309;
+  --purple: #7C3AED;
+  --purple-light: #F3E8FF;
+  --purple-dark: #6D28D9;
+  --lavender: #C4B5FD;
+  --pink: #EC4899;
+  --pink-light: #FCE7F3;
+  --pink-dark: #DB2777;
 
   --bg: #F5F3FF;
   --bg-card: #FFFFFF;
@@ -260,6 +267,9 @@ textarea.input { min-height: 100px; resize: vertical; }
   --blue-light: rgba(59, 130, 246, 0.15);
   --green-light: rgba(5, 150, 105, 0.15);
   --yellow-light: rgba(217, 119, 6, 0.15);
+  --purple-light: rgba(124, 58, 237, 0.15);
+  --pink-light: rgba(236, 72, 153, 0.15);
+  --lavender: #A78BFA;
 }
 .dark body { background: var(--bg); color: var(--text); }
 .dark .input { background: var(--bg-card); border-color: var(--border); color: var(--text); }
