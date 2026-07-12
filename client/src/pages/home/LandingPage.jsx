@@ -446,21 +446,23 @@ export default function LandingPage() {
         }
         @media (max-width: 768px) {
           .hero-banner-wrap { height: 400px; }
-          .hero-title { font-size: 36px; }
-          .hero-subtitle { font-size: 15px; margin-top: 12px; }
+          .hero-title { font-size: 34px; }
+          .hero-subtitle { font-size: 14px; margin-top: 12px; max-width: 340px; }
           .hero-btns { margin-top: 24px; gap: 12px; }
           .btn-hero-primary, .btn-hero-secondary { padding: 12px 28px; font-size: 14px; }
           .hero-arrow { width: 40px; height: 40px; }
           .hero-arrow-left { left: 12px; }
           .hero-arrow-right { right: 12px; }
+          .hero-content { padding: 0 16px; }
         }
         @media (max-width: 480px) {
-          .hero-banner-wrap { height: 320px; }
-          .hero-title { font-size: 28px; }
-          .hero-subtitle { font-size: 13px; padding: 0 10px; }
-          .hero-btns { flex-direction: column; align-items: center; gap: 10px; }
-          .btn-hero-primary, .btn-hero-secondary { width: 220px; text-align: center; }
+          .hero-banner-wrap { height: 300px; }
+          .hero-title { font-size: 26px; }
+          .hero-subtitle { font-size: 13px; padding: 0 8px; max-width: 280px; }
+          .hero-btns { flex-direction: column; align-items: center; gap: 10px; margin-top: 20px; }
+          .btn-hero-primary, .btn-hero-secondary { width: 200px; text-align: center; padding: 11px 24px; font-size: 13px; }
           .hero-arrow { display: none; }
+          .hero-content { padding: 0 12px; }
         }
       `}</style>
     </div>

@@ -326,17 +326,17 @@ textarea.input { min-height: 100px; resize: vertical; }
   display: block;
 }
 .footer-wave-fill {
-  fill: #1a1035;
+  fill: #2e1065;
 }
 .dark .footer-wave-fill {
-  fill: #0a0818;
+  fill: #1e1b4b;
 }
 .footer-inner {
-  background: #1a1035;
+  background: #2e1065;
   padding: 48px 0 0;
 }
 .dark .footer-inner {
-  background: #0a0818;
+  background: #1e1b4b;
 }
 .footer-grid {
   display: grid;
@@ -347,7 +347,7 @@ textarea.input { min-height: 100px; resize: vertical; }
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(196, 181, 253, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -374,7 +374,7 @@ textarea.input { min-height: 100px; resize: vertical; }
   padding-left: 0;
 }
 .footer-link:hover {
-  color: #F87171;
+  color: #C4B5FD;
   padding-left: 6px;
 }
 .footer-link::before {
@@ -384,10 +384,10 @@ textarea.input { min-height: 100px; resize: vertical; }
   top: 50%;
   width: 3px;
   height: 0;
-  background: #EF4444;
+  background: #C4B5FD;
   border-radius: 2px;
   transition: height 0.3s ease, top 0.3s ease;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 8px rgba(196, 181, 253, 0.5);
 }
 .footer-link:hover::before {
   height: 100%;
@@ -408,7 +408,7 @@ textarea.input { min-height: 100px; resize: vertical; }
   transition: color 0.3s;
 }
 .footer-contact-item:hover {
-  color: #F87171;
+  color: #C4B5FD;
 }
 .footer-socials {
   display: flex;
@@ -428,11 +428,11 @@ textarea.input { min-height: 100px; resize: vertical; }
   transition: all 0.3s ease;
 }
 .footer-social-link:hover {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #F87171;
+  background: rgba(196, 181, 253, 0.15);
+  border-color: rgba(196, 181, 253, 0.3);
+  color: #C4B5FD;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 4px 12px rgba(196, 181, 253, 0.2);
 }
 .footer-bottom {
   display: flex;
@@ -446,18 +446,18 @@ textarea.input { min-height: 100px; resize: vertical; }
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #F87171;
+  background: rgba(196, 181, 253, 0.12);
+  border: 1px solid rgba(196, 181, 253, 0.2);
+  color: #C4B5FD;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
 }
 .footer-top-btn:hover {
-  background: rgba(239, 68, 68, 0.25);
+  background: rgba(196, 181, 253, 0.25);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(196, 181, 253, 0.3);
 }
 
 /* ── Responsive ── */
