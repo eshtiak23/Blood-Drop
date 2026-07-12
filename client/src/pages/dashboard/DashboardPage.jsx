@@ -354,40 +354,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Blood Stock Overview + Requests Side by Side ── */}
-      <div className="dash-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 24 }}>
-
-        {/* Blood Stock */}
-        {stats && (
-          <div className="card">
-            <div className="card-body">
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                <TrendingUp size={18} color="var(--red)" />
-                <h2 style={{ fontSize: 16, fontWeight: 700 }}>Blood Stock</h2>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {Object.entries(stats).map(([group, count]) => {
-                  const maxCount = Math.max(...Object.values(stats), 1);
-                  const pct = (count / maxCount) * 100;
-                  const gc = BLOOD_GROUP_COLORS[group] || {};
-                  const isDark = document.documentElement.classList.contains("dark");
-                  return (
-                    <div key={group} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ width: 36, fontSize: 12, fontWeight: 700, color: isDark ? gc.darkText : gc.text }}>{group}</span>
-                      <div style={{ flex: 1, height: 8, borderRadius: 4, background: "var(--border-light)", overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${Math.max(pct, 4)}%`, borderRadius: 4, background: isDark ? gc.darkText : gc.text, transition: "width 0.5s ease" }} />
-                      </div>
-                      <span style={{ fontSize: 12, fontWeight: 600, minWidth: 20, textAlign: "right" }}>{count}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Nearby Requests */}
-        <div className="card">
+      {/* ── Nearby Requests ── */}
+      <div className="card" style={{ marginTop: 24 }}>
           <div className="card-body">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -425,7 +393,6 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
-      </div>
 
       {/* Responsive: stack on mobile */}
       <style>{`
