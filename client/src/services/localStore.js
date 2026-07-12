@@ -19,6 +19,7 @@ const NOTIFICATIONS_KEY = "ld_notifications";
 const BOOKMARKS_KEY = "ld_bookmarks";
 const DONATION_LOGS_KEY = "ld_donation_logs";
 const FEEDBACK_KEY = "ld_feedback";
+const RATINGS_KEY = "ld_ratings";
 
 // ── Generic localStorage helpers ──
 
@@ -246,4 +247,65 @@ export function addFeedback(data, user) {
 export function deleteFeedback(feedbackId) {
   const list = get(FEEDBACK_KEY).filter((f) => f._id !== feedbackId);
   set(FEEDBACK_KEY, list);
+}
+
+// ── Donor Ratings (after donation) ──
+
+/** Get all ratings for a specific user */
+export function getUserRatings(userId) {
+  return get(RATINGS_KEY).filter((r) => r.ratedUserId === userId);
+}
+
+/** Get all ratings given by a user */
+export function getRatingsGivenBy(userId) {
+  return get(RATINGS_KEY).filter((r) => r.raterId === userId);
+}
+
+/** Check if user has already rated for a given request */
+export function hasRated(requestId, raterId) {
+  return get(RATINGS_KEY).some((r) => r.requestId === requestId && r.raterId === raterId);
+}
+
+/**
+ * Submit a rating for a user after completing a donation request.
+ * rater = the person giving the rating, ratedUserId = the person being rated.
+ * Can be requester rating the donor, or donor rating the requester.
+ */
+export function addRating(data, rater) {
+  const list = get(RATINGS_KEY);
+  const rating = {
+    _id: "rt" + Date.now(),
+    requestId: data.requestId,
+    raterId: rater._id,
+    raterName: rater.name,
+    ratedUserId: data.ratedUserId,
+    rating: data.rating,
+    comment: data.comment,
+    createdAt: new Date().toISOString(),
+  };
+  list.unshift(rating);
+  set(RATINGS_KEY, list);
+  return rating;
+}
+
+// ── Donation Cooldown Helper ──
+
+/**
+ * Check if a user is within the 3-month donation cooldown.
+ * Returns { cooledDown: true/false, daysSinceLast, nextAvailable }
+ */
+export function getDonationCooldown(user) {
+  if (!user || !user.lastDonationDate) return { cooledDown: false, daysSinceLast: 999, nextAvailable: null };
+  const last = new Date(user.lastDonationDate);
+  const now = new Date();
+  const diffMs = now - last;
+  const daysSinceLast = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const cooldownDays = 90; // 3 months
+  const nextAvailable = new Date(last.getTime() + cooldownDays * 86400000);
+  return {
+    cooledDown: daysSinceLast >= cooldownDays,
+    daysSinceLast,
+    nextAvailable: daysSinceLast < cooldownDays ? nextAvailable : null,
+    daysRemaining: daysSinceLast < cooldownDays ? cooldownDays - daysSinceLast : 0,
+  };
 }

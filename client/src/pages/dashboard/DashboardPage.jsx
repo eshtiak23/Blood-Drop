@@ -11,12 +11,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { searchRequests, addDonationLog, getDonationLogs, addFeedback, getMyFeedback, deleteFeedback } from "../../services/localStore";
+import { searchRequests, addDonationLog, getDonationLogs, addFeedback, getMyFeedback, deleteFeedback, getDonationCooldown } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 import {
   Droplets, Heart, AlertCircle, Search, Plus, Users, MapPin, Phone, Mail,
   Shield, Clock, TrendingUp, Activity, ArrowRight, Calendar, Star,
-  Building2, MessageSquare, Trash2, CheckCircle, Loader2, X
+  Building2, MessageSquare, Trash2, CheckCircle, Loader2, X, ToggleLeft, ToggleRight, Bell
 } from "lucide-react";
 
 /** Returns theme-aware blood group badge colors */
@@ -46,6 +46,9 @@ export default function DashboardPage() {
   const [feedbackSaved, setFeedbackSaved] = useState(false);
   const [feedbackError, setFeedbackError] = useState("");
 
+  // Cooldown reminder
+  const [cooldown, setCooldown] = useState(null);
+
   useEffect(() => {
     const all = searchRequests();
     // Count open requests per blood group for stock overview
@@ -65,6 +68,9 @@ export default function DashboardPage() {
     // Load feedback
     setFeedbackList(JSON.parse(localStorage.getItem("ld_feedback") || "[]").slice(0, 10));
     if (user?._id) setMyFeedback(getMyFeedback(user._id));
+
+    // Check donation cooldown
+    setCooldown(getDonationCooldown(user));
   }, [user]);
 
   /** Log a blood donation — updates user stats and saves the log */
@@ -110,6 +116,11 @@ export default function DashboardPage() {
     setMyFeedback(getMyFeedback(user._id));
   };
 
+  /** Toggle donor availability on/off */
+  const handleToggleAvailability = () => {
+    updateUser({ isAvailable: !user.isAvailable });
+  };
+
   const c = getBloodGroupColor(user?.bloodGroup);
 
   return (
@@ -145,6 +156,22 @@ export default function DashboardPage() {
             <Link to="/settings" className="btn btn-secondary btn-sm">
               Edit Profile
             </Link>
+
+            {/* Donor Availability Toggle */}
+            <button
+              className="btn btn-sm"
+              onClick={handleToggleAvailability}
+              style={{
+                background: user?.isAvailable ? "var(--green)" : "var(--bg-secondary)",
+                color: user?.isAvailable ? "#fff" : "var(--text-muted)",
+                border: "none",
+                fontWeight: 600,
+                gap: 6,
+              }}
+            >
+              {user?.isAvailable ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
+              {user?.isAvailable ? "Available" : "Off Duty"}
+            </button>
           </div>
 
           {/* Contact Info Row */}
@@ -166,6 +193,29 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Cooldown Reminder Banner ── */}
+      {cooldown && !cooldown.cooledDown && cooldown.nextAvailable && (
+        <div
+          style={{
+            marginTop: 16,
+            padding: "14px 20px",
+            borderRadius: "var(--radius)",
+            background: "linear-gradient(135deg, #FDE68A 0%, #FCD34D 100%)",
+            color: "#92400E",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            fontSize: 14,
+            fontWeight: 600,
+          }}
+        >
+          <Bell size={20} color="#92400E" />
+          <div>
+            Donation cooldown active — you can donate again in <strong>{cooldown.daysRemaining} days</strong> ({cooldown.nextAvailable.toLocaleDateString()}).
+          </div>
+        </div>
+      )}
 
       {/* ── Stats Grid ── */}
       <div className="grid dash-stats" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 24 }}>

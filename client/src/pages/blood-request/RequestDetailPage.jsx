@@ -6,9 +6,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { getRequests, acceptRequest, completeRequest } from "../../services/localStore";
+import { getRequests, acceptRequest, completeRequest, addRating, hasRated } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS, URGENCY } from "../../data/constants";
-import { MapPin, Phone, Calendar, Clock, User, Hospital, CheckCircle, ArrowLeft } from "lucide-react";
+import { MapPin, Phone, Calendar, Clock, User, Hospital, CheckCircle, ArrowLeft, Star } from "lucide-react";
 
 /** Returns themed background/text colors for a blood group badge. */
 function getBloodGroupColor(bloodGroup) {
@@ -24,18 +24,37 @@ export default function RequestDetailPage() {
   const navigate = useNavigate();
   const [request, setRequest] = useState(null);
   const [showModal, setShowModal] = useState("");
+  const [ratingForm, setRatingForm] = useState({ rating: 5, comment: "" });
+  const [ratingSaving, setRatingSaving] = useState(false);
+  const [rated, setRated] = useState(false);
 
   useEffect(() => {
     const found = getRequests().find((r) => r._id === id);
     setRequest(found || null);
-  }, [id]);
+    if (found && user?._id) {
+      setRated(hasRated(id, user._id));
+    }
+  }, [id, user]);
 
   const handleAction = (action) => {
-    if (action === "accept") acceptRequest(id, user);   // Donor accepts the request → status becomes "accepted"
-    if (action === "complete") completeRequest(id);       // Requester or accepted donor marks it done → status becomes "completed"
+    if (action === "accept") acceptRequest(id, user);
+    if (action === "complete") completeRequest(id);
     const found = getRequests().find((r) => r._id === id);
     setRequest(found);
     setShowModal("");
+  };
+
+  /** Submit a rating for the other party after request completion */
+  const handleRate = (e) => {
+    e.preventDefault();
+    if (!ratingForm.comment.trim()) return;
+    setRatingSaving(true);
+    // Determine who to rate: if current user is requester, rate the donor; vice versa
+    const isRequester = user?._id === request.requester?._id;
+    const ratedUserId = isRequester ? request.acceptedBy?._id : request.requester?._id;
+    addRating({ requestId: id, ratedUserId, rating: ratingForm.rating, comment: ratingForm.comment }, user);
+    setRated(true);
+    setRatingSaving(false);
   };
 
   if (!request) return <div className="container" style={{ padding: 40, textAlign: "center" }}>Request not found</div>;
@@ -89,11 +108,48 @@ export default function RequestDetailPage() {
       </div>
 
       <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-        {/* Accept: shown only to donors when request is open */}
         {canAccept && <button className="btn btn-primary" onClick={() => setShowModal("accept")}><CheckCircle size={16} /> Accept Request</button>}
-        {/* Complete: shown to requester or accepted donor when request is accepted */}
         {canComplete && <button className="btn btn-success" onClick={() => setShowModal("complete")}><CheckCircle size={16} /> Mark Complete</button>}
       </div>
+
+      {/* ── Rate After Completion ── */}
+      {request.status === "completed" && user?._id && (
+        <div className="card animate-fadeIn" style={{ marginTop: 20 }}>
+          <div className="card-body">
+            {rated ? (
+              <div style={{ textAlign: "center", padding: "12px 0", color: "var(--green)", fontWeight: 600, fontSize: 14 }}>
+                <CheckCircle size={18} style={{ verticalAlign: "middle", marginRight: 6 }} />
+                You have already rated this donation. Thank you!
+              </div>
+            ) : (
+              <form onSubmit={handleRate}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                  <Star size={18} fill="#F59E0B" color="#F59E0B" />
+                  <h2 style={{ fontSize: 16, fontWeight: 700 }}>
+                    Rate the {user?._id === request.requester?._id ? "Donor" : "Requester"}
+                  </h2>
+                </div>
+                <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 12 }}>
+                  How was your experience with {user?._id === request.requester?._id ? request.acceptedBy?.name : request.requester?.name}?
+                </p>
+                <div style={{ display: "flex", gap: 4, marginBottom: 12 }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} type="button" onClick={() => setRatingForm({ ...ratingForm, rating: star })} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                      <Star size={24} fill={star <= ratingForm.rating ? "#F59E0B" : "none"} color={star <= ratingForm.rating ? "#F59E0B" : "var(--text-muted)"} />
+                    </button>
+                  ))}
+                </div>
+                <div className="input-group" style={{ marginBottom: 12 }}>
+                  <textarea className="input" rows={2} placeholder="Share your experience..." value={ratingForm.comment} onChange={(e) => setRatingForm({ ...ratingForm, comment: e.target.value })} required />
+                </div>
+                <button className="btn btn-primary btn-sm" type="submit" disabled={ratingSaving}>
+                  {ratingSaving ? "Saving..." : "Submit Rating"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal("")}>

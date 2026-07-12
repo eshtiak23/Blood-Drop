@@ -2,14 +2,17 @@
  * ProfilePage — Public-facing profile view for the logged-in user.
  * 
  * Displays the user's photo, name, blood group, verification status,
- * personal info (email, phone, location), donation stats, and bio.
+ * personal info (email, phone, location), donation stats, bio,
+ * donation history timeline, and ratings received.
  * Includes an Edit button that navigates to Settings.
  */
 
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
-import { Mail, Phone, MapPin, Calendar, Droplets, Heart, Shield, Edit, Clock, User } from "lucide-react";
+import { getDonationLogs, getUserRatings } from "../../services/localStore";
+import { Mail, Phone, MapPin, Calendar, Droplets, Heart, Shield, Edit, Clock, User, Star, Building2, History } from "lucide-react";
 
 /** Returns theme-aware blood group badge colors */
 function getBloodGroupColor(bloodGroup) {
@@ -22,8 +25,21 @@ function getBloodGroupColor(bloodGroup) {
 export default function ProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [donationLogs, setDonationLogs] = useState([]);
+  const [ratings, setRatings] = useState([]);
+
+  useEffect(() => {
+    if (user?._id) {
+      setDonationLogs(getDonationLogs(user._id));
+      setRatings(getUserRatings(user._id));
+    }
+  }, [user]);
+
   if (!user) return null;
   const c = getBloodGroupColor(user.bloodGroup);
+
+  /** Calculate average rating */
+  const avgRating = ratings.length > 0 ? (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length).toFixed(1) : null;
 
   return (
     <div className="container" style={{ padding: "32px 20px", maxWidth: 800 }}>
@@ -89,11 +105,104 @@ export default function ProfilePage() {
                   <Heart size={14} /> {user.isAvailable ? "Available to donate" : "Currently unavailable"}
                 </span>
                 <span style={{ display: "flex", alignItems: "center", gap: 8 }}><Clock size={14} /> Last donation: {user.lastDonationDate ? new Date(user.lastDonationDate).toLocaleDateString() : "Never"}</span>
+                {avgRating && (
+                  <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Star size={14} fill="#F59E0B" color="#F59E0B" /> {avgRating} avg rating ({ratings.length} reviews)
+                  </span>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ── Donation History Timeline ── */}
+      {donationLogs.length > 0 && (
+        <div className="card animate-fadeIn" style={{ marginTop: 20 }}>
+          <div className="card-body">
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <History size={18} color="var(--red)" />
+              <h2 style={{ fontSize: 16, fontWeight: 700 }}>Donation History</h2>
+            </div>
+
+            <div style={{ position: "relative", paddingLeft: 28 }}>
+              {/* Vertical timeline line */}
+              <div style={{ position: "absolute", left: 8, top: 4, bottom: 4, width: 2, background: "var(--border-light)", borderRadius: 1 }} />
+
+              {donationLogs.map((log, i) => (
+                <div key={log._id} style={{ position: "relative", marginBottom: i < donationLogs.length - 1 ? 20 : 0 }}>
+                  {/* Timeline dot */}
+                  <div style={{
+                    position: "absolute", left: -24, top: 4,
+                    width: 14, height: 14, borderRadius: "50%",
+                    background: "var(--red)", border: "2px solid var(--bg-primary)",
+                    boxShadow: "0 0 0 3px var(--red-light)",
+                    zIndex: 1,
+                  }} />
+
+                  <div style={{
+                    padding: "12px 16px",
+                    borderRadius: "var(--radius-sm)",
+                    background: "var(--bg-secondary)",
+                    border: "1px solid var(--border-light)",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <Building2 size={14} color="var(--text-muted)" />
+                      <span style={{ fontWeight: 600, fontSize: 14 }}>{log.hospital}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 6, fontSize: 13, color: "var(--text-secondary)" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <Calendar size={12} /> {new Date(log.donationDate).toLocaleDateString()}
+                      </span>
+                      <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <Droplets size={12} /> {log.bloodGroup}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Ratings Received ── */}
+      {ratings.length > 0 && (
+        <div className="card animate-fadeIn" style={{ marginTop: 20 }}>
+          <div className="card-body">
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <Star size={18} fill="#F59E0B" color="#F59E0B" />
+              <h2 style={{ fontSize: 16, fontWeight: 700 }}>Ratings & Reviews</h2>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, maxHeight: 300, overflowY: "auto" }}>
+              {ratings.map((rt) => (
+                <div key={rt._id} style={{
+                  padding: "12px 16px",
+                  borderRadius: "var(--radius-sm)",
+                  background: "var(--bg-secondary)",
+                  border: "1px solid var(--border-light)",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <div style={{ display: "flex", gap: 2 }}>
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} size={12} fill={s <= rt.rating ? "#F59E0B" : "none"} color={s <= rt.rating ? "#F59E0B" : "var(--text-muted)"} />
+                      ))}
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)" }}>
+                      by {rt.raterName}
+                    </span>
+                    <span style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: "auto" }}>
+                      {new Date(rt.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  {rt.comment && <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>{rt.comment}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
