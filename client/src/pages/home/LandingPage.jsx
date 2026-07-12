@@ -231,14 +231,13 @@ export default function LandingPage() {
           <h2 style={{ fontSize: 32, fontWeight: 800, textAlign: "center" }}>Frequently Asked Questions</h2>
           <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 12 }}>
             {FAQS.map((faq, i) => (
-              <div key={i} style={{ borderRadius: "var(--radius)", border: "1px solid var(--border-light)", overflow: "hidden" }}>
-                {/* Toggle: clicking an open item closes it; clicking closed opens it */}
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "16px 20px", fontSize: 15, fontWeight: 600, textAlign: "left" }}>
+              <div key={i} className="faq-item">
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="faq-btn">
                   {faq.question}
                   <ChevronDown size={18} style={{ transform: openFaq === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", flexShrink: 0, marginLeft: 12 }} />
                 </button>
                 {openFaq === i && (
-                  <div style={{ padding: "0 20px 16px", fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.7 }}>{faq.answer}</div>
+                  <div className="faq-answer">{faq.answer}</div>
                 )}
               </div>
             ))}
@@ -413,6 +412,37 @@ export default function LandingPage() {
           border-color: #EF4444;
           box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
           transform: scale(1.3);
+        }
+        .faq-item {
+          border-radius: var(--radius);
+          border: 1px solid var(--border);
+          background: var(--bg-card);
+          overflow: hidden;
+          transition: border-color 0.2s;
+        }
+        .faq-item:hover {
+          border-color: rgba(239, 68, 68, 0.3);
+        }
+        .faq-btn {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          padding: 16px 20px;
+          font-size: 15px;
+          font-weight: 600;
+          text-align: left;
+          color: var(--text);
+          background: transparent;
+        }
+        .faq-btn:hover {
+          color: var(--red);
+        }
+        .faq-answer {
+          padding: 0 20px 16px;
+          font-size: 14px;
+          color: var(--text-secondary);
+          line-height: 1.7;
         }
         @media (max-width: 768px) {
           .hero-banner-wrap { height: 400px; }
