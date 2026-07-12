@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Droplets, Star, AlertTriangle, Droplet } from "lucide-react";
+import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Droplets, Star, AlertTriangle, Droplet, ChevronLeft, ChevronRight } from "lucide-react";
 import { STATS, TESTIMONIALS, FAQS, BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 import { getAllFeedback } from "../../services/localStore";
 
@@ -82,22 +82,36 @@ export default function LandingPage() {
   return (
     <div>
       {/* ── Hero ── */}
-      <section style={{ position: "relative", overflow: "hidden", background: "var(--bg-card)" }}>
-        <div className="hero-section">
-          <div className="hero-banner-wrap">
-            {banners.map((src, i) => (
-              <img key={src} src={src} alt={`LifeDrop banner ${i + 1}`} className={`hero-banner-img ${i === bannerIdx ? "hero-banner-active" : ""}`} />
+      <section className="hero-section">
+        <div className="hero-banner-wrap">
+          {/* Banner images with crossfade */}
+          {banners.map((src, i) => (
+            <img key={src} src={src} alt={`LifeDrop banner ${i + 1}`} className={`hero-banner-img ${i === bannerIdx ? "hero-banner-active" : ""}`} />
+          ))}
+          {/* Color overlay */}
+          <div className="hero-overlay" />
+          {/* Left arrow */}
+          <button className="hero-arrow hero-arrow-left" onClick={() => setBannerIdx((bannerIdx - 1 + banners.length) % banners.length)} aria-label="Previous slide">
+            <ChevronLeft size={28} />
+          </button>
+          {/* Right arrow */}
+          <button className="hero-arrow hero-arrow-right" onClick={() => setBannerIdx((bannerIdx + 1) % banners.length)} aria-label="Next slide">
+            <ChevronRight size={28} />
+          </button>
+          {/* Center content: heading, subtitle, buttons */}
+          <div className="hero-content">
+            <h1 className="hero-title">Every Drop <span>Counts</span></h1>
+            <p className="hero-subtitle">Find blood donors instantly. Connect, donate, and save lives.</p>
+            <div className="hero-btns">
+              <Link to="/requests/create" className="btn btn-hero-primary">Request Blood</Link>
+              <Link to="/donors" className="btn btn-hero-secondary">Find Donors</Link>
+            </div>
+          </div>
+          {/* Dot indicators */}
+          <div className="hero-banner-dots">
+            {banners.map((_, i) => (
+              <button key={i} onClick={() => setBannerIdx(i)} className={`hero-banner-dot ${i === bannerIdx ? "hero-banner-dot-active" : ""}`} aria-label={`Slide ${i + 1}`} />
             ))}
-            {/* Buttons on the picture */}
-            <div className="hero-buttons-overlay">
-              <Link to="/requests/create" className="btn btn-primary btn-lg">Request Blood <ArrowRight size={18} /></Link>
-              <Link to="/donors" className="btn btn-secondary btn-lg">Find Donors</Link>
-            </div>
-            <div className="hero-banner-dots">
-              {banners.map((_, i) => (
-                <button key={i} onClick={() => setBannerIdx(i)} className={`hero-banner-dot ${i === bannerIdx ? "hero-banner-dot-active" : ""}`} aria-label={`Slide ${i + 1}`} />
-              ))}
-            </div>
           </div>
         </div>
       </section>
@@ -251,15 +265,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Responsive overrides for hero grid on mobile */}
+      {/* Responsive overrides + hero styles */}
       <style>{`
         .hero-section {
+          position: relative;
           width: 100%;
+          overflow: hidden;
         }
         .hero-banner-wrap {
           position: relative;
           width: 100%;
-          height: 520px;
+          height: 560px;
           overflow: hidden;
         }
         .hero-banner-img {
@@ -274,20 +290,108 @@ export default function LandingPage() {
         .hero-banner-active {
           opacity: 1;
         }
-        .hero-buttons-overlay {
+        .hero-overlay {
           position: absolute;
-          top: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          display: flex;
-          gap: 12px;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(153, 27, 27, 0.82) 0%, rgba(127, 29, 29, 0.72) 40%, rgba(185, 28, 28, 0.55) 100%);
+          z-index: 1;
+        }
+        .hero-content {
+          position: absolute;
+          inset: 0;
           z-index: 2;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 0 20px;
+        }
+        .hero-title {
+          font-size: 56px;
+          font-weight: 800;
+          color: #fff;
+          line-height: 1.1;
+          text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+        .hero-title span {
+          background: linear-gradient(135deg, #FCA5A5, #FEE2E2);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .hero-subtitle {
+          font-size: 18px;
+          color: rgba(255, 255, 255, 0.85);
+          margin-top: 16px;
+          max-width: 500px;
+          text-shadow: 0 1px 8px rgba(0,0,0,0.2);
+        }
+        .hero-btns {
+          display: flex;
+          gap: 16px;
+          margin-top: 32px;
           flex-wrap: wrap;
           justify-content: center;
         }
+        .btn-hero-primary {
+          padding: 14px 36px;
+          border-radius: 50px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #fff;
+          background: linear-gradient(135deg, #EF4444, #EC4899);
+          box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+          transition: all 0.3s ease;
+          border: none;
+        }
+        .btn-hero-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 28px rgba(239, 68, 68, 0.5);
+        }
+        .btn-hero-secondary {
+          padding: 14px 36px;
+          border-radius: 50px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #fff;
+          background: rgba(255, 255, 255, 0.12);
+          border: 1.5px solid rgba(255, 255, 255, 0.4);
+          backdrop-filter: blur(8px);
+          transition: all 0.3s ease;
+        }
+        .btn-hero-secondary:hover {
+          background: rgba(255, 255, 255, 0.22);
+          border-color: rgba(255, 255, 255, 0.6);
+          transform: translateY(-2px);
+        }
+        .hero-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 3;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1.5px solid rgba(255, 255, 255, 0.25);
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(6px);
+        }
+        .hero-arrow:hover {
+          background: rgba(255, 255, 255, 0.22);
+          border-color: rgba(255, 255, 255, 0.5);
+        }
+        .hero-arrow-left { left: 20px; }
+        .hero-arrow-right { right: 20px; }
         .hero-banner-dots {
           position: absolute;
-          bottom: 16px;
+          bottom: 20px;
           left: 50%;
           transform: translateX(-50%);
           display: flex;
@@ -298,8 +402,8 @@ export default function LandingPage() {
           width: 12px;
           height: 12px;
           border-radius: 50%;
-          background: rgba(255,255,255,0.4);
-          border: 2px solid rgba(255,255,255,0.6);
+          background: rgba(255, 255, 255, 0.35);
+          border: 2px solid rgba(255, 255, 255, 0.5);
           cursor: pointer;
           transition: all 0.3s ease;
           padding: 0;
@@ -307,18 +411,26 @@ export default function LandingPage() {
         .hero-banner-dot-active {
           background: #EF4444;
           border-color: #EF4444;
-          box-shadow: 0 0 10px rgba(239,68,68,0.6);
+          box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
           transform: scale(1.3);
         }
         @media (max-width: 768px) {
-          .hero-banner-wrap { height: 320px; }
-          .hero-buttons-overlay { top: 12px; gap: 8px; }
-          .hero-buttons-overlay .btn { padding: 10px 20px; font-size: 14px; }
+          .hero-banner-wrap { height: 400px; }
+          .hero-title { font-size: 36px; }
+          .hero-subtitle { font-size: 15px; margin-top: 12px; }
+          .hero-btns { margin-top: 24px; gap: 12px; }
+          .btn-hero-primary, .btn-hero-secondary { padding: 12px 28px; font-size: 14px; }
+          .hero-arrow { width: 40px; height: 40px; }
+          .hero-arrow-left { left: 12px; }
+          .hero-arrow-right { right: 12px; }
         }
         @media (max-width: 480px) {
-          .hero-banner-wrap { height: 240px; }
-          .hero-buttons-overlay { top: 10px; gap: 6px; }
-          .hero-buttons-overlay .btn { padding: 8px 16px; font-size: 13px; }
+          .hero-banner-wrap { height: 320px; }
+          .hero-title { font-size: 28px; }
+          .hero-subtitle { font-size: 13px; padding: 0 10px; }
+          .hero-btns { flex-direction: column; align-items: center; gap: 10px; }
+          .btn-hero-primary, .btn-hero-secondary { width: 220px; text-align: center; }
+          .hero-arrow { display: none; }
         }
       `}</style>
     </div>
