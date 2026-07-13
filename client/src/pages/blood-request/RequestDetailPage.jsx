@@ -6,9 +6,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { getRequests, acceptRequest, completeRequest, addRating, hasRated } from "../../services/localStore";
+import { getRequests, acceptRequest, completeRequest, addRating, hasRated, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS, URGENCY } from "../../data/constants";
-import { MapPin, Phone, Calendar, Clock, User, Hospital, CheckCircle, ArrowLeft, Star } from "lucide-react";
+import { MapPin, Phone, Calendar, Clock, User, Hospital, CheckCircle, ArrowLeft, Star, Trash2 } from "lucide-react";
 
 /** Returns themed background/text colors for a blood group badge. */
 function getBloodGroupColor(bloodGroup) {
@@ -49,7 +49,6 @@ export default function RequestDetailPage() {
     e.preventDefault();
     if (!ratingForm.comment.trim()) return;
     setRatingSaving(true);
-    // Determine who to rate: if current user is requester, rate the donor; vice versa
     const isRequester = user?._id === request.requester?._id;
     const ratedUserId = isRequester ? request.acceptedBy?._id : request.requester?._id;
     addRating({ requestId: id, ratedUserId, rating: ratingForm.rating, comment: ratingForm.comment }, user);
@@ -57,13 +56,19 @@ export default function RequestDetailPage() {
     setRatingSaving(false);
   };
 
+  /** Delete the request and navigate back */
+  const handleDelete = () => {
+    deleteRequest(id);
+    navigate("/requests");
+  };
+
   if (!request) return <div className="container" style={{ padding: 40, textAlign: "center" }}>Request not found</div>;
 
   const u = URGENCY.find((x) => x.value === request.urgency);
   // Any logged-in user can accept open requests (everyone is both donor and seeker)
   const canAccept = request.status === "open";
-  // Only the original requester or the accepted donor can mark a request complete
   const canComplete = (user?._id === request.requester?._id || user?._id === request.acceptedBy?._id) && request.status === "accepted";
+  const canDelete = user?._id === request.requester?._id && request.status === "open";
 
   return (
     <div className="container" style={{ padding: "32px 20px", maxWidth: 800 }}>
@@ -110,6 +115,7 @@ export default function RequestDetailPage() {
       <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
         {canAccept && <button className="btn btn-primary" onClick={() => setShowModal("accept")}><CheckCircle size={16} /> Accept Request</button>}
         {canComplete && <button className="btn btn-success" onClick={() => setShowModal("complete")}><CheckCircle size={16} /> Mark Complete</button>}
+        {canDelete && <button className="btn btn-danger" onClick={() => setShowModal("delete")}><Trash2 size={16} /> Delete</button>}
       </div>
 
       {/* ── Rate After Completion ── */}
@@ -154,11 +160,15 @@ export default function RequestDetailPage() {
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal("")}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-title">{showModal === "accept" ? "Accept Blood Request" : "Complete Request"}</div>
-            <div className="modal-desc">{showModal === "accept" ? "Are you sure you want to accept this request?" : "Mark this request as completed?"}</div>
+            <div className="modal-title">
+              {showModal === "accept" ? "Accept Blood Request" : showModal === "complete" ? "Complete Request" : "Delete Request"}
+            </div>
+            <div className="modal-desc">
+              {showModal === "accept" ? "Are you sure you want to accept this request?" : showModal === "complete" ? "Mark this request as completed?" : `Delete the request for ${request.patientName}? This cannot be undone.`}
+            </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               <button className="btn btn-secondary" onClick={() => setShowModal("")}>Cancel</button>
-              <button className="btn btn-primary" onClick={() => handleAction(showModal)}>Confirm</button>
+              <button className={showModal === "delete" ? "btn btn-danger" : "btn btn-primary"} onClick={() => showModal === "delete" ? handleDelete() : handleAction(showModal)}>Confirm</button>
             </div>
           </div>
         </div>

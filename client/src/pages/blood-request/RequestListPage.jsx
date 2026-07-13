@@ -2,12 +2,14 @@
  * RequestListPage - Displays a searchable/filterable list of blood requests.
  * Allows users to browse open requests by blood group, district, and urgency.
  * Each card links to the full detail view of that request.
+ * Contact button shows requester phone. Delete button for own requests.
  */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { searchRequests } from "../../services/localStore";
+import { useAuth } from "../../context/AuthContext";
+import { searchRequests, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
-import { MapPin, Clock, Plus, AlertCircle } from "lucide-react";
+import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2, X } from "lucide-react";
 
 /** Returns themed background/text colors for a blood group badge. */
 function getBloodGroupColor(bloodGroup) {
@@ -18,11 +20,20 @@ function getBloodGroupColor(bloodGroup) {
 }
 
 export default function RequestListPage() {
+  const { user } = useAuth();
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", urgency: "" });
   const [requests, setRequests] = useState([]);
+  const [showContact, setShowContact] = useState(null); // request whose contact to show
+  const [showDelete, setShowDelete] = useState(null);   // request to delete
 
-  // Re-fetch filtered requests whenever any filter changes
   useEffect(() => { setRequests(searchRequests(filters)); }, [filters]);
+
+  /** Delete a request after confirmation */
+  const handleDelete = (requestId) => {
+    deleteRequest(requestId);
+    setRequests(searchRequests(filters));
+    setShowDelete(null);
+  };
 
   return (
     <div className="container" style={{ padding: "32px 20px" }}>
@@ -34,7 +45,7 @@ export default function RequestListPage() {
         <Link to="/requests/create" className="btn btn-primary"><Plus size={16} /> Create Request</Link>
       </div>
 
-      {/* Filter bar: dropdowns narrow the request list by blood group, district, or urgency */}
+      {/* Filter bar */}
       <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap" }}>
         <select className="input" style={{ flex: 1, minWidth: 140 }} value={filters.bloodGroup} onChange={(e) => setFilters({ ...filters, bloodGroup: e.target.value })}>
           <option value="">All Groups</option>{BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
@@ -54,27 +65,92 @@ export default function RequestListPage() {
           <div className="grid grid-3">
             {requests.map((r) => {
               const u = URGENCY.find((x) => x.value === r.urgency);
+              const isOwn = user?._id === r.requester?._id;
               return (
-                <Link key={r._id} to={`/requests/${r._id}`} className="card" style={{ padding: 20 }}>
-                  {/* Status badges: blood group, urgency level, and current status (open/accepted/completed) */}
-                  <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                    <span className="badge" style={{ background: getBloodGroupColor(r.patientBloodGroup).bg, color: getBloodGroupColor(r.patientBloodGroup).text }}>{r.patientBloodGroup}</span>
-                    <span className={`badge ${u?.color || "badge-gray"}`}>{u?.label}</span>
-                    <span className={`badge ${r.status === "open" ? "badge-green" : r.status === "completed" ? "badge-gray" : "badge-blue"}`}>{r.status}</span>
-                  </div>
-                  <h3 style={{ fontSize: 16, fontWeight: 700 }}>{r.patientName}</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8, fontSize: 13, color: "var(--text-secondary)" }}>
-                    <span>{r.hospital}</span>
-                    <span style={{ display: "flex", alignItems: "center", gap: 4 }}><MapPin size={12} /> {r.area}, {r.district}</span>
-                    <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Clock size={12} /> {r.dateNeeded ? new Date(r.dateNeeded).toLocaleDateString() : "ASAP"}</span>
-                  </div>
-                  <div style={{ marginTop: 12, fontSize: 13, color: "var(--text-muted)" }}>{r.unitsRequired} unit(s) needed</div>
-                </Link>
+                <div key={r._id} className="card" style={{ padding: 20, position: "relative" }}>
+                  {/* Delete button — only for own requests */}
+                  {isOwn && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowDelete(r); }}
+                      style={{ position: "absolute", top: 12, right: 12, background: "none", border: "none", color: "var(--text-muted)", padding: 4, borderRadius: 6, transition: "all 0.2s" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "var(--red-light)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.background = "none"; }}
+                      title="Delete request"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+
+                  <Link to={`/requests/${r._id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                    <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                      <span className="badge" style={{ background: getBloodGroupColor(r.patientBloodGroup).bg, color: getBloodGroupColor(r.patientBloodGroup).text }}>{r.patientBloodGroup}</span>
+                      <span className={`badge ${u?.color || "badge-gray"}`}>{u?.label}</span>
+                      <span className={`badge ${r.status === "open" ? "badge-green" : r.status === "completed" ? "badge-gray" : "badge-blue"}`}>{r.status}</span>
+                    </div>
+                    <h3 style={{ fontSize: 16, fontWeight: 700 }}>{r.patientName}</h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8, fontSize: 13, color: "var(--text-secondary)" }}>
+                      <span>{r.hospital}</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><MapPin size={12} /> {r.area}, {r.district}</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Clock size={12} /> {r.dateNeeded ? new Date(r.dateNeeded).toLocaleDateString() : "ASAP"}</span>
+                    </div>
+                    <div style={{ marginTop: 12, fontSize: 13, color: "var(--text-muted)" }}>{r.unitsRequired} unit(s) needed</div>
+                  </Link>
+
+                  {/* Contact button — for other users only */}
+                  {!isOwn && (
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      style={{ marginTop: 12, width: "100%", gap: 6 }}
+                      onClick={(e) => { e.stopPropagation(); setShowContact(r); }}
+                    >
+                      <Phone size={14} /> Contact
+                    </button>
+                  )}
+                </div>
               );
             })}
           </div>
         )}
       </div>
+
+      {/* ── Contact Modal ── */}
+      {showContact && (
+        <div className="modal-overlay" onClick={() => setShowContact(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div className="modal-title">Contact Requester</div>
+              <button onClick={() => setShowContact(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", padding: 4 }}><X size={18} /></button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div className="avatar avatar-sm">{showContact.requester?.name?.charAt(0)}</div>
+                <div style={{ fontWeight: 600 }}>{showContact.requester?.name}</div>
+              </div>
+              <div className="separator" />
+              <a href={`tel:${showContact.contactNumber}`} style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)", textDecoration: "none", padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--bg-secondary)", transition: "all 0.2s" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--red-light)"; e.currentTarget.style.color = "var(--red)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "var(--bg-secondary)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+              >
+                <Phone size={16} /> {showContact.contactNumber}
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirmation Modal ── */}
+      {showDelete && (
+        <div className="modal-overlay" onClick={() => setShowDelete(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-title">Delete Request</div>
+            <div className="modal-desc">Are you sure you want to delete the request for <strong>{showDelete.patientName}</strong>? This cannot be undone.</div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button className="btn btn-secondary" onClick={() => setShowDelete(null)}>Cancel</button>
+              <button className="btn btn-danger" onClick={() => handleDelete(showDelete._id)}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

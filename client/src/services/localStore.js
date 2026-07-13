@@ -92,6 +92,13 @@ export function completeRequest(requestId) {
   return requests[idx];
 }
 
+/** Delete a blood request permanently */
+export function deleteRequest(requestId) {
+  const requests = get(REQUESTS_KEY).filter((r) => r._id !== requestId);
+  set(REQUESTS_KEY, requests);
+  return requests;
+}
+
 /**
  * Search/filter blood requests.
  * Applies filters one by one — only requests matching ALL filters are returned.
