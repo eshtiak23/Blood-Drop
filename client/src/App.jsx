@@ -17,7 +17,7 @@
  *   *              → 404 Not Found page (any unmatched URL)
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -76,13 +76,24 @@ function AdminOnly({ children }) {
 /**
  * AppContent — The actual page layout.
  * Navbar stays at the top, Footer at the bottom, and pages load in the middle.
+ * Each page gets a fade-in transition when navigating.
  */
+function PageTransition({ children }) {
+  const location = useLocation();
+  return (
+    <div key={location.pathname} className="page-enter">
+      {children}
+    </div>
+  );
+}
+
 function AppContent() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar />
       <main style={{ flex: 1 }}>
-        <Routes>
+        <PageTransition>
+          <Routes>
           {/* Public pages — anyone can visit */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/donors" element={<DonorSearchPage />} />
@@ -108,6 +119,7 @@ function AppContent() {
           {/* Catch-all — shows 404 for any URL not listed above */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </PageTransition>
       </main>
       <Footer />
     </div>

@@ -90,6 +90,18 @@ export default function LandingPage() {
           ))}
           {/* Color overlay */}
           <div className="hero-overlay" />
+          {/* Animated blood drops */}
+          <div className="hero-drops">
+            {[...Array(10)].map((_, i) => (
+              <span key={i} className="blood-drop" style={{
+                left: `${8 + i * 9}%`,
+                animationDelay: `${i * 0.7}s`,
+                animationDuration: `${3.5 + (i % 3) * 1.5}s`,
+                width: `${6 + (i % 3) * 2}px`,
+                height: `${6 + (i % 3) * 2}px`,
+              }} />
+            ))}
+          </div>
           {/* Center content: heading, subtitle, buttons */}
           <div className="hero-content">
             <h1 className="hero-title">Every Drop <span>Counts</span></h1>
@@ -287,6 +299,27 @@ export default function LandingPage() {
           background: linear-gradient(135deg, rgba(153, 27, 27, 0.55) 0%, rgba(127, 29, 29, 0.45) 40%, rgba(185, 28, 28, 0.35) 100%);
           z-index: 1;
         }
+        .hero-drops {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          pointer-events: none;
+          overflow: hidden;
+        }
+        .blood-drop {
+          position: absolute;
+          top: -12px;
+          border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+          background: rgba(239, 68, 68, 0.35);
+          animation: bloodDropFall linear infinite;
+          will-change: transform;
+        }
+        @keyframes bloodDropFall {
+          0% { transform: translateY(-12px); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translateY(580px); opacity: 0; }
+        }
         .hero-content {
           position: absolute;
           inset: 0;
@@ -335,6 +368,11 @@ export default function LandingPage() {
           box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
           transition: all 0.3s ease;
           border: none;
+          animation: ctaPulse 2s ease-in-out infinite;
+        }
+        @keyframes ctaPulse {
+          0%, 100% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
+          50% { box-shadow: 0 4px 32px rgba(239, 68, 68, 0.7); }
         }
         .btn-hero-primary:hover {
           transform: translateY(-2px);
@@ -455,6 +493,8 @@ export default function LandingPage() {
           .btn-hero-primary, .btn-hero-secondary { width: 200px; text-align: center; padding: 11px 24px; font-size: 13px; }
           .hero-arrow { display: none; }
           .hero-content { padding: 0 12px; }
+          .hero-drops { display: none; }
+          .btn-hero-primary { animation: none; }
         }
       `}</style>
     </div>

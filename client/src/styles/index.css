@@ -112,9 +112,13 @@ textarea.input { min-height: 100px; resize: vertical; }
 /* ── Cards ── */
 .card {
   background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius);
-  box-shadow: var(--shadow); transition: all 0.3s ease;
+  box-shadow: var(--shadow-md); transition: all 0.3s ease;
+  transform-style: preserve-3d; perspective: 800px;
 }
-.card:hover { box-shadow: var(--shadow-md); }
+.card:hover {
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.1), var(--shadow-lg);
+  transform: rotateX(2deg) rotateY(-2deg) translateY(-2px);
+}
 .card-body { padding: 24px; }
 .card-header { padding: 20px 24px 0; }
 .card-title { font-size: 18px; font-weight: 700; color: var(--text); }
@@ -249,6 +253,29 @@ textarea.input { min-height: 100px; resize: vertical; }
 .animate-fadeIn { animation: fadeIn 0.4s ease forwards; }
 .animate-slideUp { animation: slideUp 0.5s ease forwards; }
 .animate-pulse { animation: pulse 2s infinite; }
+
+/* ── Ripple Click Effect ── */
+.btn { position: relative; overflow: hidden; }
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0);
+  animation: rippleAnim 0.6s ease-out forwards;
+  pointer-events: none;
+}
+.btn-secondary .ripple,
+.btn-ghost .ripple { background: rgba(239, 68, 68, 0.15); }
+@keyframes rippleAnim {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ── Page Transition ── */
+.page-enter { animation: pageEnter 0.35s ease forwards; }
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* ── Dark Mode ── */
 .dark {
@@ -488,6 +515,7 @@ textarea.input { min-height: 100px; resize: vertical; }
   .hide-mobile { display: none !important; }
   .flex-mobile-col { flex-direction: column; }
   .full-mobile { width: 100%; }
+  .card:hover { transform: none; }
   .footer-grid {
     grid-template-columns: 1fr 1fr;
     gap: 32px;
