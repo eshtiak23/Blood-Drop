@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Star, AlertTriangle, Droplet, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Star, AlertTriangle, Droplet } from "lucide-react";
 import { STATS, TESTIMONIALS, FAQS, BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 import { getAllFeedback } from "../../services/localStore";
 
@@ -90,14 +90,6 @@ export default function LandingPage() {
           ))}
           {/* Color overlay */}
           <div className="hero-overlay" />
-          {/* Left arrow */}
-          <button className="hero-arrow hero-arrow-left" onClick={() => setBannerIdx((bannerIdx - 1 + banners.length) % banners.length)} aria-label="Previous slide">
-            <ChevronLeft size={28} />
-          </button>
-          {/* Right arrow */}
-          <button className="hero-arrow hero-arrow-right" onClick={() => setBannerIdx((bannerIdx + 1) % banners.length)} aria-label="Next slide">
-            <ChevronRight size={28} />
-          </button>
           {/* Center content: heading, subtitle, buttons */}
           <div className="hero-content">
             <h1 className="hero-title">Every Drop <span>Counts</span></h1>
