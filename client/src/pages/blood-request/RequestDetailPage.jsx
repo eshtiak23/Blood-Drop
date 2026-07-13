@@ -37,11 +37,16 @@ export default function RequestDetailPage() {
   }, [id, user]);
 
   const handleAction = (action) => {
-    if (action === "accept") acceptRequest(id, user);
-    if (action === "complete") completeRequest(id);
-    const found = getRequests().find((r) => r._id === id);
-    setRequest(found);
-    setShowModal("");
+    try {
+      if (action === "accept") acceptRequest(id, user);
+      else if (action === "complete") completeRequest(id);
+      const found = getRequests().find((r) => r._id === id);
+      setRequest(found);
+      setShowModal("");
+    } catch (err) {
+      console.error(err);
+      setShowModal("");
+    }
   };
 
   /** Submit a rating for the other party after request completion */
@@ -49,11 +54,16 @@ export default function RequestDetailPage() {
     e.preventDefault();
     if (!ratingForm.comment.trim()) return;
     setRatingSaving(true);
-    const isRequester = user?._id === request.requester?._id;
-    const ratedUserId = isRequester ? request.acceptedBy?._id : request.requester?._id;
-    addRating({ requestId: id, ratedUserId, rating: ratingForm.rating, comment: ratingForm.comment }, user);
-    setRated(true);
-    setRatingSaving(false);
+    try {
+      const isRequester = user?._id === request.requester?._id;
+      const ratedUserId = isRequester ? request.acceptedBy?._id : request.requester?._id;
+      addRating({ requestId: id, ratedUserId, rating: ratingForm.rating, comment: ratingForm.comment }, user);
+      setRated(true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRatingSaving(false);
+    }
   };
 
   /** Delete the request and navigate back */
@@ -62,11 +72,18 @@ export default function RequestDetailPage() {
     navigate("/requests");
   };
 
-  if (!request) return <div className="container" style={{ padding: 40, textAlign: "center" }}>Request not found</div>;
+  if (!request) return (
+    <div className="container" style={{ padding: 40, textAlign: "center" }}>
+      <button onClick={() => navigate(-1)} className="btn btn-ghost btn-sm" style={{ marginBottom: 16 }}><ArrowLeft size={16} /> Back</button>
+      <div className="empty-state">
+        <div className="empty-state-title">Request not found</div>
+        <div className="empty-state-desc">This request may have been deleted.</div>
+      </div>
+    </div>
+  );
 
   const u = URGENCY.find((x) => x.value === request.urgency);
-  // Any logged-in user can accept open requests (everyone is both donor and seeker)
-  const canAccept = request.status === "open";
+  const canAccept = request.status === "open" && user?._id !== request.requester?._id;
   const canComplete = (user?._id === request.requester?._id || user?._id === request.acceptedBy?._id) && request.status === "accepted";
   const canDelete = user?._id === request.requester?._id && request.status === "open";
 
@@ -76,7 +93,7 @@ export default function RequestDetailPage() {
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
         <span className="badge" style={{ background: getBloodGroupColor(request.patientBloodGroup).bg, color: getBloodGroupColor(request.patientBloodGroup).text }}>{request.patientBloodGroup}</span>
-        <span className={`badge ${u?.color || ""}`}>{u?.label}</span>
+        <span className={`badge ${u?.color || "badge-gray"}`}>{u?.label || "Unknown"}</span>
         <span className={`badge ${request.status === "open" ? "badge-green" : request.status === "completed" ? "badge-gray" : "badge-blue"}`}>{request.status}</span>
       </div>
 

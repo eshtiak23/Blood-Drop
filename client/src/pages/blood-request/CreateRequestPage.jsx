@@ -47,7 +47,7 @@ export default function CreateRequestPage() {
                 <option value="">Select</option>{BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
-            <div className="input-group"><label>Units Required</label><input className="input" type="number" min={1} max={10} value={form.unitsRequired} onChange={(e) => set("unitsRequired", parseInt(e.target.value))} required /></div>
+            <div className="input-group"><label>Units Required</label><input className="input" type="number" min={1} max={10} value={form.unitsRequired} onChange={(e) => { const v = parseInt(e.target.value, 10); set("unitsRequired", isNaN(v) ? 1 : v); }} required /></div>
           </div>
           <div className="grid grid-2" style={{ marginBottom: 16 }}>
             <div className="input-group">
@@ -76,7 +76,7 @@ export default function CreateRequestPage() {
           </div>
           <div className="input-group" style={{ marginBottom: 16 }}>
             <label>Contact Number</label>
-            <input className="input" value={form.contactNumber} onChange={(e) => set("contactNumber", e.target.value)} required />
+            <input className="input" type="tel" value={form.contactNumber} onChange={(e) => set("contactNumber", e.target.value)} required />
           </div>
           <div className="input-group" style={{ marginBottom: 20 }}>
             <label>Description (Optional)</label>

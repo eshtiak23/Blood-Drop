@@ -3,7 +3,7 @@
  * 
  * Everyone is both a blood donor AND a seeker — no role separation.
  * Shows: profile card, stats, donation logging, feedback/reviews,
- * blood stock overview, recent requests, and quick actions.
+ * recent requests, quick actions, and cooldown reminder.
  * 
  * Profile photo is stored as base64 in localStorage (no server needed).
  */

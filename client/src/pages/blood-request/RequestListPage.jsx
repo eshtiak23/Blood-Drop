@@ -64,7 +64,7 @@ export default function RequestListPage() {
           <div className="grid grid-3">
             {requests.map((r) => {
               const u = URGENCY.find((x) => x.value === r.urgency);
-              const isOwn = user?._id === r.requester?._id;
+              const isOwn = user?._id && user._id === r.requester?._id;
               return (
                 <div key={r._id} className="card" style={{ padding: 20, position: "relative" }}>
                   {/* Delete button — only for own requests */}
