@@ -292,7 +292,7 @@ export default function LandingPage() {
         .hero-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(135deg, rgba(153, 27, 27, 0.82) 0%, rgba(127, 29, 29, 0.72) 40%, rgba(185, 28, 28, 0.55) 100%);
+          background: linear-gradient(135deg, rgba(153, 27, 27, 0.55) 0%, rgba(127, 29, 29, 0.45) 40%, rgba(185, 28, 28, 0.35) 100%);
           z-index: 1;
         }
         .hero-content {
