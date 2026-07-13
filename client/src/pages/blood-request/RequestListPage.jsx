@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { searchRequests, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
-import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2, X } from "lucide-react";
+import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2 } from "lucide-react";
 
 /** Returns themed background/text colors for a blood group badge. */
 function getBloodGroupColor(bloodGroup) {
@@ -23,7 +23,6 @@ export default function RequestListPage() {
   const { user } = useAuth();
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", urgency: "" });
   const [requests, setRequests] = useState([]);
-  const [showContact, setShowContact] = useState(null); // request whose contact to show
   const [showDelete, setShowDelete] = useState(null);   // request to delete
 
   useEffect(() => { setRequests(searchRequests(filters)); }, [filters]);
@@ -96,15 +95,16 @@ export default function RequestListPage() {
                     <div style={{ marginTop: 12, fontSize: 13, color: "var(--text-muted)" }}>{r.unitsRequired} unit(s) needed</div>
                   </Link>
 
-                  {/* Contact button — for other users only */}
-                  {!isOwn && (
-                    <button
+                  {/* Call button — for other users only */}
+                  {!isOwn && r.contactNumber && (
+                    <a
+                      href={`tel:${r.contactNumber}`}
                       className="btn btn-secondary btn-sm"
-                      style={{ marginTop: 12, width: "100%", gap: 6 }}
-                      onClick={(e) => { e.stopPropagation(); setShowContact(r); }}
+                      style={{ marginTop: 12, width: "100%", gap: 6, textDecoration: "none" }}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      <Phone size={14} /> Contact
-                    </button>
+                      <Phone size={14} /> Call
+                    </a>
                   )}
                 </div>
               );
@@ -112,31 +112,6 @@ export default function RequestListPage() {
           </div>
         )}
       </div>
-
-      {/* ── Contact Modal ── */}
-      {showContact && (
-        <div className="modal-overlay" onClick={() => setShowContact(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <div className="modal-title">Contact Requester</div>
-              <button onClick={() => setShowContact(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", padding: 4 }}><X size={18} /></button>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 14 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div className="avatar avatar-sm">{showContact.requester?.name?.charAt(0)}</div>
-                <div style={{ fontWeight: 600 }}>{showContact.requester?.name}</div>
-              </div>
-              <div className="separator" />
-              <a href={`tel:${showContact.contactNumber}`} style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)", textDecoration: "none", padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--bg-secondary)", transition: "all 0.2s" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--red-light)"; e.currentTarget.style.color = "var(--red)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "var(--bg-secondary)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
-              >
-                <Phone size={16} /> {showContact.contactNumber}
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Delete Confirmation Modal ── */}
       {showDelete && (
