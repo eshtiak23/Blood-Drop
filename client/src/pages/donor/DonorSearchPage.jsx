@@ -345,77 +345,79 @@ export default function DonorSearchPage() {
       </div>
 
       {/* ---- Contact Modal ---- */}
-      {selectedDonor && (() => {
-        const sc = getBloodGroupColor(selectedDonor.bloodGroup);
-        const canDonate = isDonationCooledDown(selectedDonor.lastDonationDate);
-        return (
-        <div className="donor-modal-overlay" onClick={() => setSelectedDonor(null)}>
-          <div className="donor-modal-backdrop" />
-          <div className="donor-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="donor-modal-close" onClick={() => setSelectedDonor(null)}>
-              <X size={16} />
-            </button>
+      {selectedDonor && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={() => setSelectedDonor(null)}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }} />
+          {(() => {
+            const sc = getBloodGroupColor(selectedDonor.bloodGroup);
+            const canDonate = isDonationCooledDown(selectedDonor.lastDonationDate);
+            return (
+              <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 340, background: "var(--bg-card)", borderRadius: "var(--radius-lg)", boxShadow: "0 25px 60px rgba(0,0,0,0.25)", overflow: "hidden" }}>
+                {/* Close */}
+                <button onClick={() => setSelectedDonor(null)} style={{ position: "absolute", top: 10, right: 10, zIndex: 10, width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+                  <X size={14} />
+                </button>
 
-            {/* Header */}
-            <div className="donor-modal-header" style={{ background: `linear-gradient(135deg, ${sc.bg || "var(--red-light)"}, ${sc.bg || "var(--red-light)"}dd)` }}>
-              <div className="donor-modal-avatar" style={{ background: sc.text || "var(--red)", color: "#fff" }}>
-                {selectedDonor.name?.charAt(0)?.toUpperCase()}
-              </div>
-              <h3 className="donor-modal-name">{selectedDonor.name}</h3>
-              <div className="donor-modal-location">
-                <MapPin size={12} /> {selectedDonor.area}{selectedDonor.district ? `, ${selectedDonor.district}` : ""}
-              </div>
-              <div className="donor-modal-blood" style={{ background: sc.bg, color: sc.text, border: `2px solid ${sc.text}22` }}>
-                <Droplets size={13} /> {selectedDonor.bloodGroup}
-              </div>
-            </div>
-
-            {/* Body */}
-            <div className="donor-modal-body">
-              <div className="donor-modal-stats">
-                <div className="donor-modal-stat">
-                  <div className="donor-modal-stat-icon" style={{ background: "var(--red-light)", color: "var(--red)" }}><Droplets /></div>
-                  <div className="donor-modal-stat-value">{selectedDonor.totalDonations || 0}</div>
-                  <div className="donor-modal-stat-label">Donations</div>
-                </div>
-                <div className="donor-modal-stat">
-                  <div className="donor-modal-stat-icon" style={{ background: "var(--purple-light)", color: "var(--purple)" }}><Calendar /></div>
-                  <div className="donor-modal-stat-value" style={{ fontSize: 12 }}>{selectedDonor.lastDonationDate ? new Date(selectedDonor.lastDonationDate).toLocaleDateString("en-BD", { day: "numeric", month: "short" }) : "Never"}</div>
-                  <div className="donor-modal-stat-label">Last Donation</div>
-                </div>
-                <div className="donor-modal-stat">
-                  <div className="donor-modal-stat-icon" style={{ background: canDonate ? "var(--green-light)" : "var(--yellow-light)", color: canDonate ? "var(--green)" : "var(--yellow)" }}>
-                    {canDonate ? <CheckCircle /> : <Clock />}
+                {/* Header */}
+                <div style={{ padding: "20px 16px 14px", textAlign: "center", background: `linear-gradient(135deg, ${sc.bg || "#FEE2E2"}, ${sc.bg || "#FEE2E2"}cc)` }}>
+                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: sc.text || "#DC2626", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, margin: "0 auto 8px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)", border: "3px solid rgba(255,255,255,0.5)" }}>
+                    {selectedDonor.name?.charAt(0)?.toUpperCase()}
                   </div>
-                  <div className="donor-modal-stat-value" style={{ fontSize: 11, color: canDonate ? "var(--green)" : "var(--yellow)" }}>{canDonate ? "Available" : "Cooldown"}</div>
-                  <div className="donor-modal-stat-label">Status</div>
-                </div>
-              </div>
-
-              <div className="donor-modal-phone-row">
-                <div className="donor-modal-phone-info">
-                  <Phone size={16} color="var(--red)" />
-                  <div>
-                    <div className="donor-modal-phone-label">Phone</div>
-                    <a href={`tel:${selectedDonor.phone}`} className="donor-modal-phone-number">{selectedDonor.phone || "Not provided"}</a>
+                  <div style={{ fontSize: 17, fontWeight: 800, color: "var(--text)" }}>{selectedDonor.name}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
+                    <MapPin size={11} /> {selectedDonor.area}{selectedDonor.district ? `, ${selectedDonor.district}` : ""}
+                  </div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 8, padding: "4px 14px", borderRadius: 20, fontSize: 14, fontWeight: 700, background: sc.bg, color: sc.text }}>
+                    <Droplets size={13} /> {selectedDonor.bloodGroup}
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Actions */}
-            <div className="donor-modal-actions">
-              <a href={`tel:${selectedDonor.phone}`} className="btn btn-primary donor-modal-call">
-                <Phone size={14} /> Call Now
-              </a>
-              <Link to={`/donors/${selectedDonor._id}`} onClick={() => setSelectedDonor(null)} className="btn btn-secondary donor-modal-view">
-                View Profile
-              </Link>
-            </div>
-          </div>
+                {/* Stats */}
+                <div style={{ padding: "10px 16px 8px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+                  <div style={{ textAlign: "center", padding: "7px 2px", borderRadius: 8, background: "var(--bg-secondary)" }}>
+                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--red-light)", color: "var(--red)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 3px" }}><Droplets size={13} /></div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{selectedDonor.totalDonations || 0}</div>
+                    <div style={{ fontSize: 9, color: "var(--text-muted)" }}>Donations</div>
+                  </div>
+                  <div style={{ textAlign: "center", padding: "7px 2px", borderRadius: 8, background: "var(--bg-secondary)" }}>
+                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--purple-light)", color: "var(--purple)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 3px" }}><Calendar size={13} /></div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{selectedDonor.lastDonationDate ? new Date(selectedDonor.lastDonationDate).toLocaleDateString("en-BD", { day: "numeric", month: "short" }) : "Never"}</div>
+                    <div style={{ fontSize: 9, color: "var(--text-muted)" }}>Last Donation</div>
+                  </div>
+                  <div style={{ textAlign: "center", padding: "7px 2px", borderRadius: 8, background: "var(--bg-secondary)" }}>
+                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: canDonate ? "var(--green-light)" : "var(--yellow-light)", color: canDonate ? "var(--green)" : "var(--yellow)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 3px" }}>
+                      {canDonate ? <CheckCircle size={13} /> : <Clock size={13} />}
+                    </div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: canDonate ? "var(--green)" : "var(--yellow)" }}>{canDonate ? "Available" : "Cooldown"}</div>
+                    <div style={{ fontSize: 9, color: "var(--text-muted)" }}>Status</div>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <div style={{ padding: "8px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 8, background: "var(--bg-secondary)" }}>
+                    <Phone size={16} color="var(--red)" />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5 }}>Phone</div>
+                      <a href={`tel:${selectedDonor.phone}`} style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", textDecoration: "none" }}>{selectedDonor.phone || "Not provided"}</a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: 8, padding: "6px 16px 14px", borderTop: "1px solid var(--border-light)" }}>
+                  <a href={`tel:${selectedDonor.phone}`} className="btn btn-primary" style={{ flex: 1, padding: "9px 0", fontSize: 13 }}>
+                    <Phone size={14} /> Call Now
+                  </a>
+                  <Link to={`/donors/${selectedDonor._id}`} onClick={() => setSelectedDonor(null)} className="btn btn-secondary" style={{ flex: 1, padding: "9px 0", fontSize: 13 }}>
+                    View Profile
+                  </Link>
+                </div>
+              </div>
+            );
+          })()}
         </div>
-        );
-      })()}
+      )}
 
       <style>{`
         @media(max-width:768px){
