@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
       User.countDocuments({ role: { $ne: "admin" } }),
       Request.countDocuments(),
       Request.countDocuments({ status: "completed" }),
-      User.distinct("district"),
+      User.distinct("district", { district: { $ne: "" } }),
     ]);
     res.json({
       totalDonors,

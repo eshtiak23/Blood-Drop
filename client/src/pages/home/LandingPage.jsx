@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Star, AlertTriangle, Droplet } from "lucide-react";
-import { STATS, TESTIMONIALS, FAQS, BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
+import { TESTIMONIALS, FAQS, BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 import { getAllFeedback } from "../../services/localStore";
 import api from "../../services/api";
 
@@ -130,7 +130,12 @@ export default function LandingPage() {
               { value: `${realStats.livesSaved}+`, label: "Lives Saved" },
               { value: `${realStats.districtsCovered}`, label: "Districts Covered" },
               { value: "24/7", label: "Emergency Support" },
-            ] : STATS).map((s, i) => (
+            ] : [
+              { value: "...", label: "Registered Donors" },
+              { value: "...", label: "Lives Saved" },
+              { value: "...", label: "Districts Covered" },
+              { value: "24/7", label: "Emergency Support" },
+            ]).map((s, i) => (
               <AnimatedDiv key={s.label} delay={i * 0.1}>
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>{s.value}</div>
