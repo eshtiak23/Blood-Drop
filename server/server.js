@@ -38,6 +38,9 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/ratings", ratingRoutes);
 app.use("/api/stats", statsRoutes);
 
+// Root route
+app.get("/", (req, res) => res.json({ name: "LifeDrop API", status: "running" }));
+
 // Health check
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
