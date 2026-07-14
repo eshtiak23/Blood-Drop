@@ -97,7 +97,7 @@ export default function DonorSearchPage() {
     } else {
       if (filters.district) list = list.filter((d) => d.district === filters.district);
       if (filters.area) list = list.filter((d) => d.area === filters.area);
-      list.sort((a, b) => b.totalDonations - a.totalDonations);
+      list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
 
     return list;
