@@ -84,6 +84,16 @@ export default function DonorSearchPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (selectedDonor) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [selectedDonor]);
+
   const filteredResults = useMemo(() => {
     let list = [...donors];
 
@@ -289,8 +299,7 @@ export default function DonorSearchPage() {
                       </div>
                     </div>
                   </Link>
-                  <button className="btn btn-primary btn-sm" style={{ marginTop: 12, width: "100%", gap: 6 }} onClick={(e) => {
-                    e.preventDefault();
+                  <button className="btn btn-primary btn-sm" style={{ marginTop: 12, width: "100%", gap: 6, position: "relative", zIndex: 2 }} onClick={() => {
                     if (!isAuthenticated) {
                       navigate("/login");
                       return;
