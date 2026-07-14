@@ -5,6 +5,7 @@
  * contact modal for reaching out to donors.
  */
 import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
@@ -345,22 +346,22 @@ export default function DonorSearchPage() {
       </div>
 
       {/* ---- Contact Modal ---- */}
-      {selectedDonor && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={() => setSelectedDonor(null)}>
+      {selectedDonor && createPortal(
+        <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px" }} onClick={() => setSelectedDonor(null)}>
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }} />
           {(() => {
             const sc = getBloodGroupColor(selectedDonor.bloodGroup);
             const canDonate = isDonationCooledDown(selectedDonor.lastDonationDate);
             return (
-              <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 340, background: "var(--bg-card)", borderRadius: "var(--radius-lg)", boxShadow: "0 25px 60px rgba(0,0,0,0.25)", overflow: "hidden" }}>
+              <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 420, maxHeight: "90vh", overflowY: "auto", background: "var(--bg-card)", borderRadius: "var(--radius-lg)", boxShadow: "0 25px 60px rgba(0,0,0,0.25)" }}>
                 {/* Close */}
                 <button onClick={() => setSelectedDonor(null)} style={{ position: "absolute", top: 10, right: 10, zIndex: 10, width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
                   <X size={14} />
                 </button>
 
                 {/* Header */}
-                <div style={{ padding: "20px 16px 14px", textAlign: "center", background: `linear-gradient(135deg, ${sc.bg || "#FEE2E2"}, ${sc.bg || "#FEE2E2"}cc)` }}>
-                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: sc.text || "#DC2626", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, margin: "0 auto 8px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)", border: "3px solid rgba(255,255,255,0.5)" }}>
+                <div style={{ padding: "24px 20px 16px", textAlign: "center", background: `linear-gradient(135deg, ${sc.bg || "#FEE2E2"}, ${sc.bg || "#FEE2E2"}cc)` }}>
+                  <div style={{ width: 60, height: 60, borderRadius: "50%", background: sc.text || "#DC2626", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800, margin: "0 auto 10px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)", border: "3px solid rgba(255,255,255,0.5)" }}>
                     {selectedDonor.name?.charAt(0)?.toUpperCase()}
                   </div>
                   <div style={{ fontSize: 17, fontWeight: 800, color: "var(--text)" }}>{selectedDonor.name}</div>
@@ -373,30 +374,30 @@ export default function DonorSearchPage() {
                 </div>
 
                 {/* Stats */}
-                <div style={{ padding: "10px 16px 8px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
-                  <div style={{ textAlign: "center", padding: "7px 2px", borderRadius: 8, background: "var(--bg-secondary)" }}>
-                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--red-light)", color: "var(--red)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 3px" }}><Droplets size={13} /></div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{selectedDonor.totalDonations || 0}</div>
-                    <div style={{ fontSize: 9, color: "var(--text-muted)" }}>Donations</div>
+                <div style={{ padding: "12px 20px 10px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                  <div style={{ textAlign: "center", padding: "10px 4px", borderRadius: 10, background: "var(--bg-secondary)" }}>
+                    <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--red-light)", color: "var(--red)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 4px" }}><Droplets size={14} /></div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{selectedDonor.totalDonations || 0}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Donations</div>
                   </div>
-                  <div style={{ textAlign: "center", padding: "7px 2px", borderRadius: 8, background: "var(--bg-secondary)" }}>
-                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--purple-light)", color: "var(--purple)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 3px" }}><Calendar size={13} /></div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{selectedDonor.lastDonationDate ? new Date(selectedDonor.lastDonationDate).toLocaleDateString("en-BD", { day: "numeric", month: "short" }) : "Never"}</div>
-                    <div style={{ fontSize: 9, color: "var(--text-muted)" }}>Last Donation</div>
+                  <div style={{ textAlign: "center", padding: "10px 4px", borderRadius: 10, background: "var(--bg-secondary)" }}>
+                    <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--purple-light)", color: "var(--purple)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 4px" }}><Calendar size={14} /></div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{selectedDonor.lastDonationDate ? new Date(selectedDonor.lastDonationDate).toLocaleDateString("en-BD", { day: "numeric", month: "short" }) : "Never"}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Last Donation</div>
                   </div>
-                  <div style={{ textAlign: "center", padding: "7px 2px", borderRadius: 8, background: "var(--bg-secondary)" }}>
-                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: canDonate ? "var(--green-light)" : "var(--yellow-light)", color: canDonate ? "var(--green)" : "var(--yellow)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 3px" }}>
+                  <div style={{ textAlign: "center", padding: "10px 4px", borderRadius: 10, background: "var(--bg-secondary)" }}>
+                    <div style={{ width: 30, height: 30, borderRadius: "50%", background: canDonate ? "var(--green-light)" : "var(--yellow-light)", color: canDonate ? "var(--green)" : "var(--yellow)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 4px" }}>
                       {canDonate ? <CheckCircle size={13} /> : <Clock size={13} />}
                     </div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: canDonate ? "var(--green)" : "var(--yellow)" }}>{canDonate ? "Available" : "Cooldown"}</div>
-                    <div style={{ fontSize: 9, color: "var(--text-muted)" }}>Status</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: canDonate ? "var(--green)" : "var(--yellow)" }}>{canDonate ? "Available" : "Cooldown"}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Status</div>
                   </div>
                 </div>
 
                 {/* Phone */}
-                <div style={{ padding: "8px 16px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 8, background: "var(--bg-secondary)" }}>
-                    <Phone size={16} color="var(--red)" />
+                <div style={{ padding: "10px 20px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10, background: "var(--bg-secondary)" }}>
+                    <Phone size={18} color="var(--red)" />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5 }}>Phone</div>
                       <a href={`tel:${selectedDonor.phone}`} style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", textDecoration: "none" }}>{selectedDonor.phone || "Not provided"}</a>
@@ -405,18 +406,19 @@ export default function DonorSearchPage() {
                 </div>
 
                 {/* Actions */}
-                <div style={{ display: "flex", gap: 8, padding: "6px 16px 14px", borderTop: "1px solid var(--border-light)" }}>
-                  <a href={`tel:${selectedDonor.phone}`} className="btn btn-primary" style={{ flex: 1, padding: "9px 0", fontSize: 13 }}>
-                    <Phone size={14} /> Call Now
+                <div style={{ display: "flex", gap: 10, padding: "8px 20px 16px", borderTop: "1px solid var(--border-light)" }}>
+                  <a href={`tel:${selectedDonor.phone}`} className="btn btn-primary" style={{ flex: 1, padding: "11px 0", fontSize: 14 }}>
+                    <Phone size={15} /> Call Now
                   </a>
-                  <Link to={`/donors/${selectedDonor._id}`} onClick={() => setSelectedDonor(null)} className="btn btn-secondary" style={{ flex: 1, padding: "9px 0", fontSize: 13 }}>
+                  <Link to={`/donors/${selectedDonor._id}`} onClick={() => setSelectedDonor(null)} className="btn btn-secondary" style={{ flex: 1, padding: "11px 0", fontSize: 14 }}>
                     View Profile
                   </Link>
                 </div>
               </div>
             );
           })()}
-        </div>
+        </div>,
+        document.body
       )}
 
       <style>{`
