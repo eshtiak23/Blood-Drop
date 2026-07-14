@@ -66,14 +66,22 @@ export default function DonorSearchPage() {
   const [searchOpen, setSearchOpen] = useState(false);
   const areas = filters.district ? (AREAS[filters.district] || []) : [];
 
+  // Fetch donors from API
+  const fetchDonors = (showLoader = false) => {
+    if (showLoader) setLoading(true);
+    api.get("/donors/search")
+      .then((res) => setDonors(res.data.donors))
+      .catch(() => {})
+      .finally(() => { if (showLoader) setLoading(false); });
+  };
+
+  // Initial load + polling every 30s for new donors
   useEffect(() => {
     const bloodGroup = searchParams.get("bloodGroup");
     if (bloodGroup) setHasSearched(true);
-    setLoading(true);
-    api.get("/donors/search")
-      .then((res) => setDonors(res.data.donors))
-      .catch(() => setDonors([]))
-      .finally(() => setLoading(false));
+    fetchDonors(true);
+    const interval = setInterval(() => fetchDonors(false), 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const filteredResults = useMemo(() => {
@@ -133,8 +141,11 @@ export default function DonorSearchPage() {
   return (
     <div className="container" style={{ padding: "32px 20px" }}>
       <h1 style={{ fontSize: 24, fontWeight: 800 }}>Find Blood Donors</h1>
-      <p style={{ color: "var(--text-secondary)", marginTop: 4 }}>
+      <p style={{ color: "var(--text-secondary)", marginTop: 4, display: "flex", alignItems: "center", gap: 8 }}>
         {loading ? "Loading donors..." : `Showing ${filteredResults.length} of ${donors.length} donors`}
+        <button onClick={() => fetchDonors(false)} title="Refresh donor list" style={{ background: "none", border: "none", padding: 4, cursor: "pointer", color: "var(--text-muted)", display: "flex", alignItems: "center" }}>
+          <Loader2 size={14} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
+        </button>
       </p>
 
       {locationError && (
