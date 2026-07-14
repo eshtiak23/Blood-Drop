@@ -1,6 +1,7 @@
 import express from "express";
 import Request from "../models/Request.js";
 import Notification from "../models/Notification.js";
+import User from "../models/User.js";
 import auth from "../middleware/auth.js";
 
 const router = express.Router();
@@ -56,6 +57,23 @@ router.post("/", auth, async (req, res) => {
   try {
     const request = await Request.create({ ...req.body, requester: req.user._id });
     const populated = await request.populate("requester", "name email");
+
+    // Notify all users with matching blood group (excluding the requester)
+    const matchingUsers = await User.find({
+      _id: { $ne: req.user._id },
+      bloodGroup: req.body.patientBloodGroup,
+    }).select("_id");
+
+    if (matchingUsers.length > 0) {
+      const notifications = matchingUsers.map((u) => ({
+        userId: u._id,
+        type: "blood_request",
+        title: "New Blood Request",
+        message: `${req.user.name} needs ${req.body.unitsRequired} unit(s) of ${req.body.patientBloodGroup} blood at ${req.body.hospital || req.body.district}`,
+      }));
+      await Notification.insertMany(notifications);
+    }
+
     res.status(201).json({ request: populated });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -15,11 +15,12 @@
  * - Glass effect: Semi-transparent background with blur
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus, Search } from "lucide-react";
+import api from "../../services/api";
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -28,6 +29,15 @@ export default function Navbar() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchCount = () => api.get("/notifications").then((res) => setUnreadCount(res.data.notifications.filter((n) => !n.isRead).length)).catch(() => {});
+    fetchCount();
+    const interval = setInterval(fetchCount, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   /** Log out and redirect to home page */
   const handleLogout = () => { logout(); navigate("/"); setMenuOpen(false); setOpen(false); };
@@ -84,6 +94,11 @@ export default function Navbar() {
               {/* Notification Bell — only shown on desktop */}
               <button className="hide-mobile notif-btn" onClick={() => navigate("/notifications")} style={{ position: "relative", padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Bell size={18} />
+                {unreadCount > 0 && (
+                  <span style={{ position: "absolute", top: 2, right: 2, width: 18, height: 18, borderRadius: "50%", background: "var(--red)", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid var(--bg-card)" }}>
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </button>
               
               {/* User Avatar Dropdown Menu */}
