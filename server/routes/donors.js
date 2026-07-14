@@ -20,7 +20,7 @@ router.get("/search", async (req, res) => {
     if (bloodGroup) query.bloodGroup = bloodGroup;
     if (district) query.district = district;
     if (area) query.area = area;
-    let donors = await User.find(query).select("-password -email -__v").lean();
+    let donors = await User.find(query).select("-password -email -__v").sort({ createdAt: -1 }).lean();
     if (lat && lng && radius) {
       const userLat = parseFloat(lat);
       const userLng = parseFloat(lng);

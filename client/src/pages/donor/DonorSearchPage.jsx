@@ -343,9 +343,8 @@ export default function DonorSearchPage() {
         <div className="donor-modal-overlay" onClick={() => setSelectedDonor(null)}>
           <div className="donor-modal-backdrop" />
           <div className="donor-modal" onClick={(e) => e.stopPropagation()}>
-            {/* Close button */}
             <button className="donor-modal-close" onClick={() => setSelectedDonor(null)}>
-              <X size={18} />
+              <X size={16} />
             </button>
 
             {/* Header */}
@@ -355,61 +354,53 @@ export default function DonorSearchPage() {
               </div>
               <h3 className="donor-modal-name">{selectedDonor.name}</h3>
               <div className="donor-modal-location">
-                <MapPin size={13} /> {selectedDonor.area}{selectedDonor.district ? `, ${selectedDonor.district}` : ""}
+                <MapPin size={12} /> {selectedDonor.area}{selectedDonor.district ? `, ${selectedDonor.district}` : ""}
               </div>
               <div className="donor-modal-blood" style={{ background: sc.bg, color: sc.text, border: `2px solid ${sc.text}22` }}>
-                <Droplets size={14} /> {selectedDonor.bloodGroup}
+                <Droplets size={13} /> {selectedDonor.bloodGroup}
               </div>
             </div>
 
-            {/* Info Grid */}
+            {/* Body */}
             <div className="donor-modal-body">
               <div className="donor-modal-stats">
                 <div className="donor-modal-stat">
-                  <div className="donor-modal-stat-icon" style={{ background: "var(--red-light)", color: "var(--red)" }}><Droplets size={18} /></div>
+                  <div className="donor-modal-stat-icon" style={{ background: "var(--red-light)", color: "var(--red)" }}><Droplets /></div>
                   <div className="donor-modal-stat-value">{selectedDonor.totalDonations || 0}</div>
                   <div className="donor-modal-stat-label">Donations</div>
                 </div>
                 <div className="donor-modal-stat">
-                  <div className="donor-modal-stat-icon" style={{ background: "var(--purple-light)", color: "var(--purple)" }}><Calendar size={18} /></div>
-                  <div className="donor-modal-stat-value" style={{ fontSize: 13 }}>{selectedDonor.lastDonationDate ? new Date(selectedDonor.lastDonationDate).toLocaleDateString("en-BD", { day: "numeric", month: "short" }) : "Never"}</div>
+                  <div className="donor-modal-stat-icon" style={{ background: "var(--purple-light)", color: "var(--purple)" }}><Calendar /></div>
+                  <div className="donor-modal-stat-value" style={{ fontSize: 12 }}>{selectedDonor.lastDonationDate ? new Date(selectedDonor.lastDonationDate).toLocaleDateString("en-BD", { day: "numeric", month: "short" }) : "Never"}</div>
                   <div className="donor-modal-stat-label">Last Donation</div>
                 </div>
                 <div className="donor-modal-stat">
                   <div className="donor-modal-stat-icon" style={{ background: canDonate ? "var(--green-light)" : "var(--yellow-light)", color: canDonate ? "var(--green)" : "var(--yellow)" }}>
-                    {canDonate ? <CheckCircle size={18} /> : <Clock size={18} />}
+                    {canDonate ? <CheckCircle /> : <Clock />}
                   </div>
-                  <div className="donor-modal-stat-value" style={{ fontSize: 12, color: canDonate ? "var(--green)" : "var(--yellow)" }}>{canDonate ? "Available" : "Cooldown"}</div>
+                  <div className="donor-modal-stat-value" style={{ fontSize: 11, color: canDonate ? "var(--green)" : "var(--yellow)" }}>{canDonate ? "Available" : "Cooldown"}</div>
                   <div className="donor-modal-stat-label">Status</div>
                 </div>
               </div>
 
-              {/* Phone row */}
               <div className="donor-modal-phone-row">
                 <div className="donor-modal-phone-info">
-                  <Phone size={18} color="var(--red)" />
+                  <Phone size={16} color="var(--red)" />
                   <div>
-                    <div className="donor-modal-phone-label">Phone Number</div>
+                    <div className="donor-modal-phone-label">Phone</div>
                     <a href={`tel:${selectedDonor.phone}`} className="donor-modal-phone-number">{selectedDonor.phone || "Not provided"}</a>
                   </div>
                 </div>
               </div>
-
-              {/* Bio */}
-              {selectedDonor.bio && (
-                <div className="donor-modal-bio">
-                  <p>"{selectedDonor.bio}"</p>
-                </div>
-              )}
             </div>
 
             {/* Actions */}
             <div className="donor-modal-actions">
               <a href={`tel:${selectedDonor.phone}`} className="btn btn-primary donor-modal-call">
-                <Phone size={16} /> Call Now
+                <Phone size={14} /> Call Now
               </a>
               <Link to={`/donors/${selectedDonor._id}`} onClick={() => setSelectedDonor(null)} className="btn btn-secondary donor-modal-view">
-                View Full Profile
+                View Profile
               </Link>
             </div>
           </div>

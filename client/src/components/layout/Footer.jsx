@@ -13,11 +13,19 @@
  * The glow effects adapt to both dark and light themes.
  */
 
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, Heart, ArrowUp, Globe, MessageCircle, Share2, Code } from "lucide-react";
 
 export default function Footer() {
-  /** Smooth scroll to top of page */
+  const [showTop, setShowTop] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
@@ -92,12 +100,19 @@ export default function Footer() {
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)" }}>
               &copy; {new Date().getFullYear()} LifeDrop. Made with <Heart size={12} fill="#F87171" color="#F87171" style={{ display: "inline", verticalAlign: "middle" }} /> in Bangladesh
             </p>
-            <button onClick={scrollToTop} className="footer-top-btn" aria-label="Back to top">
-              <ArrowUp size={16} />
-            </button>
           </div>
         </div>
       </div>
+
+      {/* Floating back-to-top button */}
+      <button
+        onClick={scrollToTop}
+        className="scroll-top-fab"
+        aria-label="Back to top"
+        style={{ opacity: showTop ? 1 : 0, pointerEvents: showTop ? "auto" : "none", transform: showTop ? "translateY(0)" : "translateY(16px)" }}
+      >
+        <ArrowUp size={20} />
+      </button>
     </footer>
   );
 }
