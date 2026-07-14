@@ -5,7 +5,7 @@
  * contact modal for reaching out to donors.
  */
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
 import api from "../../services/api";
@@ -53,9 +53,10 @@ function isDonationCooledDown(lastDonationDate) {
 export default function DonorSearchPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [donors, setDonors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ bloodGroup: "", district: "", area: "", radius: 10 });
+  const [filters, setFilters] = useState({ bloodGroup: searchParams.get("bloodGroup") || "", district: "", area: "", radius: 10 });
   const [useLocation, setUseLocation] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [locationError, setLocationError] = useState("");
@@ -66,6 +67,8 @@ export default function DonorSearchPage() {
   const areas = filters.district ? (AREAS[filters.district] || []) : [];
 
   useEffect(() => {
+    const bloodGroup = searchParams.get("bloodGroup");
+    if (bloodGroup) setHasSearched(true);
     setLoading(true);
     api.get("/donors/search")
       .then((res) => setDonors(res.data.donors))
