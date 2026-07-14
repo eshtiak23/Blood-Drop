@@ -4,12 +4,12 @@
  * using geolocation. Features collapsible filters, paginated results, and a
  * contact modal for reaching out to donors.
  */
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
-import donors from "../../data/donors.json";
-import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import api from "../../services/api";
+import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, ChevronLeft, ChevronRight, SlidersHorizontal, Loader2 } from "lucide-react";
 
 const RADIUS_OPTIONS = [10, 20, 30, 50, 100];
 const PER_PAGE = 12;
@@ -25,6 +25,7 @@ function getBloodGroupColor(bloodGroup) {
 
 // Calculates great-circle distance (km) between two GPS coords using the Haversine formula
 function haversineDistance(lat1, lng1, lat2, lng2) {
+  if (!lat1 || !lng1 || !lat2 || !lng2) return Infinity;
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;
@@ -52,6 +53,8 @@ function isDonationCooledDown(lastDonationDate) {
 export default function DonorSearchPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [donors, setDonors] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", area: "", radius: 10 });
   const [useLocation, setUseLocation] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
@@ -61,6 +64,14 @@ export default function DonorSearchPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const areas = filters.district ? (AREAS[filters.district] || []) : [];
+
+  useEffect(() => {
+    setLoading(true);
+    api.get("/donors/search")
+      .then((res) => setDonors(res.data.donors))
+      .catch(() => setDonors([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filteredResults = useMemo(() => {
     let list = [...donors];
@@ -79,7 +90,7 @@ export default function DonorSearchPage() {
     }
 
     return list;
-  }, [filters, useLocation, userLocation]);
+  }, [donors, filters, useLocation, userLocation]);
 
   const totalPages = Math.ceil(filteredResults.length / PER_PAGE);
   const pagedResults = filteredResults.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -120,7 +131,7 @@ export default function DonorSearchPage() {
     <div className="container" style={{ padding: "32px 20px" }}>
       <h1 style={{ fontSize: 24, fontWeight: 800 }}>Find Blood Donors</h1>
       <p style={{ color: "var(--text-secondary)", marginTop: 4 }}>
-        Showing {filteredResults.length} of {donors.length} donors
+        {loading ? "Loading donors..." : `Showing ${filteredResults.length} of ${donors.length} donors`}
       </p>
 
       {locationError && (
@@ -211,7 +222,11 @@ export default function DonorSearchPage() {
 
       {/* ---- Donor Cards ---- */}
       <div style={{ marginTop: 8 }}>
-        {pagedResults.length === 0 ? (
+        {loading ? (
+          <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
+            <Loader2 size={32} color="var(--red)" className="animate-pulse" />
+          </div>
+        ) : pagedResults.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon"><UserSearch size={28} color="var(--purple)" /></div>
             <div className="empty-state-title">No donors found</div>
@@ -222,51 +237,54 @@ export default function DonorSearchPage() {
             <div className="grid grid-3">
               {pagedResults.map((d) => {
                 const canDonate = isDonationCooledDown(d.lastDonationDate);
+                const c = getBloodGroupColor(d.bloodGroup);
                 return (
-                <div key={d.id} className="card" style={{ padding: 20, transition: "all 0.3s" }}>
-                  <div style={{ display: "flex", alignItems: "start", gap: 12 }}>
-                    <div className="avatar" style={{ background: getBloodGroupColor(d.bloodGroup).bg || "var(--border-light)", color: getBloodGroupColor(d.bloodGroup).text || "var(--text)" }}>
-                      {d.name?.charAt(0)?.toUpperCase()}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-                        <div>
-                          <div style={{ fontWeight: 600 }}>{d.name}</div>
-                          <div style={{ fontSize: 13, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
-                            <MapPin size={12} /> {d.area}, {d.district}
+                <div key={d._id} className="card" style={{ padding: 20, transition: "all 0.3s" }}>
+                  <Link to={`/donors/${d._id}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+                    <div style={{ display: "flex", alignItems: "start", gap: 12 }}>
+                      <div className="avatar" style={{ background: c.bg || "var(--border-light)", color: c.text || "var(--text)" }}>
+                        {d.name?.charAt(0)?.toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+                          <div>
+                            <div style={{ fontWeight: 600 }}>{d.name}</div>
+                            <div style={{ fontSize: 13, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                              <MapPin size={12} /> {d.area}, {d.district}
+                            </div>
                           </div>
+                          {d.bloodGroup && (
+                            <span className="badge" style={{ background: c.bg, color: c.text }}>
+                              {d.bloodGroup}
+                            </span>
+                          )}
                         </div>
-                        {d.bloodGroup && (
-                          <span className="badge" style={{ background: getBloodGroupColor(d.bloodGroup).bg, color: getBloodGroupColor(d.bloodGroup).text }}>
-                            {d.bloodGroup}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ display: "flex", gap: 14, marginTop: 12, fontSize: 13, color: "var(--text-secondary)", flexWrap: "wrap" }}>
-                        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Droplets size={12} /> {d.totalDonations} donations</span>
-                        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Calendar size={12} /> {d.lastDonationDate ? new Date(d.lastDonationDate).toLocaleDateString() : "Never"}</span>
-                        {d.distance != null && (
-                          <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--red)", fontWeight: 600 }}>
-                            <Navigation size={12} /> {formatDistance(d.distance)}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap", alignItems: "center" }}>
-                        {d.isVerified && <span className="badge badge-green"><Shield size={10} /> Verified</span>}
-                        <span className={`badge ${canDonate ? "badge-green" : "badge-gray"}`}>{canDonate ? "Available" : "Not Available"}</span>
-                        <button className="btn btn-primary btn-sm" style={{ marginLeft: "auto", padding: "4px 12px", fontSize: 12 }} onClick={() => {
-                          if (!isAuthenticated) {
-                            alert("Please log in to view donor contact information.");
-                            navigate("/login");
-                            return;
-                          }
-                          setSelectedDonor(d);
-                        }}>
-                          <Phone size={12} /> Contact
-                        </button>
+                        <div style={{ display: "flex", gap: 14, marginTop: 12, fontSize: 13, color: "var(--text-secondary)", flexWrap: "wrap" }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Droplets size={12} /> {d.totalDonations || 0} donations</span>
+                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Calendar size={12} /> {d.lastDonationDate ? new Date(d.lastDonationDate).toLocaleDateString() : "Never"}</span>
+                          {d.distance != null && (
+                            <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--red)", fontWeight: 600 }}>
+                              <Navigation size={12} /> {formatDistance(d.distance)}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap", alignItems: "center" }}>
+                          {d.isVerified && <span className="badge badge-green"><Shield size={10} /> Verified</span>}
+                          <span className={`badge ${canDonate ? "badge-green" : "badge-gray"}`}>{canDonate ? "Available" : "Not Available"}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
+                  <button className="btn btn-primary btn-sm" style={{ marginTop: 12, width: "100%", gap: 6 }} onClick={(e) => {
+                    e.preventDefault();
+                    if (!isAuthenticated) {
+                      navigate("/login");
+                      return;
+                    }
+                    setSelectedDonor(d);
+                  }}>
+                    <Phone size={12} /> Contact
+                  </button>
                 </div>
                 );
               })}
@@ -331,13 +349,6 @@ export default function DonorSearchPage() {
                   <div>
                     <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Phone</div>
                     <a href={`tel:${selectedDonor.phone}`} style={{ fontWeight: 600, color: "var(--text)", textDecoration: "none" }}>{selectedDonor.phone}</a>
-                  </div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--bg-secondary)" }}>
-                  <User size={16} color="var(--blue)" />
-                  <div>
-                    <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Gender</div>
-                    <div style={{ fontWeight: 600, textTransform: "capitalize" }}>{selectedDonor.gender}</div>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--bg-secondary)" }}>

@@ -1,7 +1,7 @@
 /**
  * CreateRequestPage - Form for creating a new blood request.
  * Collects patient details, location (district → area cascading dropdown),
- * urgency, and contact info. Submits via localStore and redirects to the list.
+ * urgency, and contact info. Submits via API and redirects to the list.
  */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,16 +15,15 @@ export default function CreateRequestPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ patientName: "", hospital: "", patientBloodGroup: "", unitsRequired: 1, urgency: "normal", dateNeeded: "", contactNumber: user?.phone || "", district: "", area: "", description: "" });
   const [error, setError] = useState("");
-  // Cascading dropdown: areas list updates based on the selected district
   const areas = form.district ? (AREAS[form.district] || []) : [];
   const set = (k, v) => setForm({ ...form, [k]: v });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault(); setError("");
     try {
-      createRequest(form, user);
+      await createRequest(form);
       navigate("/requests");
-    } catch (err) { setError(err.message); }
+    } catch (err) { setError(err.response?.data?.error || err.message); }
   };
 
   return (
@@ -59,7 +58,6 @@ export default function CreateRequestPage() {
             <div className="input-group"><label>Date Needed</label><input className="input" type="date" value={form.dateNeeded} onChange={(e) => set("dateNeeded", e.target.value)} required /></div>
           </div>
           <div className="grid grid-2" style={{ marginBottom: 16 }}>
-            {/* Cascading district → area: selecting a district populates its areas */}
             <div className="input-group">
               <label>District</label>
               <select className="input" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, area: "" })} required>
@@ -68,7 +66,6 @@ export default function CreateRequestPage() {
             </div>
             <div className="input-group">
               <label>Area</label>
-              {/* Disabled until a district is selected to prevent invalid selections */}
               <select className="input" value={form.area} onChange={(e) => set("area", e.target.value)} disabled={!form.district} required>
                 <option value="">{form.district ? "Select" : "Select district first"}</option>{areas.map((a) => <option key={a} value={a}>{a}</option>)}
               </select>

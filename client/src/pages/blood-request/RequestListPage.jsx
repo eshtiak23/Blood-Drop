@@ -23,14 +23,16 @@ export default function RequestListPage() {
   const { user } = useAuth();
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", urgency: "" });
   const [requests, setRequests] = useState([]);
-  const [showDelete, setShowDelete] = useState(null);   // request to delete
+  const [showDelete, setShowDelete] = useState(null);
 
-  useEffect(() => { setRequests(searchRequests(filters)); }, [filters]);
+  useEffect(() => {
+    searchRequests(filters).then(setRequests).catch(() => setRequests([]));
+  }, [filters]);
 
-  /** Delete a request after confirmation */
-  const handleDelete = (requestId) => {
-    deleteRequest(requestId);
-    setRequests(searchRequests(filters));
+  const handleDelete = async (requestId) => {
+    await deleteRequest(requestId);
+    const updated = await searchRequests(filters);
+    setRequests(updated);
     setShowDelete(null);
   };
 

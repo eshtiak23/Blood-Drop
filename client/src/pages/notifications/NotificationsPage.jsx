@@ -10,20 +10,20 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  /** Reloads notifications from storage and updates unread count */
-  const refresh = () => {
-    const list = getNotifications();
+  /** Reloads notifications from API and updates unread count */
+  const refresh = async () => {
+    const list = await getNotifications();
     setNotifications(list);
     setUnreadCount(list.filter((n) => !n.isRead).length);
   };
 
   useEffect(() => { refresh(); }, []);
 
-  const markRead = (id) => { markNotificationRead(id); refresh(); };
-  const markAll = () => { markAllNotificationsRead(); refresh(); };
-  const remove = (id) => { deleteNotification(id); refresh(); };
+  const markRead = async (id) => { await markNotificationRead(id); refresh(); };
+  const markAll = async () => { await markAllNotificationsRead(); refresh(); };
+  const remove = async (id) => { await deleteNotification(id); refresh(); };
 
-  /** Maps notification type to an emoji icon */
+  /** Maps notification type to an icon */
   const icon = (type) => ({ blood_request: "🩸", request_accepted: "✅", request_completed: "🎉", donor_verified: "🛡️", reminder: "⏰" }[type] || "🔔");
 
   return (

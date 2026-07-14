@@ -5,8 +5,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
-import donors from "../../data/donors.json";
 import { addBookmark, isBookmarked, removeBookmark } from "../../services/localStore";
+import api from "../../services/api";
 import { MapPin, Phone, Calendar, Droplets, Shield, Bookmark, ArrowLeft } from "lucide-react";
 
 /** Returns blood group badge colors based on dark/light theme */
@@ -23,17 +23,16 @@ export default function DonorProfilePage() {
   const [donor, setDonor] = useState(null);
   const [bookmarked, setBookmarked] = useState(false);
 
-  /** Finds donor by route param and checks bookmark status */
   useEffect(() => {
-    const found = donors.find((d) => d.id === id);
-    setDonor(found || null);
-    if (found) setBookmarked(isBookmarked(found.id));
+    api.get(`/donors/${id}`)
+      .then((res) => setDonor(res.data.donor))
+      .catch(() => setDonor(null));
+    isBookmarked(id).then(setBookmarked).catch(() => setBookmarked(false));
   }, [id]);
 
-  /** Toggles bookmark state — adds if not bookmarked, removes if already bookmarked */
-  const toggleBookmark = () => {
-    if (bookmarked) { removeBookmark(donor.id); setBookmarked(false); }
-    else { addBookmark(donor.id, donor); setBookmarked(true); }
+  const toggleBookmark = async () => {
+    if (bookmarked) { await removeBookmark(id); setBookmarked(false); }
+    else { await addBookmark(id); setBookmarked(true); }
   };
 
   if (!donor) return <div className="container" style={{ padding: 40, textAlign: "center" }}>Donor not found</div>;

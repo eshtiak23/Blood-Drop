@@ -19,10 +19,9 @@ function getBloodGroupColor(bloodGroup) {
 export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState([]);
 
-  useEffect(() => { setBookmarks(getBookmarks()); }, []);
+  useEffect(() => { getBookmarks().then(setBookmarks).catch(() => setBookmarks([])); }, []);
 
-  /** Removes a donor from bookmarks and refreshes the list */
-  const remove = (donorId) => { removeBookmark(donorId); setBookmarks(getBookmarks()); };
+  const remove = async (donorId) => { await removeBookmark(donorId); getBookmarks().then(setBookmarks); };
 
   return (
     <div className="container" style={{ padding: "32px 20px" }}>
@@ -36,7 +35,7 @@ export default function BookmarksPage() {
         ) : (
           <div className="grid grid-3">
             {bookmarks.map((b) => {
-              const d = b.donor;
+              const d = b.donorId;
               const c = getBloodGroupColor(d.bloodGroup);
               return (
                 <div key={b._id} className="card" style={{ padding: 20 }}>
@@ -52,7 +51,7 @@ export default function BookmarksPage() {
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
                     <span style={{ fontSize: 13, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 4 }}><Droplets size={12} /> {d.totalDonations || 0} donations</span>
-                    <button className="btn btn-ghost btn-sm" style={{ color: "var(--red)" }} onClick={() => remove(b.donorId)}><Trash2 size={14} /> Remove</button>
+                    <button className="btn btn-ghost btn-sm" style={{ color: "var(--red)" }} onClick={() => remove(d._id)}><Trash2 size={14} /> Remove</button>
                   </div>
                 </div>
               );

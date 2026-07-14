@@ -19,7 +19,7 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus } from "lucide-react";
+import { Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus, Search } from "lucide-react";
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -150,6 +150,7 @@ export default function Navbar() {
               <>
                 <Link to="/dashboard" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><LayoutDashboard size={16} /> Dashboard</Link>
                 <Link to="/notifications" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Bell size={16} /> Notifications</Link>
+                <Link to="/bookmarks" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Bookmark size={16} /> Bookmarks</Link>
                 <Link to="/settings" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Settings size={16} /> Settings</Link>
                 <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8, color: "var(--red)", width: "100%" }}><LogOut size={16} /> Logout</button>
               </>

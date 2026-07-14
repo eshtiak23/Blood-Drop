@@ -5,34 +5,32 @@
 import { useState, useEffect } from "react";
 import { Users, Heart, AlertCircle, Shield, CheckCircle } from "lucide-react";
 import { getRequests } from "../../services/localStore";
-
-/** Reads all users from localStorage */
-function getUsers() {
-  return JSON.parse(localStorage.getItem("ld_users") || "[]");
-}
+import api from "../../services/api";
 
 export default function AdminDashboardPage() {
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
 
-  /** Loads users and computes dashboard stats on mount */
+  /** Loads users via admin API and computes dashboard stats on mount */
   useEffect(() => {
-    const allUsers = getUsers();
-    setUsers(allUsers.slice(0, 8));
-    const requests = getRequests();
-    setStats({
-      totalUsers: allUsers.length,
-      totalDonors: allUsers.filter((u) => u.role !== "admin").length,
-      openRequests: requests.filter((r) => r.status === "open").length,
-      pendingVerifications: allUsers.filter((u) => u.role !== "admin" && !u.isVerified).length,
-    });
+    Promise.all([
+      api.get("/auth/users"),
+      getRequests(),
+    ]).then(([usersRes, requests]) => {
+      const allUsers = usersRes.data.users;
+      setUsers(allUsers.slice(0, 8));
+      setStats({
+        totalUsers: allUsers.length,
+        totalDonors: allUsers.filter((u) => u.role !== "admin").length,
+        openRequests: requests.filter((r) => r.status === "open").length,
+        pendingVerifications: allUsers.filter((u) => u.role !== "admin" && !u.isVerified).length,
+      });
+    }).catch(console.error);
   }, []);
 
-  /** Verifies a donor by updating localStorage and local state */
-  const verifyDonor = (id) => {
-    const allUsers = getUsers();
-    const idx = allUsers.findIndex((u) => u._id === id);
-    if (idx !== -1) { allUsers[idx].isVerified = true; localStorage.setItem("ld_users", JSON.stringify(allUsers)); }
+  /** Verifies a donor via admin API and updates local state */
+  const verifyDonor = async (id) => {
+    await api.patch(`/auth/users/${id}/verify`);
     setUsers(users.map((u) => u._id === id ? { ...u, isVerified: true } : u));
   };
 

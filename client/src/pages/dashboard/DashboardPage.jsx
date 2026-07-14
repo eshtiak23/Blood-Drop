@@ -5,13 +5,13 @@
  * Shows: profile card, stats, donation logging, feedback/reviews,
  * recent requests, quick actions, and cooldown reminder.
  * 
- * Profile photo is stored as base64 in localStorage (no server needed).
+ * All data is fetched from the MongoDB Atlas backend via API.
  */
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { searchRequests, addDonationLog, getDonationLogs, addFeedback, getMyFeedback, deleteFeedback, getDonationCooldown } from "../../services/localStore";
+import { searchRequests, addDonationLog, getDonationLogs, addFeedback, getAllFeedback, getMyFeedback, deleteFeedback, getDonationCooldown } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 import {
   Droplets, Heart, AlertCircle, Search, Plus, Users, MapPin, Phone, Mail,
@@ -50,75 +50,86 @@ export default function DashboardPage() {
   const [cooldown, setCooldown] = useState(null);
 
   useEffect(() => {
-    const all = searchRequests();
-    // Count open requests per blood group for stock overview
-    const stock = {};
-    BLOOD_GROUPS.forEach((g) => { stock[g] = 0; });
-    all.filter((r) => r.status === "open").forEach((r) => { stock[r.patientBloodGroup] = (stock[r.patientBloodGroup] || 0) + 1; });
-    setStats(stock);
+    if (!user) return;
 
-    // Show requests relevant to the user's district
-    if (user?.district) {
-      setNearbyRequests(all.filter((r) => r.district === user.district && r.status === "open").slice(0, 3));
-    }
+    // Load all data from API
+    Promise.all([
+      searchRequests(),
+      getDonationLogs(),
+      getAllFeedback(),
+      user._id ? getMyFeedback() : Promise.resolve([]),
+    ]).then(([allRequests, logs, allFeedback, myFb]) => {
+      // Count open requests per blood group
+      const stock = {};
+      BLOOD_GROUPS.forEach((g) => { stock[g] = 0; });
+      allRequests.filter((r) => r.status === "open").forEach((r) => { stock[r.patientBloodGroup] = (stock[r.patientBloodGroup] || 0) + 1; });
+      setStats(stock);
 
-    // Load donation logs
-    if (user?._id) setDonationLogs(getDonationLogs(user._id));
+      // Show requests relevant to the user's district
+      if (user.district) {
+        setNearbyRequests(allRequests.filter((r) => r.district === user.district && r.status === "open").slice(0, 3));
+      }
 
-    // Load feedback
-    setFeedbackList(JSON.parse(localStorage.getItem("ld_feedback") || "[]").slice(0, 10));
-    if (user?._id) setMyFeedback(getMyFeedback(user._id));
-
-    // Check donation cooldown
-    setCooldown(getDonationCooldown(user));
+      setDonationLogs(logs);
+      setFeedbackList(allFeedback.slice(0, 10));
+      setMyFeedback(myFb);
+      setCooldown(getDonationCooldown(user));
+    }).catch(console.error);
   }, [user]);
 
   /** Log a blood donation — updates user stats and saves the log */
-  const handleDonationLog = (e) => {
+  const handleDonationLog = async (e) => {
     e.preventDefault();
     if (!donationForm.donationDate || !donationForm.hospital) return;
     setDonationSaving(true);
-    setTimeout(() => {
-      addDonationLog(donationForm, user);
+    try {
+      await addDonationLog(donationForm);
       const newTotal = (user.totalDonations || 0) + 1;
-      updateUser({ totalDonations: newTotal, lastDonationDate: donationForm.donationDate });
-      setDonationLogs(getDonationLogs(user._id));
+      await updateUser({ totalDonations: newTotal, lastDonationDate: donationForm.donationDate });
+      const logs = await getDonationLogs();
+      setDonationLogs(logs);
       setDonationForm({ donationDate: "", hospital: "" });
-      setDonationSaving(false);
       setDonationSaved(true);
       setTimeout(() => setDonationSaved(false), 2000);
-    }, 300);
+    } catch (err) {
+      console.error(err);
+    }
+    setDonationSaving(false);
   };
 
   /** Submit feedback / review */
-  const handleFeedback = (e) => {
+  const handleFeedback = async (e) => {
     e.preventDefault();
     if (!feedbackForm.comment.trim()) return;
     setFeedbackSaving(true);
     setFeedbackError("");
     try {
-      addFeedback(feedbackForm, user);
-      setFeedbackList(JSON.parse(localStorage.getItem("ld_feedback") || "[]").slice(0, 10));
-      setMyFeedback(getMyFeedback(user._id));
+      await addFeedback(feedbackForm);
+      const allFb = await getAllFeedback();
+      const myFb = await getMyFeedback();
+      setFeedbackList(allFb.slice(0, 10));
+      setMyFeedback(myFb);
       setFeedbackForm({ rating: 5, comment: "" });
       setFeedbackSaved(true);
       setTimeout(() => setFeedbackSaved(false), 2000);
     } catch (err) {
-      setFeedbackError(err.message);
+      setFeedbackError(err.response?.data?.error || err.message);
     }
     setFeedbackSaving(false);
   };
 
   /** Delete own feedback */
-  const handleDeleteFeedback = (fbId) => {
-    deleteFeedback(fbId);
-    setFeedbackList(JSON.parse(localStorage.getItem("ld_feedback") || "[]").slice(0, 10));
-    setMyFeedback(getMyFeedback(user._id));
+  const handleDeleteFeedback = async (fbId) => {
+    await deleteFeedback(fbId);
+    const allFb = await getAllFeedback();
+    const myFb = await getMyFeedback();
+    setFeedbackList(allFb.slice(0, 10));
+    setMyFeedback(myFb);
   };
 
   /** Toggle donor availability on/off */
-  const handleToggleAvailability = () => {
-    updateUser({ isAvailable: !user.isAvailable });
+  const handleToggleAvailability = async () => {
+    await updateUser({ isAvailable: !user.isAvailable });
   };
 
   const c = getBloodGroupColor(user?.bloodGroup);
@@ -246,9 +257,6 @@ export default function DashboardPage() {
           </Link>
           <Link to="/requests" className="btn btn-secondary" style={{ gap: 8 }}>
             <AlertCircle size={16} /> View Requests
-          </Link>
-          <Link to="/profile" className="btn btn-ghost" style={{ gap: 8 }}>
-            My Profile <ArrowRight size={14} />
           </Link>
         </div>
       </div>

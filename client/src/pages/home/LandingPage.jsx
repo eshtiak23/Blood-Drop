@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Star, AlertTriangle, Droplet } from "lucide-react";
 import { STATS, TESTIMONIALS, FAQS, BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 import { getAllFeedback } from "../../services/localStore";
+import api from "../../services/api";
 
 /* ── Helper: Blood Group Color ── */
 function getBloodGroupColor(bloodGroup) {
@@ -51,23 +52,23 @@ const FEATURES = [
 export default function LandingPage() {
   // Track which FAQ item is expanded (null = all collapsed)
   const [openFaq, setOpenFaq] = useState(null);
-  // User-submitted feedback from localStorage
   const [userFeedback, setUserFeedback] = useState([]);
-  // Banner carousel index
   const [bannerIdx, setBannerIdx] = useState(0);
+  const [realStats, setRealStats] = useState(null);
   const banners = ["/banner1.png", "/banner2.png"];
 
   useEffect(() => {
-    const fb = getAllFeedback();
-    // Convert feedback to the same shape as TESTIMONIALS so they render together
-    setUserFeedback(fb.map((f) => ({
-      name: f.userName,
-      role: "LifeDrop User",
-      content: f.comment,
-      rating: f.rating,
-      isUserFeedback: true,
-      userPhoto: f.userPhoto,
-    })));
+    getAllFeedback().then((fb) => {
+      setUserFeedback(fb.map((f) => ({
+        name: f.userName,
+        role: "LifeDrop User",
+        content: f.comment,
+        rating: f.rating,
+        isUserFeedback: true,
+        userPhoto: f.userPhoto,
+      })));
+    }).catch(() => {});
+    api.get("/stats").then((res) => setRealStats(res.data)).catch(() => {});
   }, []);
 
   // Auto-rotate banner every 4 seconds
@@ -124,7 +125,12 @@ export default function LandingPage() {
       <section style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-card)", padding: "32px 0" }}>
         <div className="container">
           <div className="grid grid-4">
-            {STATS.map((s, i) => (
+            {(realStats ? [
+              { value: `${realStats.totalDonors}+`, label: "Registered Donors" },
+              { value: `${realStats.livesSaved}+`, label: "Lives Saved" },
+              { value: `${realStats.districtsCovered}`, label: "Districts Covered" },
+              { value: "24/7", label: "Emergency Support" },
+            ] : STATS).map((s, i) => (
               <AnimatedDiv key={s.label} delay={i * 0.1}>
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>{s.value}</div>

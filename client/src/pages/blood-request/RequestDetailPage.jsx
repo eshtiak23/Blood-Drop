@@ -6,6 +6,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
 import { getRequests, acceptRequest, completeRequest, addRating, hasRated, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS, URGENCY } from "../../data/constants";
 import { MapPin, Phone, Calendar, Clock, User, Hospital, CheckCircle, ArrowLeft, Star, Trash2 } from "lucide-react";
@@ -29,19 +30,20 @@ export default function RequestDetailPage() {
   const [rated, setRated] = useState(false);
 
   useEffect(() => {
-    const found = getRequests().find((r) => r._id === id);
-    setRequest(found || null);
-    if (found && user?._id) {
-      setRated(hasRated(id, user._id));
+    api.get(`/requests/${id}`)
+      .then((res) => setRequest(res.data.request))
+      .catch(() => setRequest(null));
+    if (user?._id) {
+      hasRated(id).then(setRated).catch(() => setRated(false));
     }
   }, [id, user]);
 
-  const handleAction = (action) => {
+  const handleAction = async (action) => {
     try {
-      if (action === "accept") acceptRequest(id, user);
-      else if (action === "complete") completeRequest(id);
-      const found = getRequests().find((r) => r._id === id);
-      setRequest(found);
+      if (action === "accept") await acceptRequest(id);
+      else if (action === "complete") await completeRequest(id);
+      const res = await api.get(`/requests/${id}`);
+      setRequest(res.data.request);
       setShowModal("");
     } catch (err) {
       console.error(err);
@@ -50,14 +52,14 @@ export default function RequestDetailPage() {
   };
 
   /** Submit a rating for the other party after request completion */
-  const handleRate = (e) => {
+  const handleRate = async (e) => {
     e.preventDefault();
     if (!ratingForm.comment.trim()) return;
     setRatingSaving(true);
     try {
       const isRequester = user?._id === request.requester?._id;
       const ratedUserId = isRequester ? request.acceptedBy?._id : request.requester?._id;
-      addRating({ requestId: id, ratedUserId, rating: ratingForm.rating, comment: ratingForm.comment }, user);
+      await addRating({ requestId: id, ratedUserId, rating: ratingForm.rating, comment: ratingForm.comment });
       setRated(true);
     } catch (err) {
       console.error(err);
@@ -67,8 +69,8 @@ export default function RequestDetailPage() {
   };
 
   /** Delete the request and navigate back */
-  const handleDelete = () => {
-    deleteRequest(id);
+  const handleDelete = async () => {
+    await deleteRequest(id);
     navigate("/requests");
   };
 
