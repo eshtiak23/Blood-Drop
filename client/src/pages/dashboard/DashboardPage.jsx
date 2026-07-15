@@ -277,14 +277,19 @@ export default function DashboardPage() {
             { action: "scroll-donation", icon: Droplets, shortLabel: "Log", gradient: "linear-gradient(135deg, #8B5CF6, #EC4899)" },
             { to: "/bookmarks", icon: Heart, shortLabel: "Saved", gradient: "linear-gradient(135deg, #10B981, #14B8A6)" },
             { to: "/notifications", icon: Bell, shortLabel: "Alerts", gradient: "linear-gradient(135deg, #6366F1, #8B5CF6)" },
-          ].map((item) => {
+          ].map((item, index) => {
             const inner = (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer", transition: "transform 0.2s ease" }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
               >
-                <div style={{ width: 56, height: 56, borderRadius: "50%", background: item.gradient, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-                  <item.icon size={22} />
+                <div style={{ position: "relative", width: 56, height: 56 }}>
+                  <div style={{ width: 56, height: 56, borderRadius: "50%", background: item.gradient, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+                    <item.icon size={22} />
+                  </div>
+                  <div className="orbit-drop" style={{ position: "absolute", top: "50%", left: "50%", width: 0, height: 0, animation: `orbit 3s linear infinite`, animationDelay: `${index * 0.5}s` }}>
+                    <div style={{ width: 8, height: 10, borderRadius: "50% 50% 50% 50% / 60% 60% 40% 40%", background: "#EF4444", boxShadow: "0 1px 4px rgba(239,68,68,0.5)", transform: "translate(-50%, -50%)" }} />
+                  </div>
                 </div>
                 <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text)", textAlign: "center", lineHeight: 1.2, maxWidth: 70 }}>
                   {item.shortLabel}
@@ -450,10 +455,15 @@ export default function DashboardPage() {
 
       {/* Responsive: stack on mobile */}
       <style>{`
+        @keyframes orbit {
+          0%   { transform: rotate(0deg)   translateX(36px) rotate(0deg); }
+          100% { transform: rotate(360deg) translateX(36px) rotate(-360deg); }
+        }
         @media(max-width:768px){
           .dash-stats{grid-template-columns:repeat(2,1fr) !important;}
           .dash-two-col{grid-template-columns:1fr !important;}
           .dash-quick-actions{display:grid !important; grid-template-columns:repeat(3,1fr) !important; justify-items:center;}
+          .orbit-drop{display:none !important;}
         }
         @media(max-width:480px){
           .dash-stats{grid-template-columns:1fr !important;}
