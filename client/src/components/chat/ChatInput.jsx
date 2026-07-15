@@ -96,6 +96,7 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
     <div style={{
       borderTop: "1px solid var(--border-light)",
       padding: "10px 12px",
+      paddingBottom: "max(10px, env(safe-area-inset-bottom))",
       background: "var(--bg-card)",
     }}>
       {/* Image preview */}
