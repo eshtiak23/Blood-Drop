@@ -102,39 +102,44 @@ function AppContent() {
   const isChatPage = location.pathname.startsWith("/chat");
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: isChatPage ? "100vh" : "auto", minHeight: isChatPage ? "100vh" : "100vh", display: "flex", flexDirection: "column", overflow: isChatPage ? "hidden" : "visible" }}>
       {!isChatPage && <Navbar />}
-      <main style={isChatPage ? { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" } : { flex: 1 }}>
-        <PageTransition>
+      <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
+        {isChatPage ? (
           <Routes>
-          {/* Public pages — anyone can visit */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/donors" element={<DonorSearchPage />} />
-          <Route path="/donors/:id" element={<DonorProfilePage />} />
+            <Route path="/chat" element={<Protected><ChatPage /></Protected>} />
+            <Route path="/chat/:userId" element={<Protected><ChatPage /></Protected>} />
+          </Routes>
+        ) : (
+          <PageTransition>
+            <Routes>
+            {/* Public pages — anyone can visit */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/donors" element={<DonorSearchPage />} />
+            <Route path="/donors/:id" element={<DonorProfilePage />} />
 
-          {/* Protected pages — must be logged in */}
-          <Route path="/dashboard" element={<Protected><DashboardPage /></Protected>} />
-          <Route path="/notifications" element={<Protected><NotificationsPage /></Protected>} />
-          <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
-          <Route path="/settings" element={<Protected><SettingsPage /></Protected>} />
-          <Route path="/requests" element={<Protected><RequestListPage /></Protected>} />
-          <Route path="/requests/:id" element={<Protected><RequestDetailPage /></Protected>} />
-          <Route path="/requests/create" element={<Protected><CreateRequestPage /></Protected>} />
-          <Route path="/bookmarks" element={<Protected><BookmarksPage /></Protected>} />
-          <Route path="/chat" element={<Protected><ChatPage /></Protected>} />
-          <Route path="/chat/:userId" element={<Protected><ChatPage /></Protected>} />
+            {/* Protected pages — must be logged in */}
+            <Route path="/dashboard" element={<Protected><DashboardPage /></Protected>} />
+            <Route path="/notifications" element={<Protected><NotificationsPage /></Protected>} />
+            <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
+            <Route path="/settings" element={<Protected><SettingsPage /></Protected>} />
+            <Route path="/requests" element={<Protected><RequestListPage /></Protected>} />
+            <Route path="/requests/:id" element={<Protected><RequestDetailPage /></Protected>} />
+            <Route path="/requests/create" element={<Protected><CreateRequestPage /></Protected>} />
+            <Route path="/bookmarks" element={<Protected><BookmarksPage /></Protected>} />
 
-          {/* Public-only pages — redirect to dashboard if already logged in */}
-          <Route path="/login" element={<Public><LoginPage /></Public>} />
-          <Route path="/register" element={<Public><RegisterPage /></Public>} />
+            {/* Public-only pages — redirect to dashboard if already logged in */}
+            <Route path="/login" element={<Public><LoginPage /></Public>} />
+            <Route path="/register" element={<Public><RegisterPage /></Public>} />
 
-          {/* Admin-only page — must be logged in as admin */}
-          <Route path="/admin" element={<AdminOnly><AdminDashboardPage /></AdminOnly>} />
+            {/* Admin-only page — must be logged in as admin */}
+            <Route path="/admin" element={<AdminOnly><AdminDashboardPage /></AdminOnly>} />
 
-          {/* Catch-all — shows 404 for any URL not listed above */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-        </PageTransition>
+            {/* Catch-all — shows 404 for any URL not listed above */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+          </PageTransition>
+        )}
       </main>
       {!isChatPage && <Footer />}
     </div>
