@@ -3,11 +3,11 @@
  * Includes contact info, donation history, and a bookmark toggle button.
  */
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
 import { addBookmark, isBookmarked, removeBookmark } from "../../services/localStore";
 import api from "../../services/api";
-import { MapPin, Phone, Calendar, Droplets, Shield, Bookmark, ArrowLeft } from "lucide-react";
+import { MapPin, Phone, Calendar, Droplets, Shield, Bookmark, ArrowLeft, MessageCircle } from "lucide-react";
 
 /** Returns blood group badge colors based on dark/light theme */
 function getBloodGroupColor(bloodGroup) {
@@ -77,7 +77,8 @@ export default function DonorProfilePage() {
           </div>
 
           <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
-            <a href={`tel:${donor.phone}`} className="btn btn-primary"><Phone size={16} /> Call Donor</a>
+            <Link to={`/chat/${donor._id}`} className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: 6 }}><MessageCircle size={16} /> Chat</Link>
+            <a href={`tel:${donor.phone}`} className="btn btn-secondary" style={{ display: "flex", alignItems: "center", gap: 6 }}><Phone size={16} /> Call Donor</a>
             <button className={`btn ${bookmarked ? "btn-primary" : "btn-secondary"}`} onClick={toggleBookmark}><Bookmark size={16} /> {bookmarked ? "Bookmarked" : "Bookmark"}</button>
           </div>
         </div>

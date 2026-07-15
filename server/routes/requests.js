@@ -3,7 +3,7 @@ import Request from "../models/Request.js";
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
 import auth from "../middleware/auth.js";
-import { sendBloodRequestEmails } from "../utils/email.js";
+import { sendBloodRequestEmails, sendEmail } from "../utils/email.js";
 
 const router = express.Router();
 
@@ -42,7 +42,35 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// GET /api/requests/:id — AFTER /search and /my
+// GET /api/requests/test-email — send test email to verify SMTP works
+router.get("/test-email", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("email name");
+    if (!user?.email) return res.status(400).json({ error: "No email on your account. Update your profile first." });
+    await sendEmail({
+      to: user.email,
+      subject: "🩸 LifeDrop — Email Test",
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+          <div style="background:linear-gradient(135deg,#EF4444,#DC2626);padding:24px;border-radius:16px 16px 0 0;text-align:center;">
+            <div style="font-size:32px;">✅</div>
+            <h1 style="color:white;margin:8px 0 0;font-size:20px;">Email Works!</h1>
+          </div>
+          <div style="background:white;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px;">
+            <p style="font-size:15px;color:#374151;">Hi <strong>${user.name}</strong>,</p>
+            <p style="font-size:14px;color:#6B7280;">Your Gmail SMTP is configured correctly on LifeDrop. Blood request notifications will be sent to <strong>${user.email}</strong>.</p>
+          </div>
+        </div>
+      `,
+    });
+    res.json({ message: `Test email sent to ${user.email}` });
+  } catch (err) {
+    console.error("[Email] Test failed:", err.message);
+    res.status(500).json({ error: `SMTP failed: ${err.message}` });
+  }
+});
+
+// GET /api/requests/:id — AFTER /search, /my, and /test-email
 router.get("/:id", auth, async (req, res) => {
   try {
     const request = await Request.findById(req.params.id).populate("requester", "name email").populate("acceptedBy", "name");
@@ -76,6 +104,8 @@ router.post("/", auth, async (req, res) => {
     }
 
     // Send email notifications to matching donors with email addresses
+    let emailsSent = 0;
+    let emailError = null;
     const donorsWithEmail = await User.find({
       _id: { $ne: req.user._id },
       bloodGroup: req.body.patientBloodGroup,
@@ -83,12 +113,53 @@ router.post("/", auth, async (req, res) => {
     }).select("email name");
 
     if (donorsWithEmail.length > 0) {
-      sendBloodRequestEmails(donorsWithEmail, req.body).catch((err) =>
-        console.error("[Email] Background send error:", err.message)
-      );
+      try {
+        const results = await Promise.allSettled(
+          donorsWithEmail.map((donor) =>
+            sendEmail({
+              to: donor.email,
+              subject: `🩸 Urgent: ${req.body.patientBloodGroup} blood needed in ${req.body.district}`,
+              html: `
+                <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+                  <div style="background:linear-gradient(135deg,#EF4444,#DC2626);padding:24px;border-radius:16px 16px 0 0;text-align:center;">
+                    <div style="font-size:32px;">🩸</div>
+                    <h1 style="color:white;margin:8px 0 0;font-size:20px;">Blood Request Alert</h1>
+                    <p style="color:rgba(255,255,255,0.85);margin:4px 0 0;font-size:14px;">A patient needs your help</p>
+                  </div>
+                  <div style="background:white;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px;">
+                    <div style="text-align:center;margin-bottom:16px;">
+                      <span style="display:inline-block;padding:8px 20px;border-radius:20px;font-size:18px;font-weight:700;background:#FEE2E2;color:#DC2626;">${req.body.patientBloodGroup} Blood Needed</span>
+                    </div>
+                    <table style="width:100%;font-size:14px;color:#374151;">
+                      <tr><td style="padding:6px 0;color:#6B7280;">Patient</td><td style="padding:6px 0;font-weight:600;">${req.body.patientName}</td></tr>
+                      <tr><td style="padding:6px 0;color:#6B7280;">Hospital</td><td style="padding:6px 0;font-weight:600;">${req.body.hospital}</td></tr>
+                      <tr><td style="padding:6px 0;color:#6B7280;">Location</td><td style="padding:6px 0;font-weight:600;">${req.body.area}, ${req.body.district}</td></tr>
+                      <tr><td style="padding:6px 0;color:#6B7280;">Units</td><td style="padding:6px 0;font-weight:600;">${req.body.unitsRequired}</td></tr>
+                      <tr><td style="padding:6px 0;color:#6B7280;">Urgency</td><td style="padding:6px 0;font-weight:600;">${req.body.urgency}</td></tr>
+                      <tr><td style="padding:6px 0;color:#6B7280;">Contact</td><td style="padding:6px 0;font-weight:600;">${req.body.contactNumber}</td></tr>
+                    </table>
+                    <div style="text-align:center;margin-top:20px;">
+                      <a href="${process.env.CLIENT_URL || "https://blood-drop-jade.vercel.app"}/requests" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#EF4444,#DC2626);color:white;text-decoration:none;border-radius:8px;font-weight:700;">View Request</a>
+                    </div>
+                  </div>
+                </div>
+              `,
+            })
+          )
+        );
+        emailsSent = results.filter((r) => r.status === "fulfilled").length;
+        const failed = results.filter((r) => r.status === "rejected");
+        if (failed.length > 0) {
+          emailError = failed[0].reason?.message || "Some emails failed";
+          console.error("[Email] Send errors:", failed.map((f) => f.reason?.message));
+        }
+      } catch (err) {
+        emailError = err.message;
+        console.error("[Email] Send error:", err.message);
+      }
     }
 
-    res.status(201).json({ request: populated });
+    res.status(201).json({ request: populated, emailsSent, emailError });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

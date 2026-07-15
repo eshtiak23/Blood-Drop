@@ -8,6 +8,7 @@ import { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { MessageCircle } from "lucide-react";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
 import api from "../../services/api";
 import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, ChevronLeft, ChevronRight, SlidersHorizontal, Loader2 } from "lucide-react";
@@ -407,12 +408,12 @@ export default function DonorSearchPage() {
 
                 {/* Actions */}
                 <div style={{ display: "flex", gap: 10, padding: "8px 20px 16px", borderTop: "1px solid var(--border-light)" }}>
-                  <a href={`tel:${selectedDonor.phone}`} className="btn btn-primary" style={{ flex: 1, padding: "11px 0", fontSize: 14 }}>
+                  <Link to={`/chat/${selectedDonor._id}`} onClick={() => setSelectedDonor(null)} className="btn btn-primary" style={{ flex: 1, padding: "11px 0", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                    <MessageCircle size={15} /> Chat
+                  </Link>
+                  <a href={`tel:${selectedDonor.phone}`} className="btn btn-secondary" style={{ flex: 1, padding: "11px 0", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                     <Phone size={15} /> Call Now
                   </a>
-                  <Link to={`/donors/${selectedDonor._id}`} onClick={() => setSelectedDonor(null)} className="btn btn-secondary" style={{ flex: 1, padding: "11px 0", fontSize: 14 }}>
-                    View Profile
-                  </Link>
                 </div>
               </div>
             );

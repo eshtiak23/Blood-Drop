@@ -1,15 +1,16 @@
 /**
  * App.jsx — Root Application Component
- * 
+ *
  * This is the main "brain" of the app. It does three things:
  * 1. Sets up page routing (which page shows for which URL)
  * 2. Wraps everything in "providers" that give all pages access to theme, auth, and data
  * 3. Defines three security wrappers that control who can see which pages
- * 
+ *
  * URL Routing:
  *   /              → Home page (anyone)
  *   /donors        → Find blood donors (anyone)
  *   /requests      → Blood request list (anyone)
+ *   /chat          → Chat page (logged in)
  *   /login         → Login page (only logged-out users)
  *   /register      → Register page (only logged-out users)
  *   /dashboard     → User dashboard (must be logged in)
@@ -28,6 +29,7 @@ function ScrollToTop() {
 }
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { ChatProvider } from "./context/ChatContext";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import LandingPage from "./pages/home/LandingPage";
@@ -44,6 +46,7 @@ import BookmarksPage from "./pages/bookmarks/BookmarksPage";
 import ProfilePage from "./pages/settings/ProfilePage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import ChatPage from "./pages/chat/ChatPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 // React Query client — manages data caching. staleTime=300000 means data is "fresh" for 5 minutes
@@ -115,6 +118,8 @@ function AppContent() {
           <Route path="/requests/:id" element={<Protected><RequestDetailPage /></Protected>} />
           <Route path="/requests/create" element={<Protected><CreateRequestPage /></Protected>} />
           <Route path="/bookmarks" element={<Protected><BookmarksPage /></Protected>} />
+          <Route path="/chat" element={<Protected><ChatPage /></Protected>} />
+          <Route path="/chat/:userId" element={<Protected><ChatPage /></Protected>} />
 
           {/* Public-only pages — redirect to dashboard if already logged in */}
           <Route path="/login" element={<Public><LoginPage /></Public>} />
@@ -136,7 +141,8 @@ function AppContent() {
 /**
  * App — The outermost wrapper.
  * Provides routing (BrowserRouter), data fetching (QueryClientProvider),
- * theme control (ThemeProvider), and authentication (AuthProvider) to all pages.
+ * theme control (ThemeProvider), authentication (AuthProvider),
+ * and chat (ChatProvider) to all pages.
  */
 export default function App() {
   return (
@@ -145,7 +151,9 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
-            <AppContent />
+            <ChatProvider>
+              <AppContent />
+            </ChatProvider>
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>

@@ -6,25 +6,28 @@
  * 
  * What it shows depends on whether you're logged in:
  * - NOT logged in: Shows "Home", "Find Donors" links + Login/Register buttons
- * - Logged in: Shows the same links + notification bell + your avatar with a dropdown menu
+ * - Logged in: Shows the same links + chat + notification bell + your avatar with a dropdown menu
  * 
  * Features:
  * - Active page glow effect (works in dark and light themes)
  * - Dark/Light theme toggle (moon/sun icon)
  * - Responsive: Desktop shows full nav, mobile shows a hamburger menu
  * - Glass effect: Semi-transparent background with blur
+ * - Chat unread badge (red circle with count)
  */
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus, Search } from "lucide-react";
+import { useChat } from "../../context/ChatContext";
+import { Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus, Search, MessageCircle } from "lucide-react";
 import api from "../../services/api";
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { unreadTotal } = useChat();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -91,6 +94,16 @@ export default function Navbar() {
 
           {isAuthenticated ? (
             <>
+              {/* Chat Button — only shown on desktop */}
+              <button className="hide-mobile" onClick={() => navigate("/chat")} style={{ position: "relative", padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <MessageCircle size={18} />
+                {unreadTotal > 0 && (
+                  <span style={{ position: "absolute", top: 2, right: 2, width: 18, height: 18, borderRadius: "50%", background: "var(--red)", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid var(--bg-card)" }}>
+                    {unreadTotal > 9 ? "9+" : unreadTotal}
+                  </span>
+                )}
+              </button>
+
               {/* Notification Bell — only shown on desktop */}
               <button className="hide-mobile notif-btn" onClick={() => navigate("/notifications")} style={{ position: "relative", padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Bell size={18} />
@@ -119,6 +132,7 @@ export default function Navbar() {
                     <div style={{ position: "fixed", inset: 0, zIndex: 99 }} onClick={() => setMenuOpen(false)} />
                     <div className="dropdown-menu" style={{ zIndex: 100, minWidth: 200 }}>
                       <button className="dropdown-item" onClick={() => { navigate("/dashboard"); setMenuOpen(false); }}><LayoutDashboard size={16} /> Dashboard</button>
+                      <button className="dropdown-item" onClick={() => { navigate("/chat"); setMenuOpen(false); }}><MessageCircle size={16} /> Chat</button>
                       <button className="dropdown-item" onClick={() => { navigate("/notifications"); setMenuOpen(false); }}><Bell size={16} /> Notifications</button>
                       <button className="dropdown-item" onClick={() => { navigate("/bookmarks"); setMenuOpen(false); }}><Bookmark size={16} /> Bookmarks</button>
                       <button className="dropdown-item" onClick={() => { navigate("/settings"); setMenuOpen(false); }}><Settings size={16} /> Settings</button>
@@ -164,6 +178,14 @@ export default function Navbar() {
             {isAuthenticated ? (
               <>
                 <Link to="/dashboard" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><LayoutDashboard size={16} /> Dashboard</Link>
+                <Link to="/chat" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}>
+                  <MessageCircle size={16} /> Chat
+                  {unreadTotal > 0 && (
+                    <span style={{ marginLeft: "auto", width: 20, height: 20, borderRadius: 10, background: "var(--red)", color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {unreadTotal > 9 ? "9+" : unreadTotal}
+                    </span>
+                  )}
+                </Link>
                 <Link to="/notifications" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Bell size={16} /> Notifications</Link>
                 <Link to="/bookmarks" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Bookmark size={16} /> Bookmarks</Link>
                 <Link to="/settings" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Settings size={16} /> Settings</Link>
