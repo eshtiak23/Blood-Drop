@@ -1,21 +1,18 @@
 /**
  * ChatSidebar.jsx — Conversation List Panel
  *
- * Left side of the chat page (desktop) or main view (mobile).
- * Shows:
- * - "Start New Chat" button to search for users
+ * Left side of the chat page. Shows:
+ * - BloodDrop logo + back arrow
+ * - "Chats" title with red "+" button to start new chat
  * - Search input to filter conversations
- * - List of conversations with avatar, name, last message, unread badge
+ * - List of conversations with avatar, name, last message, timestamp, unread badge
  * - Online status dots for each user
- *
- * Props:
- * - onSelectConversation(conversation) — called when user clicks a conversation
- * - activeId — currently active conversation ID (for highlight)
- * - isMobile — whether to show back button style
+ * - Active conversation highlighted in light red
  */
 
 import { useState, useMemo } from "react";
-import { Search, MessageCircle, UserPlus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Search, ArrowLeft, Plus } from "lucide-react";
 
 export default function ChatSidebar({ conversations, onSelectConversation, activeId, onlineUsers, user }) {
   const [search, setSearch] = useState("");
@@ -38,7 +35,9 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
     if (diff < 60000) return "now";
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h`;
-    if (diff < 172800000) return "Yesterday";
+    const dayDiff = Math.floor(diff / 86400000);
+    if (dayDiff === 1) return "Yesterday";
+    if (dayDiff < 7) return d.toLocaleDateString("en-BD", { weekday: "short" });
     return d.toLocaleDateString("en-BD", { day: "numeric", month: "short" });
   };
 
@@ -48,38 +47,81 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
       height: "100%",
       display: "flex",
       flexDirection: "column",
-      background: "var(--bg-card)",
-      borderRight: "1px solid var(--border-light)",
+      background: "#fff",
+      borderRight: "1px solid #F3F4F6",
     }}>
-      {/* Header */}
-      <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid var(--border-light)" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>Messages</h2>
-          <span style={{
-            background: "var(--red)",
-            color: "#fff",
-            fontSize: 11,
-            fontWeight: 700,
-            padding: "2px 8px",
-            borderRadius: 10,
-            minWidth: 20,
-            textAlign: "center",
-          }}>
-            {conversations.length}
-          </span>
-        </div>
+      {/* Top Bar: Logo + Back */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "16px 20px 8px",
+      }}>
+        <Link to="/" style={{
+          width: 32,
+          height: 32,
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#6B7280",
+          transition: "background 0.15s",
+        }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "#F3F4F6"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+        >
+          <ArrowLeft size={20} />
+        </Link>
+        <img src="/Logo.png" alt="LifeDrop" style={{ height: 28, width: 28, objectFit: "contain", borderRadius: 6 }} />
+        <span style={{ fontSize: 18, fontWeight: 800, color: "#1E1B4B" }}>
+          Life<span style={{ color: "#DC2626" }}>Drop</span>
+        </span>
+      </div>
 
-        {/* Search */}
+      {/* Chats Title + New Chat Button */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "12px 20px 8px",
+      }}>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1E1B4B" }}>Chats</h2>
+        <Link to="/donors" style={{
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+          background: "#EF4444",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          transition: "transform 0.15s, box-shadow 0.15s",
+        }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.05)";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(239,68,68,0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        >
+          <Plus size={20} />
+        </Link>
+      </div>
+
+      {/* Search */}
+      <div style={{ padding: "4px 20px 12px" }}>
         <div style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          padding: "8px 12px",
-          borderRadius: 10,
-          background: "var(--bg-secondary)",
-          border: "1px solid var(--border-light)",
+          gap: 10,
+          padding: "10px 14px",
+          borderRadius: 12,
+          background: "#F9FAFB",
+          border: "1px solid #F3F4F6",
         }}>
-          <Search size={15} color="var(--text-muted)" />
+          <Search size={16} color="#9CA3AF" />
           <input
             type="text"
             placeholder="Search conversations..."
@@ -90,8 +132,8 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
               border: "none",
               background: "transparent",
               outline: "none",
-              fontSize: 13,
-              color: "var(--text)",
+              fontSize: 14,
+              color: "#1E1B4B",
             }}
           />
         </div>
@@ -101,12 +143,11 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
       <div style={{ flex: 1, overflowY: "auto" }}>
         {filtered.length === 0 ? (
           <div style={{ padding: "40px 20px", textAlign: "center" }}>
-            <MessageCircle size={40} color="var(--text-muted)" style={{ marginBottom: 12, opacity: 0.4 }} />
-            <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 4 }}>
+            <p style={{ fontSize: 14, color: "#9CA3AF", marginBottom: 4 }}>
               {search ? "No conversations found" : "No conversations yet"}
             </p>
-            <p style={{ fontSize: 12, color: "var(--text-muted)", opacity: 0.7 }}>
-              {!search && "Click 'Chat' on a donor's profile to start chatting"}
+            <p style={{ fontSize: 12, color: "#9CA3AF", opacity: 0.7 }}>
+              {!search && "Click '+' to find donors and start chatting"}
             </p>
           </div>
         ) : (
@@ -121,13 +162,13 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
                   display: "flex",
                   alignItems: "center",
                   gap: 12,
-                  padding: "12px 16px",
+                  padding: "14px 20px",
                   cursor: "pointer",
-                  background: isActive ? "var(--red-light)" : "transparent",
-                  borderLeft: isActive ? "3px solid var(--red)" : "3px solid transparent",
+                  background: isActive ? "#FEE2E2" : "transparent",
+                  borderBottom: "1px solid #F3F4F6",
                   transition: "background 0.15s",
                 }}
-                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = "var(--bg-secondary)"; }}
+                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = "#F9FAFB"; }}
                 onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
               >
                 {/* Avatar with online dot */}
@@ -136,19 +177,19 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
                     <img
                       src={conv.otherUser.photo}
                       alt=""
-                      style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover" }}
+                      style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover" }}
                     />
                   ) : (
                     <div style={{
-                      width: 44,
-                      height: 44,
+                      width: 48,
+                      height: 48,
                       borderRadius: "50%",
-                      background: "var(--red)",
+                      background: "linear-gradient(135deg, #EF4444, #DC2626)",
                       color: "#fff",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: 17,
+                      fontSize: 18,
                       fontWeight: 800,
                     }}>
                       {conv.otherUser?.name?.charAt(0)?.toUpperCase() || "?"}
@@ -157,24 +198,24 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
                   {isOnline && (
                     <div style={{
                       position: "absolute",
-                      bottom: 1,
-                      right: 1,
+                      bottom: 2,
+                      right: 2,
                       width: 12,
                       height: 12,
                       borderRadius: "50%",
                       background: "#22C55E",
-                      border: "2px solid var(--bg-card)",
+                      border: "2px solid #fff",
                     }} />
                   )}
                 </div>
 
                 {/* Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
                     <span style={{
-                      fontSize: 14,
+                      fontSize: 15,
                       fontWeight: conv.unreadCount > 0 ? 700 : 600,
-                      color: "var(--text)",
+                      color: "#1E1B4B",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -182,8 +223,8 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
                       {conv.otherUser?.name || "Unknown"}
                     </span>
                     <span style={{
-                      fontSize: 11,
-                      color: conv.unreadCount > 0 ? "var(--red)" : "var(--text-muted)",
+                      fontSize: 12,
+                      color: conv.unreadCount > 0 ? "#EF4444" : "#9CA3AF",
                       fontWeight: conv.unreadCount > 0 ? 600 : 400,
                       flexShrink: 0,
                       marginLeft: 8,
@@ -191,10 +232,10 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
                       {formatTime(conv.lastMessage?.createdAt)}
                     </span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{
-                      fontSize: 12,
-                      color: conv.unreadCount > 0 ? "var(--text)" : "var(--text-muted)",
+                      fontSize: 13,
+                      color: conv.unreadCount > 0 ? "#374151" : "#9CA3AF",
                       fontWeight: conv.unreadCount > 0 ? 500 : 400,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -205,10 +246,10 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
                     </span>
                     {conv.unreadCount > 0 && (
                       <span style={{
-                        minWidth: 20,
-                        height: 20,
-                        borderRadius: 10,
-                        background: "var(--red)",
+                        minWidth: 22,
+                        height: 22,
+                        borderRadius: 11,
+                        background: "#EF4444",
                         color: "#fff",
                         fontSize: 11,
                         fontWeight: 700,
@@ -218,7 +259,7 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
                         padding: "0 6px",
                         flexShrink: 0,
                       }}>
-                        {conv.unreadCount}
+                        {conv.unreadCount > 9 ? "9+" : conv.unreadCount}
                       </span>
                     )}
                   </div>

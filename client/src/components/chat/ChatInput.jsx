@@ -1,13 +1,13 @@
 /**
  * ChatInput.jsx — Message Input Area
  *
- * Bottom bar with:
- * - Text input (auto-expanding textarea)
- * - Image upload button (opens file picker)
- * - Send button (red, only enabled when there's content)
+ * Bottom bar matching the BloodDrop design:
+ * - Red "+" circle button on the left
+ * - Pill-shaped input field with emoji and attach icons inside
+ * - Red circular send button on the right
  *
- * Sends typing indicator while user is typing (debounced).
  * Press Enter to send (Shift+Enter for new line).
+ * Sends typing indicator while user is typing.
  *
  * Props:
  * - onSend(text, image) — callback when message is sent
@@ -15,7 +15,7 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Image, X } from "lucide-react";
+import { Send, Smile, Paperclip, Plus, X } from "lucide-react";
 
 export default function ChatInput({ onSend, onTyping, onStopTyping }) {
   const [text, setText] = useState("");
@@ -36,14 +36,8 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
   // Handle typing indicator
   const handleTextChange = (e) => {
     setText(e.target.value);
-
-    // Emit typing start
     onTyping?.();
-
-    // Clear previous timeout
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
-    // Stop typing after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
       onStopTyping?.();
     }, 2000);
@@ -94,43 +88,44 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
 
   return (
     <div style={{
-      borderTop: "1px solid var(--border-light)",
-      padding: "10px 12px",
-      paddingBottom: "max(10px, env(safe-area-inset-bottom))",
-      background: "var(--bg-card)",
+      padding: "12px 16px",
+      paddingBottom: "max(12px, env(safe-area-inset-bottom))",
+      background: "#fff",
+      borderTop: "1px solid #F3F4F6",
+      flexShrink: 0,
     }}>
       {/* Image preview */}
       {imagePreview && (
         <div style={{
           position: "relative",
           display: "inline-block",
-          marginBottom: 8,
+          marginBottom: 10,
           padding: 4,
-          borderRadius: 8,
-          background: "var(--bg-secondary)",
+          borderRadius: 10,
+          background: "#F9FAFB",
+          border: "1px solid #F3F4F6",
         }}>
           <img
             src={imagePreview}
             alt="Preview"
-            style={{ maxHeight: 80, borderRadius: 6 }}
+            style={{ maxHeight: 80, borderRadius: 8 }}
           />
           <button
             onClick={removeImage}
             style={{
               position: "absolute",
-              top: -4,
-              right: -4,
-              width: 20,
-              height: 20,
+              top: -6,
+              right: -6,
+              width: 22,
+              height: 22,
               borderRadius: "50%",
-              background: "var(--red)",
+              background: "#EF4444",
               color: "#fff",
-              border: "none",
+              border: "2px solid #fff",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               cursor: "pointer",
-              fontSize: 10,
             }}
           >
             <X size={10} />
@@ -141,26 +136,32 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
       <div style={{
         display: "flex",
         alignItems: "flex-end",
-        gap: 8,
+        gap: 10,
       }}>
-        {/* Image upload button */}
+        {/* Plus button */}
         <label style={{
-          width: 36,
-          height: 36,
+          width: 42,
+          height: 42,
           borderRadius: "50%",
-          background: "var(--bg-secondary)",
+          background: "#EF4444",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
           flexShrink: 0,
-          border: "1px solid var(--border-light)",
-          transition: "background 0.15s",
+          color: "#fff",
+          transition: "transform 0.15s, box-shadow 0.15s",
         }}
-          onMouseEnter={(e) => e.currentTarget.style.background = "var(--red-light)"}
-          onMouseLeave={(e) => e.currentTarget.style.background = "var(--bg-secondary)"}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.05)";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(239,68,68,0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
         >
-          <Image size={16} color="var(--text-secondary)" />
+          <Plus size={20} />
           <input
             type="file"
             accept="image/*"
@@ -169,15 +170,16 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
           />
         </label>
 
-        {/* Text input */}
+        {/* Text input — pill shape */}
         <div style={{
           flex: 1,
           display: "flex",
           alignItems: "center",
-          padding: "6px 12px",
-          borderRadius: 20,
-          background: "var(--bg-secondary)",
-          border: "1px solid var(--border-light)",
+          padding: "8px 14px",
+          borderRadius: 24,
+          background: "#F9FAFB",
+          border: "1px solid #E5E7EB",
+          gap: 8,
         }}>
           <textarea
             ref={textareaRef}
@@ -193,13 +195,16 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
               background: "transparent",
               outline: "none",
               fontSize: 14,
-              color: "var(--text)",
+              color: "#1E1B4B",
               resize: "none",
               lineHeight: "20px",
               maxHeight: 100,
               fontFamily: "inherit",
+              padding: 0,
             }}
           />
+          <Smile size={20} color="#9CA3AF" style={{ flexShrink: 0, cursor: "pointer" }} />
+          <Paperclip size={20} color="#9CA3AF" style={{ flexShrink: 0, cursor: "pointer" }} />
         </div>
 
         {/* Send button */}
@@ -207,11 +212,11 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
           onClick={handleSend}
           disabled={!text.trim() && !image}
           style={{
-            width: 36,
-            height: 36,
+            width: 42,
+            height: 42,
             borderRadius: "50%",
-            background: (text.trim() || image) ? "var(--red)" : "var(--bg-secondary)",
-            color: (text.trim() || image) ? "#fff" : "var(--text-muted)",
+            background: (text.trim() || image) ? "#EF4444" : "#F3F4F6",
+            color: (text.trim() || image) ? "#fff" : "#9CA3AF",
             border: "none",
             display: "flex",
             alignItems: "center",
@@ -221,7 +226,7 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
             transition: "all 0.15s",
           }}
         >
-          <Send size={16} />
+          <Send size={18} />
         </button>
       </div>
     </div>

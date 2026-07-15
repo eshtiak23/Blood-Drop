@@ -1,16 +1,13 @@
 /**
  * ChatBubble.jsx — Single Message Bubble
  *
- * Renders one message in the conversation.
- * - Sent messages (from current user): red background, white text, right-aligned
- * - Received messages (from other user): white background, gray text, left-aligned
- * - Shows timestamp and seen indicator (✓✓) for sent messages
- * - Supports image messages (displayed as a thumbnail)
- *
- * Props:
- * - message — the message object { text, image, senderId, createdAt, seen }
- * - isMine — whether this message was sent by the current user
- * - showAvatar — whether to show sender's avatar (first message in group)
+ * Renders one message in the conversation matching the BloodDrop design:
+ * - Sent messages: red (#EF4444) background, white text, right-aligned
+ *   - Rounded: 16px 16px 4px 16px (sharp bottom-right)
+ * - Received messages: white background, dark text, left-aligned
+ *   - Rounded: 16px 16px 16px 4px (sharp bottom-left)
+ * - Time + seen indicator (✓✓) inside bubble at bottom-right
+ * - Supports image messages
  */
 
 import { Check, CheckCheck } from "lucide-react";
@@ -26,30 +23,29 @@ export default function ChatBubble({ message, isMine, showAvatar = false }) {
       display: "flex",
       justifyContent: isMine ? "flex-end" : "flex-start",
       alignItems: "flex-end",
-      gap: 6,
-      marginBottom: 4,
-      padding: "0 12px",
+      gap: 8,
+      padding: "2px 20px",
     }}>
       {/* Received message avatar */}
       {!isMine && (
-        <div style={{ width: 28, flexShrink: 0 }}>
+        <div style={{ width: 30, flexShrink: 0 }}>
           {showAvatar && message.senderId?.photo ? (
             <img
               src={message.senderId.photo}
               alt=""
-              style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }}
+              style={{ width: 30, height: 30, borderRadius: "50%", objectFit: "cover" }}
             />
           ) : showAvatar ? (
             <div style={{
-              width: 28,
-              height: 28,
+              width: 30,
+              height: 30,
               borderRadius: "50%",
-              background: "var(--purple)",
+              background: "linear-gradient(135deg, #EF4444, #DC2626)",
               color: "#fff",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 700,
             }}>
               {message.senderId?.name?.charAt(0)?.toUpperCase() || "?"}
@@ -60,13 +56,16 @@ export default function ChatBubble({ message, isMine, showAvatar = false }) {
 
       {/* Message bubble */}
       <div style={{
-        maxWidth: "70%",
-        padding: message.image && !message.text ? "4px" : "8px 12px",
-        borderRadius: isMine ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
-        background: isMine ? "var(--red)" : "var(--bg-card)",
-        color: isMine ? "#fff" : "var(--text)",
-        boxShadow: isMine ? "0 1px 3px rgba(239,68,68,0.3)" : "0 1px 3px rgba(0,0,0,0.08)",
-        border: isMine ? "none" : "1px solid var(--border-light)",
+        maxWidth: "65%",
+        padding: message.image && !message.text ? "4px" : "10px 14px",
+        borderRadius: isMine ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+        background: isMine ? "#EF4444" : "#fff",
+        color: isMine ? "#fff" : "#1E1B4B",
+        boxShadow: isMine
+          ? "0 2px 8px rgba(239,68,68,0.25)"
+          : "0 1px 4px rgba(0,0,0,0.06)",
+        border: isMine ? "none" : "1px solid #F3F4F6",
+        wordBreak: "break-word",
       }}>
         {/* Image */}
         {message.image && (
@@ -75,9 +74,9 @@ export default function ChatBubble({ message, isMine, showAvatar = false }) {
             alt="Shared"
             style={{
               maxWidth: "100%",
-              maxHeight: 200,
-              borderRadius: 8,
-              marginBottom: message.text ? 6 : 0,
+              maxHeight: 220,
+              borderRadius: 10,
+              marginBottom: message.text ? 8 : 0,
               cursor: "pointer",
             }}
             onClick={() => window.open(message.image, "_blank")}
@@ -86,7 +85,7 @@ export default function ChatBubble({ message, isMine, showAvatar = false }) {
 
         {/* Text */}
         {message.text && (
-          <div style={{ fontSize: 14, lineHeight: 1.5, wordBreak: "break-word" }}>
+          <div style={{ fontSize: 14, lineHeight: 1.55 }}>
             {message.text}
           </div>
         )}
@@ -97,17 +96,19 @@ export default function ChatBubble({ message, isMine, showAvatar = false }) {
           alignItems: "center",
           justifyContent: "flex-end",
           gap: 4,
-          marginTop: 2,
-          opacity: 0.6,
+          marginTop: 4,
         }}>
-          <span style={{ fontSize: 10, color: isMine ? "rgba(255,255,255,0.8)" : "var(--text-muted)" }}>
+          <span style={{
+            fontSize: 11,
+            color: isMine ? "rgba(255,255,255,0.75)" : "#9CA3AF",
+          }}>
             {formatTime(message.createdAt)}
           </span>
           {isMine && (
             message.seen ? (
-              <CheckCheck size={13} color="rgba(255,255,255,0.9)" />
+              <CheckCheck size={14} color="rgba(255,255,255,0.9)" />
             ) : (
-              <Check size={13} color="rgba(255,255,255,0.6)" />
+              <Check size={14} color="rgba(255,255,255,0.6)" />
             )
           )}
         </div>
