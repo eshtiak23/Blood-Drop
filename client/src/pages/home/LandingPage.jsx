@@ -230,7 +230,7 @@ export default function LandingPage() {
                 <h2 style={{ fontSize: 24, fontWeight: 800 }}>Blood Compatibility Chart</h2>
               </div>
               <p style={{ color: "var(--text-secondary)", fontSize: 15, maxWidth: 440, margin: "0 auto 20px", lineHeight: 1.6 }}>
-                Know which blood types can safely donate to each other for transfusions
+                Find your compatible blood donors in seconds.
               </p>
               {/* Mini blood type pills preview */}
               <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6, marginBottom: 20 }}>
