@@ -382,9 +382,9 @@ export default function DonorSearchPage() {
                     <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Donations</div>
                   </div>
                   <div style={{ textAlign: "center", padding: "10px 4px", borderRadius: 10, background: "var(--bg-secondary)" }}>
-                    <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--purple-light)", color: "var(--purple)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 4px" }}><Calendar size={14} /></div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{selectedDonor.lastDonationDate ? new Date(selectedDonor.lastDonationDate).toLocaleDateString("en-BD", { day: "numeric", month: "short" }) : "Never"}</div>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Last Donation</div>
+                    <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--blue-light)", color: "var(--blue)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 4px" }}><Calendar size={14} /></div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{selectedDonor.age || "—"}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Age</div>
                   </div>
                   <div style={{ textAlign: "center", padding: "10px 4px", borderRadius: 10, background: "var(--bg-secondary)" }}>
                     <div style={{ width: 30, height: 30, borderRadius: "50%", background: canDonate ? "var(--green-light)" : "var(--yellow-light)", color: canDonate ? "var(--green)" : "var(--yellow)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 4px" }}>

@@ -229,8 +229,14 @@ export default function DashboardPage() {
             {user?.email && (
               <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Mail size={12} /> {user.email}</span>
             )}
+            {user?.age && (
+              <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Calendar size={12} /> Age: {user.age}</span>
+            )}
             {user?.district && (
               <span style={{ display: "flex", alignItems: "center", gap: 4 }}><MapPin size={12} /> {user?.area ? `${user.area}, ` : ""}{user.district}</span>
+            )}
+            {user?.lastDonationDate && (
+              <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Droplets size={12} /> Last donated: {new Date(user.lastDonationDate).toLocaleDateString()}</span>
             )}
             {user?.createdAt && (
               <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Calendar size={12} /> Member since {new Date(user.createdAt).toLocaleDateString()}</span>

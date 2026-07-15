@@ -74,6 +74,7 @@ export default function DonorProfilePage() {
             <div>
               <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Donation Info</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
+                {donor.age && <span style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)" }}><Calendar size={14} /> Age: {donor.age}</span>}
                 <span style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)" }}><Droplets size={14} /> {donor.totalDonations || 0} total donations</span>
                 <span style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)" }}><Calendar size={14} /> Last: {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString() : "Never"}</span>
                 <span style={{ display: "flex", alignItems: "center", gap: 8, color: donor.isAvailable ? "var(--green)" : "var(--text-muted)" }}>{donor.isAvailable ? "Available" : "Unavailable"}</span>
