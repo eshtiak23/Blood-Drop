@@ -1,23 +1,18 @@
 /**
  * ChatPage.jsx — Main Chat Page
  *
- * Full chat interface with:
- * - Desktop: 360px sidebar + full conversation panel
- * - Mobile: single panel (conversation list OR active conversation)
+ * Full chat interface with responsive layout:
+ * - Desktop (≥768px): 360px sidebar + full conversation panel side by side
+ * - Mobile (<768px): single panel — conversation list OR active conversation
  *
- * This page uses ChatContext for all state and operations.
- * It handles URL params (/:userId) to auto-open a conversation
- * when navigating from a donor profile's "Chat" button.
+ * Uses the full available viewport height via flex layout from App.jsx.
+ * No position:fixed or position:absolute — pure responsive flexbox.
  *
  * Features:
  * - Real-time messaging via Socket.IO
- * - Typing indicators
- * - Online status
- * - Unread badges
- * - Image sending
- * - Message seen indicators (✓✓)
- * - Auto-scroll to bottom on new messages
- * - Loading skeletons
+ * - Typing indicators, online status, unread badges
+ * - Image sending, message seen indicators (✓✓)
+ * - Auto-scroll only on new messages (no scroll on initial load or reload)
  */
 
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -55,7 +50,6 @@ export default function ChatPage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showSidebar, setShowSidebar] = useState(!userId);
   const messagesEndRef = useRef(null);
-  const messagesContainerRef = useRef(null);
   const conversationOpenedRef = useRef(false);
   const prevMessagesLengthRef = useRef(0);
   const hasScrolledRef = useRef(false);
@@ -72,7 +66,11 @@ export default function ChatPage() {
   }, []);
 
   // Auto-open conversation when navigating from /chat/:userId
-  // Only runs once per userId change — uses ref to prevent re-runs from openConversation reference changes
+  // Only runs once per userId change — ref prevents re-runs from openConversation reference changes
+  useEffect(() => {
+    conversationOpenedRef.current = false;
+  }, [userId]);
+
   useEffect(() => {
     if (userId && user && !conversationOpenedRef.current) {
       conversationOpenedRef.current = true;
@@ -80,22 +78,12 @@ export default function ChatPage() {
         if (isMobile) setShowSidebar(false);
       });
     }
-    // Reset ref when userId changes (navigating to a different user)
-    return () => {
-      if (userId) conversationOpenedRef.current = false;
-    };
-  }, [userId, user]);
+  }, [userId, user, openConversation]);
 
-  // Reset conversationOpenedRef when userId changes
-  useEffect(() => {
-    conversationOpenedRef.current = false;
-  }, [userId]);
-
-  // Auto-scroll to bottom — only when NEW messages are added (not on initial load)
+  // Auto-scroll — only when NEW messages are added (not on initial load or reload)
   useEffect(() => {
     if (messages.length === 0) return;
 
-    // On first load of messages, scroll to bottom instantly (no smooth)
     if (!hasScrolledRef.current && messages.length > 0) {
       hasScrolledRef.current = true;
       prevMessagesLengthRef.current = messages.length;
@@ -105,7 +93,6 @@ export default function ChatPage() {
       return;
     }
 
-    // Only scroll on new messages (not when messages are just reloaded)
     if (messages.length > prevMessagesLengthRef.current) {
       prevMessagesLengthRef.current = messages.length;
       if (messagesEndRef.current) {
@@ -143,52 +130,53 @@ export default function ChatPage() {
   const otherUser = activeConversation?.participants?.find((p) => p._id !== user?._id);
   const isOtherOnline = otherUser ? onlineUsers.has(otherUser._id) : false;
 
-  // Check if other user is typing in active conversation
   const otherUserId = otherUser?._id;
   const isOtherTyping = activeConversation && otherUserId
     ? isUserTyping(activeConversation._id, otherUserId)
     : false;
 
+  // Mobile: show sidebar OR conversation, not both
+  const showConversationPanel = !isMobile || !showSidebar;
+  const showSidebarPanel = !isMobile || showSidebar;
+
   return (
-    <div className="chat-page" style={{
+    <div style={{
       display: "flex",
-      height: "100dvh",
-      marginTop: "-64px",
-      paddingTop: 64,
+      width: "100%",
+      height: "100%",
       background: "var(--bg-secondary)",
       overflow: "hidden",
     }}>
       {/* Sidebar */}
-      <div style={{
-        width: isMobile ? "100%" : 360,
-        flexShrink: 0,
-        display: isMobile ? (showSidebar ? "block" : "none") : "block",
-        height: "100%",
-      }}>
-        <ChatSidebar
-          conversations={conversations}
-          onSelectConversation={handleSelectConversation}
-          activeId={activeConversation?._id}
-          onlineUsers={onlineUsers}
-          user={user}
-        />
-      </div>
+      {showSidebarPanel && (
+        <div style={{
+          width: isMobile ? "100%" : 360,
+          flexShrink: 0,
+          height: "100%",
+        }}>
+          <ChatSidebar
+            conversations={conversations}
+            onSelectConversation={handleSelectConversation}
+            activeId={activeConversation?._id}
+            onlineUsers={onlineUsers}
+            user={user}
+          />
+        </div>
+      )}
 
       {/* Conversation Panel */}
-      <div style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        minWidth: 0,
-        height: "100%",
-        background: "var(--bg-card)",
-        borderLeft: isMobile ? "none" : "1px solid var(--border-light)",
-      }}>
-        {/* On mobile, only show conversation when sidebar is hidden */}
-        {isMobile && showSidebar ? null : (
-          activeConversation && otherUser ? (
+      {showConversationPanel && (
+        <div style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          height: "100%",
+          background: "var(--bg-card)",
+          borderLeft: isMobile ? "none" : "1px solid var(--border-light)",
+        }}>
+          {activeConversation && otherUser ? (
             <>
-              {/* Header */}
               <ConversationHeader
                 user={otherUser}
                 onBack={isMobile ? handleBack : null}
@@ -196,19 +184,15 @@ export default function ChatPage() {
               />
 
               {/* Messages Area */}
-              <div
-                ref={messagesContainerRef}
-                style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  padding: "12px 0",
-                  background: "var(--bg-secondary)",
-                }}
-              >
+              <div style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "12px 0",
+                background: "var(--bg-secondary)",
+              }}>
                 {loadingMessages ? (
                   <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
                     <Loader2 size={24} color="var(--red)" style={{ animation: "spin 1s linear infinite" }} />
-                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                   </div>
                 ) : messages.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "40px 20px" }}>
@@ -217,25 +201,22 @@ export default function ChatPage() {
                     </p>
                   </div>
                 ) : (
-                  <>
-                    {messages.map((msg, idx) => {
-                      const isMine = msg.senderId?._id === user?._id || msg.senderId === user?._id;
-                      const prevMsg = messages[idx - 1];
-                      const showAvatar = !prevMsg ||
-                        (prevMsg.senderId?._id || prevMsg.senderId) !== (msg.senderId?._id || msg.senderId);
-                      return (
-                        <ChatBubble
-                          key={msg._id}
-                          message={msg}
-                          isMine={isMine}
-                          showAvatar={showAvatar}
-                        />
-                      );
-                    })}
-                  </>
+                  messages.map((msg, idx) => {
+                    const isMine = msg.senderId?._id === user?._id || msg.senderId === user?._id;
+                    const prevMsg = messages[idx - 1];
+                    const showAvatar = !prevMsg ||
+                      (prevMsg.senderId?._id || prevMsg.senderId) !== (msg.senderId?._id || msg.senderId);
+                    return (
+                      <ChatBubble
+                        key={msg._id}
+                        message={msg}
+                        isMine={isMine}
+                        showAvatar={showAvatar}
+                      />
+                    );
+                  })
                 )}
 
-                {/* Typing indicator */}
                 {isOtherTyping && (
                   <TypingIndicator userName={otherUser.name?.split(" ")[0]} />
                 )}
@@ -243,7 +224,7 @@ export default function ChatPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input */}
+              {/* Input — always at bottom */}
               <ChatInput
                 onSend={handleSend}
                 onTyping={startTyping}
@@ -252,27 +233,11 @@ export default function ChatPage() {
             </>
           ) : (
             <EmptyState />
-          )
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
-      <style>{`
-        .chat-page {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 40;
-        }
-        @media (max-width: 768px) {
-          .chat-page {
-            height: 100vh;
-            height: 100dvh;
-          }
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

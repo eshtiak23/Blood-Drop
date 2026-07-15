@@ -98,10 +98,13 @@ function PageTransition({ children }) {
 }
 
 function AppContent() {
+  const location = useLocation();
+  const isChatPage = location.pathname.startsWith("/chat");
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <Navbar />
-      <main style={{ flex: 1 }}>
+      {!isChatPage && <Navbar />}
+      <main style={isChatPage ? { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" } : { flex: 1 }}>
         <PageTransition>
           <Routes>
           {/* Public pages — anyone can visit */}
@@ -133,7 +136,7 @@ function AppContent() {
         </Routes>
         </PageTransition>
       </main>
-      <Footer />
+      {!isChatPage && <Footer />}
     </div>
   );
 }
