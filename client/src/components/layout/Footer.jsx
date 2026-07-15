@@ -88,9 +88,9 @@ export default function Footer() {
             <div className="footer-col">
               <h4 className="footer-heading">Contact Us</h4>
               <div className="footer-contact">
-                <span className="footer-contact-item"><Mail size={14} /> info@lifedrop.com</span>
-                <span className="footer-contact-item"><Phone size={14} /> +880 1700-000000</span>
-                <span className="footer-contact-item"><MapPin size={14} /> Dhaka, Bangladesh</span>
+                <span className="footer-contact-item"><Mail size={14} /> bloodadmin009@gmail.com</span>
+                <span className="footer-contact-item"><Phone size={14} /> 0198984061</span>
+                <span className="footer-contact-item"><MapPin size={14} /> Rajshai Sadar, Rajshahi</span>
               </div>
             </div>
           </div>
