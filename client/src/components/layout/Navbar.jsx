@@ -16,7 +16,8 @@
  * - Chat unread badge (red circle with count)
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -35,15 +36,34 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isClosing, setIsClosing] = useState(false);
+  const closingTimerRef = useRef(null);
 
   /** Close overlay with exit animation */
   const closeOverlay = useCallback(() => {
+    if (!open || isClosing) return;
     setIsClosing(true);
-    setTimeout(() => {
+    closingTimerRef.current = setTimeout(() => {
       setOpen(false);
       setIsClosing(false);
+      closingTimerRef.current = null;
     }, 250);
+  }, [open, isClosing]);
+
+  /** Open overlay — always resets closing state cleanly */
+  const openOverlay = useCallback(() => {
+    if (closingTimerRef.current) {
+      clearTimeout(closingTimerRef.current);
+      closingTimerRef.current = null;
+    }
+    setIsClosing(false);
+    setOpen(true);
   }, []);
+
+  /** Toggle overlay — handles open/close state properly */
+  const toggleOverlay = useCallback(() => {
+    if (open) closeOverlay();
+    else openOverlay();
+  }, [open, closeOverlay, openOverlay]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -70,6 +90,11 @@ export default function Navbar() {
     }
     return () => { document.body.style.overflow = ""; };
   }, [open]);
+
+  // Cleanup closing timer on unmount
+  useEffect(() => {
+    return () => { if (closingTimerRef.current) clearTimeout(closingTimerRef.current); };
+  }, []);
 
   /** Log out and redirect to home page */
   const handleLogout = () => { logout(); navigate("/"); closeOverlay(); setMenuOpen(false); toast.success("Logged out"); };
@@ -180,17 +205,17 @@ export default function Navbar() {
           )}
 
           {/* Mobile Hamburger Menu Button */}
-          <button className="mobile-menu-btn" onClick={() => setOpen(!open)} style={{ padding: 8, borderRadius: 8, display: "none", alignItems: "center", justifyContent: "center", color: "var(--text)" }}>
-            <div className={`hamburger-morph ${open ? "open" : ""}`}>
+          <button className="mobile-menu-btn" onClick={toggleOverlay} style={{ padding: 8, borderRadius: 8, display: "none", alignItems: "center", justifyContent: "center", color: "var(--text)" }}>
+            <div className={`hamburger-morph ${open && !isClosing ? "open" : ""}`}>
               <span /><span /><span />
             </div>
           </button>
         </div>
       </div>
 
-      {/* Full-Screen Mobile Overlay Menu */}
-      {open && (
-        <div className={`mobile-overlay ${isClosing ? "exit" : ""}`}>
+      {/* Full-Screen Mobile Overlay Menu — portaled to document.body */}
+      {open && createPortal(
+        <div className={`mobile-overlay ${isClosing ? "exit" : ""}`} onClick={closeOverlay}>
           {/* Floating blood drops */}
           <div className="mobile-overlay-drop" />
           <div className="mobile-overlay-drop" />
@@ -202,7 +227,7 @@ export default function Navbar() {
             <X size={20} />
           </button>
 
-          <div className="mobile-overlay-content">
+          <div className="mobile-overlay-content" onClick={(e) => e.stopPropagation()}>
             {/* User profile card (if authenticated) */}
             {isAuthenticated && user && (
               <div className="mobile-overlay-profile">
@@ -300,7 +325,8 @@ export default function Navbar() {
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );
