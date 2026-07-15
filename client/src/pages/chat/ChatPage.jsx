@@ -53,7 +53,7 @@ export default function ChatPage() {
   } = useChat();
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(!userId);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
@@ -75,7 +75,7 @@ export default function ChatPage() {
         if (isMobile) setShowSidebar(false);
       });
     }
-  }, [userId, user]);
+  }, [userId, user, openConversation]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

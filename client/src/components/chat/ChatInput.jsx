@@ -185,6 +185,7 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             rows={1}
+            autoFocus
             style={{
               flex: 1,
               border: "none",
