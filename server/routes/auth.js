@@ -17,11 +17,11 @@ const sanitizeUser = (user) => {
 // POST /api/auth/register
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, phone, bloodGroup, district, area } = req.body;
+    const { name, email, password, phone, age, bloodGroup, lastDonationDate, district, area } = req.body;
     if (!name || !email || !password) return res.status(400).json({ error: "Name, email and password are required" });
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ error: "Email already registered" });
-    const user = await User.create({ name, email, password, phone, bloodGroup, district, area });
+    const user = await User.create({ name, email, password, phone, age, bloodGroup, lastDonationDate, district, area });
     const token = generateToken(user._id);
     res.status(201).json({ user: sanitizeUser(user), token });
   } catch (err) {
@@ -51,7 +51,7 @@ router.get("/me", auth, async (req, res) => {
 // PUT /api/auth/me
 router.put("/me", auth, async (req, res) => {
   try {
-    const allowed = ["name", "phone", "bloodGroup", "district", "area", "bio", "photo", "isAvailable", "lastDonationDate", "totalDonations"];
+    const allowed = ["name", "phone", "age", "bloodGroup", "district", "area", "bio", "photo", "isAvailable", "lastDonationDate", "totalDonations"];
     const updates = {};
     allowed.forEach((field) => { if (req.body[field] !== undefined) updates[field] = req.body[field]; });
     const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true, runValidators: true });

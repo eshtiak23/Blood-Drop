@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true, select: false },
   phone: { type: String, default: "" },
+  age: { type: Number, default: null },
   bloodGroup: { type: String, enum: ["A+","A-","B+","B-","AB+","AB-","O+","O-",""], default: "" },
   gender: { type: String, default: "" },
   district: { type: String, default: "" },

@@ -16,7 +16,7 @@ import toast from "react-hot-toast";
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", phone: "", bloodGroup: "", district: "", area: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", phone: "", age: "", bloodGroup: "", lastDonationDate: "", district: "", area: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -30,9 +30,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     if (form.password !== form.confirmPassword) { setError("Passwords don't match"); return; }
+    if (form.age < 18 || form.age > 65) { setError("Age must be between 18 and 65"); return; }
     setLoading(true);
     try {
       const { confirmPassword, ...data } = form;
+      data.age = Number(data.age);
       await register(data);
       toast.success("Account created! Welcome!");
       navigate("/dashboard");
@@ -90,10 +92,20 @@ export default function RegisterPage() {
             {/* Blood group, district, and area — shown for all users */}
             <div className="input-group" style={{ marginBottom: 16 }}>
               <label>Blood Group</label>
-              <select className="input" value={form.bloodGroup} onChange={(e) => set("bloodGroup", e.target.value)}>
+              <select className="input" value={form.bloodGroup} onChange={(e) => set("bloodGroup", e.target.value)} required>
                 <option value="">Select blood group</option>
                 {BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
+            </div>
+            <div className="grid grid-2" style={{ marginBottom: 16 }}>
+              <div className="input-group">
+                <label>Age <span style={{ color: "var(--red)" }}>*</span></label>
+                <input className="input" type="number" min="18" max="65" placeholder="18-65" value={form.age} onChange={(e) => set("age", e.target.value)} required />
+              </div>
+              <div className="input-group">
+                <label>Last Donation Date <span style={{ color: "var(--red)" }}>*</span></label>
+                <input className="input" type="date" value={form.lastDonationDate} onChange={(e) => set("lastDonationDate", e.target.value)} required />
+              </div>
             </div>
             <div className="grid grid-2" style={{ marginBottom: 20 }}>
               <div className="input-group">
