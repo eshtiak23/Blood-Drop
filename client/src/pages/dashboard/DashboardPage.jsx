@@ -269,84 +269,44 @@ export default function DashboardPage() {
       {/* ── Quick Actions ── */}
       <div style={{ marginTop: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Quick Actions</h2>
-        <div className="dash-actions" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-          <Link to="/requests/create" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #EF4444, #EC4899)", color: "#fff", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(239,68,68,0.3)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(239,68,68,0.4)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(239,68,68,0.3)"; }}
-          >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Plus size={22} color="#fff" />
-            </div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700 }}>Create Request</div>
-              <div style={{ fontSize: 12, opacity: 0.85 }}>Ask for blood</div>
-            </div>
-          </Link>
-
-          <Link to="/donors" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #3B82F6, #06B6D4)", color: "#fff", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(59,130,246,0.3)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(59,130,246,0.4)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(59,130,246,0.3)"; }}
-          >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Search size={22} color="#fff" />
-            </div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700 }}>Find Donors</div>
-              <div style={{ fontSize: 12, opacity: 0.85 }}>Search nearby</div>
-            </div>
-          </Link>
-
-          <Link to="/requests" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #F97316, #EAB308)", color: "#fff", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(249,115,22,0.3)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(249,115,22,0.4)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(249,115,22,0.3)"; }}
-          >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <AlertCircle size={22} color="#fff" />
-            </div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700 }}>View Requests</div>
-              <div style={{ fontSize: 12, opacity: 0.85 }}>Browse all</div>
-            </div>
-          </Link>
-
-          <button onClick={() => document.getElementById("log-donation")?.scrollIntoView({ behavior: "smooth" })} style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #8B5CF6, #EC4899)", color: "#fff", border: "none", cursor: "pointer", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(139,92,246,0.3)", textAlign: "left", width: "100%" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(139,92,246,0.4)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(139,92,246,0.3)"; }}
-          >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Droplets size={22} color="#fff" />
-            </div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700 }}>Log Donation</div>
-              <div style={{ fontSize: 12, opacity: 0.85 }}>Record history</div>
-            </div>
-          </button>
-
-          <Link to="/bookmarks" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #10B981, #14B8A6)", color: "#fff", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(16,185,129,0.3)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(16,185,129,0.4)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(16,185,129,0.3)"; }}
-          >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Heart size={22} color="#fff" />
-            </div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700 }}>Bookmarks</div>
-              <div style={{ fontSize: 12, opacity: 0.85 }}>Saved donors</div>
-            </div>
-          </Link>
-
-          <Link to="/notifications" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #6366F1, #8B5CF6)", color: "#fff", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(99,102,241,0.3)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(99,102,241,0.4)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(99,102,241,0.3)"; }}
-          >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Bell size={22} color="#fff" />
-            </div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700 }}>Notifications</div>
-              <div style={{ fontSize: 12, opacity: 0.85 }}>Stay updated</div>
-            </div>
-          </Link>
+        <div className="dash-quick-actions" style={{ display: "flex", flexWrap: "wrap", gap: 16, justifyContent: "center" }}>
+          {[
+            { to: "/requests/create", icon: Plus, label: "Create Request", gradient: "linear-gradient(135deg, #EF4444, #EC4899)" },
+            { to: "/donors", icon: Search, label: "Find Donors", gradient: "linear-gradient(135deg, #3B82F6, #06B6D4)" },
+            { to: "/requests", icon: AlertCircle, label: "View Requests", gradient: "linear-gradient(135deg, #F97316, #EAB308)" },
+            { action: "scroll-donation", icon: Droplets, label: "Log Donation", gradient: "linear-gradient(135deg, #8B5CF6, #EC4899)" },
+            { to: "/bookmarks", icon: Heart, label: "Bookmarks", gradient: "linear-gradient(135deg, #10B981, #14B8A6)" },
+            { to: "/notifications", icon: Bell, label: "Notifications", gradient: "linear-gradient(135deg, #6366F1, #8B5CF6)" },
+          ].map((item) => {
+            const inner = (
+              <div style={{
+                width: 56, height: 56, borderRadius: "50%",
+                background: item.gradient,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#fff", cursor: "pointer",
+                transition: "all 0.2s ease",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.1)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)"; }}
+              >
+                <item.icon size={22} />
+              </div>
+            );
+            if (item.action === "scroll-donation") {
+              return (
+                <button key={item.label} title={item.label}
+                  onClick={() => document.getElementById("log-donation")?.scrollIntoView({ behavior: "smooth" })}
+                  style={{ background: "none", border: "none", padding: 0 }}
+                >{inner}</button>
+              );
+            }
+            return (
+              <Link key={item.label} to={item.to} title={item.label} style={{ textDecoration: "none" }}>
+                {inner}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
@@ -496,11 +456,18 @@ export default function DashboardPage() {
         @media(max-width:768px){
           .dash-stats{grid-template-columns:repeat(2,1fr) !important;}
           .dash-two-col{grid-template-columns:1fr !important;}
-          .dash-actions{grid-template-columns:repeat(2,1fr) !important;}
+          .dash-quick-actions{
+            display:grid !important;
+            grid-template-columns:repeat(3,1fr) !important;
+            justify-items:center;
+            gap:16px !important;
+          }
         }
         @media(max-width:480px){
           .dash-stats{grid-template-columns:1fr !important;}
-          .dash-actions{grid-template-columns:1fr !important;}
+          .dash-quick-actions{
+            grid-template-columns:repeat(2,1fr) !important;
+          }
           .dash-toggle{width:100% !important; justify-content:center; padding:8px 16px 8px 8px !important;}
         }
       `}</style>
