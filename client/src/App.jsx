@@ -48,6 +48,7 @@ import SettingsPage from "./pages/settings/SettingsPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import ChatPage from "./pages/chat/ChatPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import LoadingAnimation from "./components/ui/LoadingAnimation";
 
 // React Query client — manages data caching. staleTime=300000 means data is "fresh" for 5 minutes
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 300000, retry: 1 } } });
@@ -59,7 +60,7 @@ const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30
  */
 function Protected({ children }) {
   const { isAuthenticated, loading } = useAuth();
-  if (loading) return <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'60vh'}}><div className="animate-pulse" style={{width:40,height:40,borderRadius:'50%',background:'var(--purple)'}}/></div>;
+  if (loading) return <LoadingAnimation text="Checking your session" />;
   return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
