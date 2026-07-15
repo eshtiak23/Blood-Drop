@@ -16,12 +16,12 @@
  * - Chat unread badge (red circle with count)
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useChat } from "../../context/ChatContext";
-import { Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus, Search, MessageCircle } from "lucide-react";
+import { X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus, MessageCircle, Home, Users, AlertCircle, Droplets } from "lucide-react";
 import api from "../../services/api";
 import toast from "react-hot-toast";
 
@@ -34,6 +34,16 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isClosing, setIsClosing] = useState(false);
+
+  /** Close overlay with exit animation */
+  const closeOverlay = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setOpen(false);
+      setIsClosing(false);
+    }, 250);
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -43,8 +53,26 @@ export default function Navbar() {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
+  // Close overlay on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handleEsc = (e) => { if (e.key === "Escape") closeOverlay(); };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [open, closeOverlay]);
+
+  // Lock body scroll when overlay is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
   /** Log out and redirect to home page */
-  const handleLogout = () => { logout(); navigate("/"); setMenuOpen(false); setOpen(false); toast.success("Logged out"); };
+  const handleLogout = () => { logout(); navigate("/"); closeOverlay(); setMenuOpen(false); toast.success("Logged out"); };
 
   /** Check if a nav link is active (matches current path) */
   const isActive = (path) => {
@@ -153,49 +181,122 @@ export default function Navbar() {
 
           {/* Mobile Hamburger Menu Button */}
           <button className="mobile-menu-btn" onClick={() => setOpen(!open)} style={{ padding: 8, borderRadius: 8, display: "none", alignItems: "center", justifyContent: "center", color: "var(--text)" }}>
-            {open ? <X size={20} /> : <Menu size={20} />}
+            <div className={`hamburger-morph ${open ? "open" : ""}`}>
+              <span /><span /><span />
+            </div>
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu — slides down when hamburger is clicked */}
+      {/* Full-Screen Mobile Overlay Menu */}
       {open && (
-        <div className="mobile-menu" style={{ borderTop: "1px solid var(--border)", padding: "8px 16px 16px" }}>
-          {navLinks.map(([path, label]) => {
-            const active = isActive(path);
-            return (
-              <Link key={path} to={path} onClick={() => setOpen(false)}
-                className={active ? "nav-link active" : "nav-link"}
-                style={{
-                  display: "block", padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8,
-                  color: active ? "var(--red)" : "var(--text)",
-                  background: active ? "var(--red-light)" : "transparent",
-                  transition: "all 0.2s",
-                }}
-              >{label}</Link>
-            );
-          })}
-          <div style={{ borderTop: "1px solid var(--border)", marginTop: 8, paddingTop: 8 }}>
+        <div className={`mobile-overlay ${isClosing ? "exit" : ""}`}>
+          {/* Floating blood drops */}
+          <div className="mobile-overlay-drop" />
+          <div className="mobile-overlay-drop" />
+          <div className="mobile-overlay-drop" />
+          <div className="mobile-overlay-drop" />
+
+          {/* Close button */}
+          <button className="mobile-overlay-close" onClick={closeOverlay}>
+            <X size={20} />
+          </button>
+
+          <div className="mobile-overlay-content">
+            {/* User profile card (if authenticated) */}
+            {isAuthenticated && user && (
+              <div className="mobile-overlay-profile">
+                <div className="mobile-overlay-avatar">
+                  {user?.photo ? (
+                    <img src={user.photo} alt={user.name} />
+                  ) : (
+                    user?.name?.charAt(0)?.toUpperCase()
+                  )}
+                </div>
+                <div>
+                  <div className="mobile-overlay-name">{user?.name}</div>
+                  <div className="mobile-overlay-blood">
+                    {user?.bloodGroup && (
+                      <span style={{ color: "#EF4444", fontWeight: 600 }}>{user.bloodGroup}</span>
+                    )}
+                    {user?.bloodGroup && user?.district && " · "}
+                    {user?.district}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Navigation links */}
+            {navLinks.map(([path, label]) => {
+              const active = isActive(path);
+              const iconMap = { "/": Home, "/donors": Users, "/requests": AlertCircle };
+              const Icon = iconMap[path] || Droplets;
+              return (
+                <Link
+                  key={path}
+                  to={path}
+                  onClick={closeOverlay}
+                  className={`mobile-overlay-link ${active ? "active" : ""}`}
+                >
+                  <Icon size={20} />
+                  {label}
+                </Link>
+              );
+            })}
+
+            <div className="mobile-overlay-divider" />
+
+            {/* Auth links */}
             {isAuthenticated ? (
               <>
-                <Link to="/dashboard" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><LayoutDashboard size={16} /> Dashboard</Link>
-                <Link to="/chat" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}>
-                  <MessageCircle size={16} /> Chat
+                <Link to="/dashboard" onClick={closeOverlay} className="mobile-overlay-link">
+                  <LayoutDashboard size={20} />
+                  Dashboard
+                </Link>
+                <Link to="/chat" onClick={closeOverlay} className="mobile-overlay-link">
+                  <MessageCircle size={20} />
+                  Chat
                   {unreadTotal > 0 && (
-                    <span style={{ marginLeft: "auto", width: 20, height: 20, borderRadius: 10, background: "var(--red)", color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ marginLeft: "auto", width: 22, height: 22, borderRadius: 11, background: "#EF4444", color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       {unreadTotal > 9 ? "9+" : unreadTotal}
                     </span>
                   )}
                 </Link>
-                <Link to="/notifications" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Bell size={16} /> Notifications</Link>
-                <Link to="/bookmarks" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Bookmark size={16} /> Bookmarks</Link>
-                <Link to="/settings" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><Settings size={16} /> Settings</Link>
-                <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8, color: "var(--red)", width: "100%" }}><LogOut size={16} /> Logout</button>
+                <Link to="/notifications" onClick={closeOverlay} className="mobile-overlay-link">
+                  <Bell size={20} />
+                  Notifications
+                  {unreadCount > 0 && (
+                    <span style={{ marginLeft: "auto", width: 22, height: 22, borderRadius: 11, background: "#EF4444", color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
+                <Link to="/bookmarks" onClick={closeOverlay} className="mobile-overlay-link">
+                  <Bookmark size={20} />
+                  Bookmarks
+                </Link>
+                <Link to="/settings" onClick={closeOverlay} className="mobile-overlay-link">
+                  <Settings size={20} />
+                  Settings
+                </Link>
+
+                <div className="mobile-overlay-divider" />
+
+                <button onClick={handleLogout} className="mobile-overlay-link" style={{ color: "#EF4444" }}>
+                  <LogOut size={20} />
+                  Logout
+                </button>
               </>
             ) : (
               <>
-                <Link to="/login" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><LogIn size={16} /> Login</Link>
-                <Link to="/register" onClick={() => setOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", fontSize: 15, fontWeight: 500, borderRadius: 8 }}><UserPlus size={16} /> Register</Link>
+                <Link to="/login" onClick={closeOverlay} className="mobile-overlay-link">
+                  <LogIn size={20} />
+                  Login
+                </Link>
+                <Link to="/register" onClick={closeOverlay} className="mobile-overlay-link">
+                  <UserPlus size={20} />
+                  Register
+                </Link>
               </>
             )}
           </div>

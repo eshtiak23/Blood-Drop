@@ -713,3 +713,244 @@ textarea.input { min-height: 100px; resize: vertical; }
     justify-content: center;
   }
 }
+
+/* ── Full-Screen Mobile Overlay Menu ── */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: overlayFadeIn 0.3s ease forwards;
+}
+.dark .mobile-overlay {
+  background: rgba(0, 0, 0, 0.8);
+}
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mobile-overlay-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 80px 24px 32px;
+  overflow-y: auto;
+}
+
+/* Hamburger morph to X */
+.hamburger-morph {
+  width: 24px;
+  height: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.hamburger-morph span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+.hamburger-morph.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.hamburger-morph.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.hamburger-morph.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+.dark .hamburger-morph span {
+  background: #fff;
+}
+
+/* Mobile overlay links */
+.mobile-overlay-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 12px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(40px);
+  animation: mobileLinkSlideIn 0.35s ease forwards;
+  transition: background 0.2s ease;
+}
+.mobile-overlay-link:nth-child(1) { animation-delay: 0.06s; }
+.mobile-overlay-link:nth-child(2) { animation-delay: 0.12s; }
+.mobile-overlay-link:nth-child(3) { animation-delay: 0.18s; }
+.mobile-overlay-link:nth-child(4) { animation-delay: 0.24s; }
+.mobile-overlay-link:nth-child(5) { animation-delay: 0.30s; }
+.mobile-overlay-link:nth-child(6) { animation-delay: 0.36s; }
+.mobile-overlay-link:nth-child(7) { animation-delay: 0.42s; }
+.mobile-overlay-link:nth-child(8) { animation-delay: 0.48s; }
+
+@keyframes mobileLinkSlideIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.mobile-overlay-link:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+.mobile-overlay-link.active {
+  background: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+}
+
+/* Red accent line on left of link */
+.mobile-overlay-link::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: #EF4444;
+  border-radius: 0 4px 4px 0;
+  transition: height 0.25s ease;
+}
+.mobile-overlay-link:hover::before,
+.mobile-overlay-link.active::before {
+  height: 60%;
+}
+
+/* Overlay section divider */
+.mobile-overlay-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 12px 0;
+  opacity: 0;
+  animation: mobileLinkSlideIn 0.35s ease forwards;
+}
+.mobile-overlay-divider:nth-child(1) { animation-delay: 0.2s; }
+.mobile-overlay-divider:nth-child(2) { animation-delay: 0.38s; }
+
+/* User profile card in overlay */
+.mobile-overlay-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: profileSlideDown 0.4s ease forwards;
+}
+@keyframes profileSlideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-overlay-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid rgba(239, 68, 68, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: #EF4444;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.mobile-overlay-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mobile-overlay-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+.mobile-overlay-blood {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+}
+
+/* Floating blood drops in overlay */
+.mobile-overlay-drop {
+  position: absolute;
+  width: 8px;
+  height: 10px;
+  background: rgba(239, 68, 68, 0.25);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: floatDrop 4s ease-in-out infinite;
+  pointer-events: none;
+}
+.mobile-overlay-drop:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; animation-duration: 4.5s; }
+.mobile-overlay-drop:nth-child(2) { left: 85%; top: 35%; animation-delay: 1.2s; animation-duration: 3.8s; width: 6px; height: 8px; }
+.mobile-overlay-drop:nth-child(3) { left: 20%; top: 70%; animation-delay: 2.4s; animation-duration: 5s; width: 10px; height: 12px; }
+.mobile-overlay-drop:nth-child(4) { left: 75%; top: 80%; animation-delay: 0.8s; animation-duration: 4.2s; }
+
+@keyframes floatDrop {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.25; }
+  50% { transform: translateY(-20px) rotate(10deg); opacity: 0.5; }
+}
+
+/* Overlay close button */
+.mobile-overlay-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0;
+  animation: profileSlideDown 0.4s ease 0.1s forwards;
+}
+.mobile-overlay-close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Overlay exit animation */
+.mobile-overlay.exit {
+  animation: overlayFadeOut 0.25s ease forwards;
+}
+.mobile-overlay.exit .mobile-overlay-link {
+  animation: mobileLinkSlideOut 0.2s ease forwards;
+}
+@keyframes overlayFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes mobileLinkSlideOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-30px); }
+}
