@@ -11,13 +11,14 @@
  */
 
 import { ArrowLeft, Phone } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function ConversationHeader({ user, onBack, isOnline }) {
   const handleCall = () => {
     if (user?.phone) {
       window.open(`tel:${user.phone}`, "_self");
     } else {
-      alert("Phone number not available");
+      toast.error("Phone number not available");
     }
   };
 

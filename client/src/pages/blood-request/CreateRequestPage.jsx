@@ -9,6 +9,7 @@ import { BLOOD_GROUPS, DISTRICTS, AREAS, URGENCY } from "../../data/constants";
 import { useAuth } from "../../context/AuthContext";
 import { createRequest } from "../../services/localStore";
 import { ArrowLeft } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function CreateRequestPage() {
   const { user } = useAuth();
@@ -22,8 +23,9 @@ export default function CreateRequestPage() {
     e.preventDefault(); setError("");
     try {
       await createRequest(form);
+      toast.success("Request created successfully!");
       navigate("/requests");
-    } catch (err) { setError(err.response?.data?.error || err.message); }
+    } catch (err) { setError(err.response?.data?.error || err.message); toast.error(err.response?.data?.error || err.message); }
   };
 
   return (

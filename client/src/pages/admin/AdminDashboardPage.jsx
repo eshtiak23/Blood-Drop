@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Users, Heart, AlertCircle, Shield, CheckCircle } from "lucide-react";
 import { getRequests } from "../../services/localStore";
 import api from "../../services/api";
+import toast from "react-hot-toast";
 
 export default function AdminDashboardPage() {
   const [users, setUsers] = useState([]);
@@ -25,13 +26,18 @@ export default function AdminDashboardPage() {
         openRequests: requests.filter((r) => r.status === "open").length,
         pendingVerifications: allUsers.filter((u) => u.role !== "admin" && !u.isVerified).length,
       });
-    }).catch(console.error);
+    }).catch((err) => { console.error(err); toast.error("Failed to load admin data"); });
   }, []);
 
   /** Verifies a donor via admin API and updates local state */
   const verifyDonor = async (id) => {
-    await api.patch(`/auth/users/${id}/verify`);
-    setUsers(users.map((u) => u._id === id ? { ...u, isVerified: true } : u));
+    try {
+      await api.patch(`/auth/users/${id}/verify`);
+      setUsers(users.map((u) => u._id === id ? { ...u, isVerified: true } : u));
+      toast.success("Donor verified!");
+    } catch (err) {
+      toast.error("Failed to verify donor");
+    }
   };
 
   return (

@@ -17,6 +17,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { DISTRICTS, AREAS } from "../../data/constants";
 import { Moon, Lock, LogOut, Camera, User, Save, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function SettingsPage() {
   const { user, updateUser, logout } = useAuth();
@@ -73,16 +74,17 @@ export default function SettingsPage() {
   /** Remove profile photo */
   const removePhoto = () => {
     updateUser({ photo: null });
+    toast.success("Photo removed");
   };
 
   /** Save profile changes */
   const handleSave = () => {
     setSaving(true);
-    // Simulate a brief save delay for UX
     setTimeout(() => {
       updateUser(form);
       setSaving(false);
       setSaved(true);
+      toast.success("Profile updated!");
       setTimeout(() => setSaved(false), 2000);
     }, 400);
   };
@@ -190,7 +192,7 @@ export default function SettingsPage() {
               <div style={{ fontWeight: 600, fontSize: 14 }}>Logout</div>
               <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Sign out of your account</div>
             </div>
-            <button className="btn btn-secondary btn-sm" onClick={() => { logout(); navigate("/"); }}><LogOut size={14} /> Logout</button>
+            <button className="btn btn-secondary btn-sm" onClick={() => { logout(); navigate("/"); toast.success("Logged out"); }}><LogOut size={14} /> Logout</button>
           </div>
         </div>
       </div>

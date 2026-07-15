@@ -21,6 +21,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "react-hot-toast";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -157,6 +158,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <Toaster position="top-right" toastOptions={{ duration: 3000, style: { fontSize: 14, fontWeight: 600, borderRadius: 12, padding: "12px 16px" }, success: { iconTheme: { primary: "#22C55E", secondary: "#fff" } }, error: { iconTheme: { primary: "#EF4444", secondary: "#fff" } } }} />
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>

@@ -17,6 +17,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, Smile, Plus, X } from "lucide-react";
+import toast from "react-hot-toast";
 
 /* ── Emoji data: ~80 common emojis in a grid ── */
 const EMOJI_ROWS = [
@@ -94,7 +95,7 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-      alert("Image must be under 2MB");
+      toast.error("Image must be under 2MB");
       return;
     }
     const reader = new FileReader();

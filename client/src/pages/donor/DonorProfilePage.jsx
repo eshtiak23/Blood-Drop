@@ -8,6 +8,7 @@ import { BLOOD_GROUP_COLORS } from "../../data/constants";
 import { addBookmark, isBookmarked, removeBookmark } from "../../services/localStore";
 import api from "../../services/api";
 import { MapPin, Phone, Calendar, Droplets, Shield, Bookmark, ArrowLeft, MessageCircle } from "lucide-react";
+import toast from "react-hot-toast";
 
 /** Returns blood group badge colors based on dark/light theme */
 function getBloodGroupColor(bloodGroup) {
@@ -31,8 +32,12 @@ export default function DonorProfilePage() {
   }, [id]);
 
   const toggleBookmark = async () => {
-    if (bookmarked) { await removeBookmark(id); setBookmarked(false); }
-    else { await addBookmark(id); setBookmarked(true); }
+    try {
+      if (bookmarked) { await removeBookmark(id); setBookmarked(false); toast.success("Bookmark removed"); }
+      else { await addBookmark(id); setBookmarked(true); toast.success("Bookmark added"); }
+    } catch (err) {
+      toast.error("Failed to update bookmark");
+    }
   };
 
   if (!donor) return <div className="container" style={{ padding: 40, textAlign: "center" }}>Donor not found</div>;

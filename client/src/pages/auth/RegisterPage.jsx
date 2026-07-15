@@ -11,6 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { BLOOD_GROUPS, DISTRICTS, AREAS } from "../../data/constants";
 import { Heart, Loader2, Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -33,8 +34,9 @@ export default function RegisterPage() {
     try {
       const { confirmPassword, ...data } = form;
       await register(data);
+      toast.success("Account created! Welcome!");
       navigate("/dashboard");
-    } catch (err) { setError(err.message); }
+    } catch (err) { setError(err.message); toast.error(err.message); }
     finally { setLoading(false); }
   };
 

@@ -6,6 +6,7 @@
 import { useState, useEffect } from "react";
 import { getNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification } from "../../services/localStore";
 import { Bell, Check, Trash2, CheckCheck, Droplets, CheckCircle, PartyPopper, Shield, Clock } from "lucide-react";
+import toast from "react-hot-toast";
 
 const NOTIFICATION_STYLES = {
   blood_request: { icon: Droplets, bg: "#FEE2E2", color: "#DC2626", border: "#FECACA", darkBg: "rgba(239,68,68,0.12)", darkBorder: "rgba(239,68,68,0.25)" },
@@ -27,9 +28,9 @@ export default function NotificationsPage() {
 
   useEffect(() => { refresh(); }, []);
 
-  const markRead = async (id) => { await markNotificationRead(id); refresh(); };
-  const markAll = async () => { await markAllNotificationsRead(); refresh(); };
-  const remove = async (id) => { await deleteNotification(id); refresh(); };
+  const markRead = async (id) => { await markNotificationRead(id); refresh(); toast.success("Marked as read"); };
+  const markAll = async () => { await markAllNotificationsRead(); refresh(); toast.success("All notifications marked as read"); };
+  const remove = async (id) => { await deleteNotification(id); refresh(); toast.success("Notification deleted"); };
 
   const getStyle = (type) => NOTIFICATION_STYLES[type] || NOTIFICATION_STYLES.blood_request;
 

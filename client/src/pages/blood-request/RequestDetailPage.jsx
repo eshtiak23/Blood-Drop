@@ -10,6 +10,7 @@ import api from "../../services/api";
 import { getRequests, acceptRequest, completeRequest, addRating, hasRated, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS, URGENCY } from "../../data/constants";
 import { MapPin, Phone, Calendar, Clock, User, Hospital, CheckCircle, ArrowLeft, Star, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 /** Returns themed background/text colors for a blood group badge. */
 function getBloodGroupColor(bloodGroup) {
@@ -42,11 +43,12 @@ export default function RequestDetailPage() {
     try {
       if (action === "accept") await acceptRequest(id);
       else if (action === "complete") await completeRequest(id);
+      toast.success(action === "accept" ? "Request accepted!" : "Marked as complete!");
       const res = await api.get(`/requests/${id}`);
       setRequest(res.data.request);
       setShowModal("");
     } catch (err) {
-      console.error(err);
+      toast.error(`Failed to ${action}`);
       setShowModal("");
     }
   };
@@ -61,8 +63,9 @@ export default function RequestDetailPage() {
       const ratedUserId = isRequester ? request.acceptedBy?._id : request.requester?._id;
       await addRating({ requestId: id, ratedUserId, rating: ratingForm.rating, comment: ratingForm.comment });
       setRated(true);
+      toast.success("Thanks for your rating!");
     } catch (err) {
-      console.error(err);
+      toast.error("Failed to submit rating");
     } finally {
       setRatingSaving(false);
     }
@@ -70,8 +73,13 @@ export default function RequestDetailPage() {
 
   /** Delete the request and navigate back */
   const handleDelete = async () => {
-    await deleteRequest(id);
-    navigate("/requests");
+    try {
+      await deleteRequest(id);
+      toast.success("Request deleted");
+      navigate("/requests");
+    } catch (err) {
+      toast.error("Failed to delete request");
+    }
   };
 
   if (!request) return (

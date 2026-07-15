@@ -18,6 +18,7 @@ import {
   Shield, Clock, TrendingUp, Activity, ArrowRight, Calendar, Star,
   Building2, MessageSquare, Trash2, CheckCircle, Loader2, X, Bell
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 /** Returns theme-aware blood group badge colors */
 function getBloodGroupColor(bloodGroup) {
@@ -74,7 +75,7 @@ export default function DashboardPage() {
       setFeedbackList(allFeedback.slice(0, 10));
       setMyFeedback(myFb);
       setCooldown(getDonationCooldown(user));
-    }).catch(console.error);
+    }).catch((err) => { console.error(err); toast.error("Failed to load dashboard data"); });
   }, [user]);
 
   /** Log a blood donation — updates user stats and saves the log */
@@ -90,9 +91,10 @@ export default function DashboardPage() {
       setDonationLogs(logs);
       setDonationForm({ donationDate: "", hospital: "" });
       setDonationSaved(true);
+      toast.success("Donation logged!");
       setTimeout(() => setDonationSaved(false), 2000);
     } catch (err) {
-      console.error(err);
+      toast.error("Failed to log donation");
     }
     setDonationSaving(false);
   };
@@ -111,6 +113,7 @@ export default function DashboardPage() {
       setMyFeedback(myFb);
       setFeedbackForm({ rating: 5, comment: "" });
       setFeedbackSaved(true);
+      toast.success("Feedback submitted!");
       setTimeout(() => setFeedbackSaved(false), 2000);
     } catch (err) {
       setFeedbackError(err.response?.data?.error || err.message);
@@ -120,16 +123,26 @@ export default function DashboardPage() {
 
   /** Delete own feedback */
   const handleDeleteFeedback = async (fbId) => {
-    await deleteFeedback(fbId);
-    const allFb = await getAllFeedback();
-    const myFb = await getMyFeedback();
-    setFeedbackList(allFb.slice(0, 10));
-    setMyFeedback(myFb);
+    try {
+      await deleteFeedback(fbId);
+      toast.success("Feedback removed");
+      const allFb = await getAllFeedback();
+      const myFb = await getMyFeedback();
+      setFeedbackList(allFb.slice(0, 10));
+      setMyFeedback(myFb);
+    } catch (err) {
+      toast.error("Failed to delete feedback");
+    }
   };
 
   /** Toggle donor availability on/off */
   const handleToggleAvailability = async () => {
-    await updateUser({ isAvailable: !user.isAvailable });
+    try {
+      await updateUser({ isAvailable: !user.isAvailable });
+      toast.success("Status updated");
+    } catch (err) {
+      toast.error("Failed to update status");
+    }
   };
 
   const c = getBloodGroupColor(user?.bloodGroup);

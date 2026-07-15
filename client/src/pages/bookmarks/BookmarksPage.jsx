@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { getBookmarks, removeBookmark } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
 import { Bookmark, MapPin, Droplets, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 /** Returns blood group badge colors based on dark/light theme */
 function getBloodGroupColor(bloodGroup) {
@@ -21,7 +22,15 @@ export default function BookmarksPage() {
 
   useEffect(() => { getBookmarks().then(setBookmarks).catch(() => setBookmarks([])); }, []);
 
-  const remove = async (donorId) => { await removeBookmark(donorId); getBookmarks().then(setBookmarks); };
+  const remove = async (donorId) => {
+    try {
+      await removeBookmark(donorId);
+      getBookmarks().then(setBookmarks);
+      toast.success("Bookmark removed");
+    } catch (err) {
+      toast.error("Failed to remove bookmark");
+    }
+  };
 
   return (
     <div className="container" style={{ padding: "32px 20px" }}>

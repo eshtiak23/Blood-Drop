@@ -23,6 +23,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useChat } from "../../context/ChatContext";
 import { Menu, X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus, Search, MessageCircle } from "lucide-react";
 import api from "../../services/api";
+import toast from "react-hot-toast";
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -43,7 +44,7 @@ export default function Navbar() {
   }, [isAuthenticated]);
 
   /** Log out and redirect to home page */
-  const handleLogout = () => { logout(); navigate("/"); setMenuOpen(false); setOpen(false); };
+  const handleLogout = () => { logout(); navigate("/"); setMenuOpen(false); setOpen(false); toast.success("Logged out"); };
 
   /** Check if a nav link is active (matches current path) */
   const isActive = (path) => {

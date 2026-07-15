@@ -21,6 +21,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { useAuth } from "./AuthContext.jsx";
 import useSocket from "../hooks/useSocket.js";
 import * as chatService from "../services/chatService.js";
+import toast from "react-hot-toast";
 
 const ChatContext = createContext(null);
 
@@ -248,6 +249,7 @@ export function ChatProvider({ children }) {
         return message;
       } catch (err) {
         console.error("[Chat] Failed to send message:", err);
+        toast.error("Failed to send message");
         return null;
       }
     },

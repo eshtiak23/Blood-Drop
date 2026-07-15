@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Heart, Eye, EyeOff, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -22,8 +23,8 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); setError("");
-    try { await login(form.email, form.password); navigate("/dashboard"); }
-    catch (err) { setError(err.message); }
+    try { await login(form.email, form.password); toast.success("Welcome back!"); navigate("/dashboard"); }
+    catch (err) { setError(err.message); toast.error(err.message); }
     finally { setLoading(false); }
   };
 

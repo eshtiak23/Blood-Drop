@@ -10,6 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { searchRequests, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
 import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2, MessageCircle } from "lucide-react";
+import toast from "react-hot-toast";
 
 /** Returns themed background/text colors for a blood group badge. */
 function getBloodGroupColor(bloodGroup) {
@@ -30,10 +31,15 @@ export default function RequestListPage() {
   }, [filters]);
 
   const handleDelete = async (requestId) => {
-    await deleteRequest(requestId);
-    const updated = await searchRequests(filters);
-    setRequests(updated);
-    setShowDelete(null);
+    try {
+      await deleteRequest(requestId);
+      toast.success("Request deleted");
+      const updated = await searchRequests(filters);
+      setRequests(updated);
+      setShowDelete(null);
+    } catch (err) {
+      toast.error("Failed to delete request");
+    }
   };
 
   return (
