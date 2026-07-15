@@ -3,9 +3,10 @@
  * Displays hero banner, stats, how-it-works steps, features, blood groups,
  * testimonials, FAQ accordion, and a call-to-action section.
  */
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Star, AlertTriangle, Droplet } from "lucide-react";
+import { Heart, ArrowRight, Search, Phone, Shield, History, Bell, Lock, ChevronDown, Star, AlertTriangle, Droplet, X, Droplets } from "lucide-react";
 import { TESTIMONIALS, FAQS, BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 import { getAllFeedback } from "../../services/localStore";
 import api from "../../services/api";
@@ -69,6 +70,7 @@ export default function LandingPage() {
   const [bannerIdx, setBannerIdx] = useState(0);
   const [realStats, setRealStats] = useState(null);
   const [selectedBloodType, setSelectedBloodType] = useState("O-");
+  const [showCompatModal, setShowCompatModal] = useState(false);
   const banners = ["/banner1.png", "/banner2.png"];
 
   useEffect(() => {
@@ -90,6 +92,14 @@ export default function LandingPage() {
     const timer = setInterval(() => setBannerIdx((i) => (i + 1) % banners.length), 4000);
     return () => clearInterval(timer);
   }, [banners.length]);
+
+  // Close compat modal on Escape key
+  useEffect(() => {
+    if (!showCompatModal) return;
+    const handleEsc = (e) => { if (e.key === "Escape") setShowCompatModal(false); };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [showCompatModal]);
 
   // Merge static testimonials with user feedback (user feedback shows first)
   const allTestimonials = [...userFeedback, ...TESTIMONIALS];
@@ -185,17 +195,130 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Blood Compatibility Chart ── */}
+      {/* ── Blood Compatibility Chart (Compact Trigger) ── */}
       <section className="section">
-        <div className="container" style={{ textAlign: "center" }}>
+        <div className="container">
           <AnimatedDiv>
-            <h2 style={{ fontSize: 32, fontWeight: 800 }}>Blood Compatibility Chart</h2>
-            <p style={{ color: "var(--text-secondary)", marginTop: 8, maxWidth: 500, margin: "8px auto 0" }}>Know which blood types can safely donate to each other for transfusions</p>
+            <div
+              onClick={() => setShowCompatModal(true)}
+              style={{
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-light)",
+                borderRadius: "var(--radius-xl)",
+                padding: "40px 32px",
+                textAlign: "center",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                maxWidth: 700,
+                margin: "0 auto",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = "var(--shadow-lg)";
+                e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.borderColor = "var(--border-light)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 12 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: "var(--red-light)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Droplets size={24} color="var(--red)" />
+                </div>
+                <h2 style={{ fontSize: 24, fontWeight: 800 }}>Blood Compatibility Chart</h2>
+              </div>
+              <p style={{ color: "var(--text-secondary)", fontSize: 15, maxWidth: 440, margin: "0 auto 20px", lineHeight: 1.6 }}>
+                Know which blood types can safely donate to each other for transfusions
+              </p>
+              {/* Mini blood type pills preview */}
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6, marginBottom: 20 }}>
+                {BLOOD_TYPES.map((bt) => {
+                  const c = getBloodGroupColor(bt);
+                  return (
+                    <span key={bt} style={{ padding: "5px 12px", borderRadius: 20, fontSize: 12, fontWeight: 700, background: c.bg || "var(--bg-secondary)", color: c.text || "var(--text)" }}>
+                      {bt}
+                    </span>
+                  );
+                })}
+              </div>
+              {/* CTA */}
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 24px", borderRadius: 50, background: "var(--red)", color: "#fff", fontSize: 14, fontWeight: 700, transition: "all 0.2s" }}>
+                View Full Chart <ArrowRight size={16} />
+              </div>
+            </div>
           </AnimatedDiv>
+        </div>
+      </section>
 
-          {/* Blood type selector pills */}
-          <AnimatedDiv delay={0.1}>
-            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, marginTop: 32 }}>
+      {/* ── Blood Compatibility Modal ── */}
+      {showCompatModal && createPortal(
+        <div
+          onClick={() => setShowCompatModal(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 10000,
+            background: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            overflowY: "auto",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "var(--bg-card)",
+              borderRadius: "var(--radius-xl)",
+              width: "100%",
+              maxWidth: 680,
+              maxHeight: "90vh",
+              overflowY: "auto",
+              padding: "28px 24px",
+              position: "relative",
+            }}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowCompatModal(false)}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 16,
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "var(--bg-secondary)",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "var(--text-secondary)",
+                transition: "all 0.15s",
+                zIndex: 1,
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--red-light)"; e.currentTarget.style.color = "var(--red)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "var(--bg-secondary)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+            >
+              <X size={18} />
+            </button>
+
+            {/* Title */}
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--red-light)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                <Droplets size={22} color="var(--red)" />
+              </div>
+              <h2 style={{ fontSize: 22, fontWeight: 800 }}>Blood Compatibility Chart</h2>
+              <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 6 }}>Select a blood type to see compatibility</p>
+            </div>
+
+            {/* Blood type selector pills */}
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6, marginBottom: 24 }}>
               {BLOOD_TYPES.map((bt) => {
                 const c = getBloodGroupColor(bt);
                 const isSelected = selectedBloodType === bt;
@@ -204,12 +327,12 @@ export default function LandingPage() {
                     key={bt}
                     onClick={() => setSelectedBloodType(bt)}
                     style={{
-                      padding: "10px 20px", borderRadius: 50, border: "none", cursor: "pointer",
-                      fontSize: 14, fontWeight: 700, transition: "all 0.3s ease",
+                      padding: "8px 16px", borderRadius: 50, border: "none", cursor: "pointer",
+                      fontSize: 13, fontWeight: 700, transition: "all 0.2s ease",
                       background: isSelected ? (c.text || "#DC2626") : (c.bg || "var(--bg-secondary)"),
                       color: isSelected ? "#fff" : (c.text || "var(--text)"),
-                      boxShadow: isSelected ? `0 4px 15px ${c.text || "#DC2626"}44` : "none",
-                      transform: isSelected ? "scale(1.08)" : "scale(1)",
+                      boxShadow: isSelected ? `0 3px 12px ${c.text || "#DC2626"}44` : "none",
+                      transform: isSelected ? "scale(1.06)" : "scale(1)",
                     }}
                   >
                     {bt}
@@ -217,27 +340,25 @@ export default function LandingPage() {
                 );
               })}
             </div>
-          </AnimatedDiv>
 
-          {/* Donate To / Receive From cards */}
-          <AnimatedDiv delay={0.2}>
-            <div className="compat-cards" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 32, textAlign: "left" }}>
+            {/* Donate To / Receive From cards */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 24 }}>
               {/* Can Donate To */}
-              <div className="card" style={{ padding: 24 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--green-light)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Heart size={18} color="var(--green)" fill="var(--green)" />
+              <div style={{ padding: 18, borderRadius: "var(--radius)", border: "1px solid var(--border-light)", background: "var(--bg-card)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--green-light)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Heart size={16} color="var(--green)" fill="var(--green)" />
                   </div>
                   <div>
-                    <div style={{ fontSize: 16, fontWeight: 700 }}>Can Donate To</div>
-                    <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{COMPATIBILITY[selectedBloodType].donateTo.length} blood types</div>
+                    <div style={{ fontSize: 14, fontWeight: 700 }}>Can Donate To</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{COMPATIBILITY[selectedBloodType].donateTo.length} types</div>
                   </div>
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {COMPATIBILITY[selectedBloodType].donateTo.map((bt) => {
                     const c = getBloodGroupColor(bt);
                     return (
-                      <span key={bt} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600, background: c.bg || "var(--bg-secondary)", color: c.text || "var(--text)" }}>
+                      <span key={bt} style={{ padding: "4px 10px", borderRadius: 16, fontSize: 12, fontWeight: 600, background: c.bg || "var(--bg-secondary)", color: c.text || "var(--text)" }}>
                         {bt}
                       </span>
                     );
@@ -246,21 +367,21 @@ export default function LandingPage() {
               </div>
 
               {/* Can Receive From */}
-              <div className="card" style={{ padding: 24 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--red-light)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Droplet size={18} color="var(--red)" />
+              <div style={{ padding: 18, borderRadius: "var(--radius)", border: "1px solid var(--border-light)", background: "var(--bg-card)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--red-light)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Droplet size={16} color="var(--red)" />
                   </div>
                   <div>
-                    <div style={{ fontSize: 16, fontWeight: 700 }}>Can Receive From</div>
-                    <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{COMPATIBILITY[selectedBloodType].receiveFrom.length} blood types</div>
+                    <div style={{ fontSize: 14, fontWeight: 700 }}>Can Receive From</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{COMPATIBILITY[selectedBloodType].receiveFrom.length} types</div>
                   </div>
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {COMPATIBILITY[selectedBloodType].receiveFrom.map((bt) => {
                     const c = getBloodGroupColor(bt);
                     return (
-                      <span key={bt} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600, background: c.bg || "var(--bg-secondary)", color: c.text || "var(--text)" }}>
+                      <span key={bt} style={{ padding: "4px 10px", borderRadius: 16, fontSize: 12, fontWeight: 600, background: c.bg || "var(--bg-secondary)", color: c.text || "var(--text)" }}>
                         {bt}
                       </span>
                     );
@@ -268,30 +389,28 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-          </AnimatedDiv>
 
-          {/* Full compatibility matrix */}
-          <AnimatedDiv delay={0.3}>
-            <div style={{ marginTop: 32, overflowX: "auto" }}>
-              <table className="compat-matrix" style={{ width: "100%", borderCollapse: "separate", borderSpacing: 3, fontSize: 13 }}>
+            {/* Full compatibility matrix */}
+            <div style={{ overflowX: "auto", marginBottom: 20 }}>
+              <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 2, fontSize: 12 }}>
                 <thead>
                   <tr>
-                    <th style={{ padding: "8px 6px", fontWeight: 700, color: "var(--text-muted)", fontSize: 11, textAlign: "center" }}>Donor ↓ / Recipient →</th>
+                    <th style={{ padding: "6px 4px", fontWeight: 700, color: "var(--text-muted)", fontSize: 10, textAlign: "center" }}>Donor ↓ / Recipient →</th>
                     {BLOOD_TYPES.map((bt) => (
-                      <th key={bt} style={{ padding: "8px 6px", fontWeight: 700, fontSize: 12, textAlign: "center", color: selectedBloodType === bt ? "var(--red)" : "var(--text)", background: selectedBloodType === bt ? "var(--red-light)" : "transparent", borderRadius: 6 }}>{bt}</th>
+                      <th key={bt} style={{ padding: "6px 4px", fontWeight: 700, fontSize: 11, textAlign: "center", color: selectedBloodType === bt ? "var(--red)" : "var(--text)", background: selectedBloodType === bt ? "var(--red-light)" : "transparent", borderRadius: 4 }}>{bt}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {BLOOD_TYPES.map((donor) => (
                     <tr key={donor}>
-                      <td style={{ padding: "8px 6px", fontWeight: 700, fontSize: 12, textAlign: "center", color: selectedBloodType === donor ? "var(--red)" : "var(--text)", background: selectedBloodType === donor ? "var(--red-light)" : "transparent", borderRadius: 6 }}>{donor}</td>
+                      <td style={{ padding: "6px 4px", fontWeight: 700, fontSize: 11, textAlign: "center", color: selectedBloodType === donor ? "var(--red)" : "var(--text)", background: selectedBloodType === donor ? "var(--red-light)" : "transparent", borderRadius: 4 }}>{donor}</td>
                       {BLOOD_TYPES.map((recipient) => {
                         const compatible = COMPATIBILITY[donor].donateTo.includes(recipient);
                         const isHighlighted = selectedBloodType === donor || selectedBloodType === recipient;
                         return (
                           <td key={recipient} style={{
-                            padding: "8px 6px", textAlign: "center", borderRadius: 6,
+                            padding: "6px 4px", textAlign: "center", borderRadius: 4,
                             background: compatible
                               ? (isHighlighted ? "rgba(34,197,94,0.25)" : "rgba(34,197,94,0.1)")
                               : (isHighlighted ? "rgba(239,68,68,0.1)" : "transparent"),
@@ -306,23 +425,22 @@ export default function LandingPage() {
                 </tbody>
               </table>
             </div>
-          </AnimatedDiv>
 
-          {/* Universal donor/recipient badges */}
-          <AnimatedDiv delay={0.4}>
-            <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 28, flexWrap: "wrap" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 50, background: "var(--green-light)", border: "1px solid rgba(34,197,94,0.2)" }}>
-                <Heart size={16} color="var(--green)" fill="var(--green)" />
-                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--green)" }}>Universal Donor: O-</span>
+            {/* Universal donor/recipient badges */}
+            <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 50, background: "var(--green-light)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                <Heart size={14} color="var(--green)" fill="var(--green)" />
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--green)" }}>Universal Donor: O-</span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 50, background: "var(--red-light)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                <Droplet size={16} color="var(--red)" />
-                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--red)" }}>Universal Recipient: AB+</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 50, background: "var(--red-light)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                <Droplet size={14} color="var(--red)" />
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--red)" }}>Universal Recipient: AB+</span>
               </div>
             </div>
-          </AnimatedDiv>
-        </div>
-      </section>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* ── Features ── */}
       <section className="section">
