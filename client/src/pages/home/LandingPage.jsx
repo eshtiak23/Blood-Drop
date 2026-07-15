@@ -74,8 +74,8 @@ export default function LandingPage() {
   const banners = [
     "/banner1.png",
     "/banner2.png",
-    "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=1200&h=600&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1200&h=600&fit=crop&q=80",
+    "/banner3.webp",
+    "/banner4.webp",
   ];
 
   useEffect(() => {
