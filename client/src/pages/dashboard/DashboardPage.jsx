@@ -16,7 +16,7 @@ import { BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 import {
   Droplets, Heart, AlertCircle, Search, Plus, Users, MapPin, Phone, Mail,
   Shield, Clock, TrendingUp, Activity, ArrowRight, Calendar, Star,
-  Building2, MessageSquare, Trash2, CheckCircle, Loader2, X, ToggleLeft, ToggleRight, Bell
+  Building2, MessageSquare, Trash2, CheckCircle, Loader2, X, Bell
 } from "lucide-react";
 
 /** Returns theme-aware blood group badge colors */
@@ -153,7 +153,7 @@ export default function DashboardPage() {
             {/* Name, Blood Group, Verified */}
             <div style={{ flex: 1, minWidth: 200 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <h1 style={{ fontSize: 22, fontWeight: 800 }}>Welcome back, {user?.name?.split(" ")[0]} 👋</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 800 }}>Hi, {user?.name} 👋</h1>
                 {user?.isVerified && <span className="badge badge-green"><Shield size={10} /> Verified</span>}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
@@ -170,18 +170,39 @@ export default function DashboardPage() {
 
             {/* Donor Availability Toggle */}
             <button
-              className="btn btn-sm"
               onClick={handleToggleAvailability}
+              className="dash-toggle"
               style={{
-                background: user?.isAvailable ? "var(--green)" : "var(--bg-secondary)",
-                color: user?.isAvailable ? "#fff" : "var(--text-muted)",
-                border: "none",
-                fontWeight: 600,
-                gap: 6,
+                display: "flex", alignItems: "center", gap: 8,
+                padding: user?.isAvailable ? "4px 16px 4px 4px" : "4px 14px 4px 4px",
+                borderRadius: 50,
+                border: "none", cursor: "pointer",
+                background: user?.isAvailable ? "linear-gradient(135deg, #10B981, #059669)" : "var(--bg-secondary)",
+                boxShadow: user?.isAvailable ? "0 4px 15px rgba(16,185,129,0.35)" : "0 2px 8px rgba(0,0,0,0.08)",
+                transition: "all 0.3s ease",
+                flexShrink: 0,
               }}
             >
-              {user?.isAvailable ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
-              {user?.isAvailable ? "Available" : "Off Duty"}
+              <div style={{
+                width: 30, height: 30, borderRadius: "50%",
+                background: "#fff",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}>
+                <div style={{
+                  width: 10, height: 10, borderRadius: "50%",
+                  background: user?.isAvailable ? "#10B981" : "#9CA3AF",
+                  transition: "background 0.3s ease",
+                }} />
+              </div>
+              <span style={{
+                fontSize: 13, fontWeight: 600,
+                color: user?.isAvailable ? "#fff" : "var(--text-muted)",
+                transition: "color 0.3s ease",
+              }}>
+                {user?.isAvailable ? "Active" : "Inactive"}
+              </span>
             </button>
           </div>
 
@@ -234,7 +255,7 @@ export default function DashboardPage() {
         <StatCard
           icon={<Activity size={20} color={user?.isAvailable ? "var(--green)" : "var(--text-muted)"} />}
           label="Status"
-          value={user?.isAvailable ? "Active" : "Off"}
+          value={user?.isAvailable ? "Active" : "Inactive"}
           valueColor={user?.isAvailable ? "var(--green)" : "var(--text-muted)"}
         />
         {stats && (
@@ -248,15 +269,83 @@ export default function DashboardPage() {
       {/* ── Quick Actions ── */}
       <div style={{ marginTop: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Quick Actions</h2>
-        <div className="dash-actions" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <Link to="/requests/create" className="btn btn-primary" style={{ gap: 8 }}>
-            <Plus size={16} /> Create Request
+        <div className="dash-actions" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+          <Link to="/requests/create" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #EF4444, #EC4899)", color: "#fff", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(239,68,68,0.3)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(239,68,68,0.4)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(239,68,68,0.3)"; }}
+          >
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Plus size={22} color="#fff" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>Create Request</div>
+              <div style={{ fontSize: 12, opacity: 0.85 }}>Ask for blood</div>
+            </div>
           </Link>
-          <Link to="/donors" className="btn btn-secondary" style={{ gap: 8 }}>
-            <Search size={16} /> Find Donors
+
+          <Link to="/donors" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #3B82F6, #06B6D4)", color: "#fff", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(59,130,246,0.3)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(59,130,246,0.4)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(59,130,246,0.3)"; }}
+          >
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Search size={22} color="#fff" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>Find Donors</div>
+              <div style={{ fontSize: 12, opacity: 0.85 }}>Search nearby</div>
+            </div>
           </Link>
-          <Link to="/requests" className="btn btn-secondary" style={{ gap: 8 }}>
-            <AlertCircle size={16} /> View Requests
+
+          <Link to="/requests" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #F97316, #EAB308)", color: "#fff", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(249,115,22,0.3)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(249,115,22,0.4)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(249,115,22,0.3)"; }}
+          >
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <AlertCircle size={22} color="#fff" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>View Requests</div>
+              <div style={{ fontSize: 12, opacity: 0.85 }}>Browse all</div>
+            </div>
+          </Link>
+
+          <button onClick={() => document.getElementById("log-donation")?.scrollIntoView({ behavior: "smooth" })} style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #8B5CF6, #EC4899)", color: "#fff", border: "none", cursor: "pointer", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(139,92,246,0.3)", textAlign: "left", width: "100%" }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(139,92,246,0.4)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(139,92,246,0.3)"; }}
+          >
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Droplets size={22} color="#fff" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>Log Donation</div>
+              <div style={{ fontSize: 12, opacity: 0.85 }}>Record history</div>
+            </div>
+          </button>
+
+          <Link to="/bookmarks" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #10B981, #14B8A6)", color: "#fff", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(16,185,129,0.3)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(16,185,129,0.4)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(16,185,129,0.3)"; }}
+          >
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Heart size={22} color="#fff" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>Bookmarks</div>
+              <div style={{ fontSize: 12, opacity: 0.85 }}>Saved donors</div>
+            </div>
+          </Link>
+
+          <Link to="/notifications" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 16px", borderRadius: 16, background: "linear-gradient(135deg, #6366F1, #8B5CF6)", color: "#fff", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 15px rgba(99,102,241,0.3)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(99,102,241,0.4)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(99,102,241,0.3)"; }}
+          >
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Bell size={22} color="#fff" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>Notifications</div>
+              <div style={{ fontSize: 12, opacity: 0.85 }}>Stay updated</div>
+            </div>
           </Link>
         </div>
       </div>
@@ -265,7 +354,7 @@ export default function DashboardPage() {
       <div className="dash-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 24 }}>
 
         {/* Log Donation */}
-        <div className="card">
+        <div className="card" id="log-donation">
           <div className="card-body">
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
               <Droplets size={18} color="var(--red)" />
@@ -407,11 +496,12 @@ export default function DashboardPage() {
         @media(max-width:768px){
           .dash-stats{grid-template-columns:repeat(2,1fr) !important;}
           .dash-two-col{grid-template-columns:1fr !important;}
+          .dash-actions{grid-template-columns:repeat(2,1fr) !important;}
         }
         @media(max-width:480px){
           .dash-stats{grid-template-columns:1fr !important;}
-          .dash-actions{flex-direction:column;}
-          .dash-actions .btn{width:100%;}
+          .dash-actions{grid-template-columns:1fr !important;}
+          .dash-toggle{width:100% !important; justify-content:center; padding:8px 16px 8px 8px !important;}
         }
       `}</style>
     </div>
