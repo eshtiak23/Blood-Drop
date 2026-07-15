@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { searchRequests, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
-import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2 } from "lucide-react";
+import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2, MessageCircle } from "lucide-react";
 
 /** Returns themed background/text colors for a blood group badge. */
 function getBloodGroupColor(bloodGroup) {
@@ -97,16 +97,28 @@ export default function RequestListPage() {
                     <div style={{ marginTop: 12, fontSize: 13, color: "var(--text-muted)" }}>{r.unitsRequired} unit(s) needed</div>
                   </Link>
 
-                  {/* Call button — for other users only */}
-                  {!isOwn && r.contactNumber && (
-                    <a
-                      href={`tel:${r.contactNumber}`}
-                      className="btn btn-secondary btn-sm"
-                      style={{ marginTop: 12, width: "100%", gap: 6, textDecoration: "none" }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Phone size={14} /> Call
-                    </a>
+                  {/* Action buttons — for other users only */}
+                  {!isOwn && (
+                    <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                      {r.contactNumber && (
+                        <a
+                          href={`tel:${r.contactNumber}`}
+                          className="btn btn-secondary btn-sm"
+                          style={{ flex: 1, gap: 6, textDecoration: "none", justifyContent: "center" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Phone size={14} /> Call
+                        </a>
+                      )}
+                      <Link
+                        to={`/chat/${r.requester?._id}`}
+                        className="btn btn-primary btn-sm"
+                        style={{ flex: 1, gap: 6, justifyContent: "center" }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MessageCircle size={14} /> Chat
+                      </Link>
+                    </div>
                   )}
                 </div>
               );
