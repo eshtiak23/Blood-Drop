@@ -48,6 +48,19 @@ const FEATURES = [
   { title: "Safe & Secure", desc: "Your data is encrypted and privacy is prioritized.", icon: Lock },
 ];
 
+/* ── Data: Blood compatibility matrix ── */
+const COMPATIBILITY = {
+  "O-":  { donateTo: ["O-","O+","A-","A+","B-","B+","AB-","AB+"], receiveFrom: ["O-"] },
+  "O+":  { donateTo: ["O+","A+","B+","AB+"], receiveFrom: ["O-","O+"] },
+  "A-":  { donateTo: ["A-","A+","AB-","AB+"], receiveFrom: ["O-","A-"] },
+  "A+":  { donateTo: ["A+","AB+"], receiveFrom: ["O-","O+","A-","A+"] },
+  "B-":  { donateTo: ["B-","B+","AB-","AB+"], receiveFrom: ["O-","B-"] },
+  "B+":  { donateTo: ["B+","AB+"], receiveFrom: ["O-","O+","B-","B+"] },
+  "AB-": { donateTo: ["AB-","AB+"], receiveFrom: ["O-","A-","B-","AB-"] },
+  "AB+": { donateTo: ["AB+"], receiveFrom: ["O-","O+","A-","A+","B-","B+","AB-","AB+"] },
+};
+const BLOOD_TYPES = ["O-","O+","A-","A+","B-","B+","AB-","AB+"];
+
 /* ── Main Component ── */
 export default function LandingPage() {
   // Track which FAQ item is expanded (null = all collapsed)
@@ -55,6 +68,7 @@ export default function LandingPage() {
   const [userFeedback, setUserFeedback] = useState([]);
   const [bannerIdx, setBannerIdx] = useState(0);
   const [realStats, setRealStats] = useState(null);
+  const [selectedBloodType, setSelectedBloodType] = useState("O-");
   const banners = ["/banner1.png", "/banner2.png"];
 
   useEffect(() => {
@@ -168,6 +182,145 @@ export default function LandingPage() {
               </AnimatedDiv>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Blood Compatibility Chart ── */}
+      <section className="section">
+        <div className="container" style={{ textAlign: "center" }}>
+          <AnimatedDiv>
+            <h2 style={{ fontSize: 32, fontWeight: 800 }}>Blood Compatibility Chart</h2>
+            <p style={{ color: "var(--text-secondary)", marginTop: 8, maxWidth: 500, margin: "8px auto 0" }}>Know which blood types can safely donate to each other for transfusions</p>
+          </AnimatedDiv>
+
+          {/* Blood type selector pills */}
+          <AnimatedDiv delay={0.1}>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, marginTop: 32 }}>
+              {BLOOD_TYPES.map((bt) => {
+                const c = getBloodGroupColor(bt);
+                const isSelected = selectedBloodType === bt;
+                return (
+                  <button
+                    key={bt}
+                    onClick={() => setSelectedBloodType(bt)}
+                    style={{
+                      padding: "10px 20px", borderRadius: 50, border: "none", cursor: "pointer",
+                      fontSize: 14, fontWeight: 700, transition: "all 0.3s ease",
+                      background: isSelected ? (c.text || "#DC2626") : (c.bg || "var(--bg-secondary)"),
+                      color: isSelected ? "#fff" : (c.text || "var(--text)"),
+                      boxShadow: isSelected ? `0 4px 15px ${c.text || "#DC2626"}44` : "none",
+                      transform: isSelected ? "scale(1.08)" : "scale(1)",
+                    }}
+                  >
+                    {bt}
+                  </button>
+                );
+              })}
+            </div>
+          </AnimatedDiv>
+
+          {/* Donate To / Receive From cards */}
+          <AnimatedDiv delay={0.2}>
+            <div className="compat-cards" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 32, textAlign: "left" }}>
+              {/* Can Donate To */}
+              <div className="card" style={{ padding: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--green-light)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Heart size={18} color="var(--green)" fill="var(--green)" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 700 }}>Can Donate To</div>
+                    <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{COMPATIBILITY[selectedBloodType].donateTo.length} blood types</div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {COMPATIBILITY[selectedBloodType].donateTo.map((bt) => {
+                    const c = getBloodGroupColor(bt);
+                    return (
+                      <span key={bt} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600, background: c.bg || "var(--bg-secondary)", color: c.text || "var(--text)" }}>
+                        {bt}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Can Receive From */}
+              <div className="card" style={{ padding: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--red-light)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Droplet size={18} color="var(--red)" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 700 }}>Can Receive From</div>
+                    <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{COMPATIBILITY[selectedBloodType].receiveFrom.length} blood types</div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {COMPATIBILITY[selectedBloodType].receiveFrom.map((bt) => {
+                    const c = getBloodGroupColor(bt);
+                    return (
+                      <span key={bt} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600, background: c.bg || "var(--bg-secondary)", color: c.text || "var(--text)" }}>
+                        {bt}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </AnimatedDiv>
+
+          {/* Full compatibility matrix */}
+          <AnimatedDiv delay={0.3}>
+            <div style={{ marginTop: 32, overflowX: "auto" }}>
+              <table className="compat-matrix" style={{ width: "100%", borderCollapse: "separate", borderSpacing: 3, fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    <th style={{ padding: "8px 6px", fontWeight: 700, color: "var(--text-muted)", fontSize: 11, textAlign: "center" }}>Donor ↓ / Recipient →</th>
+                    {BLOOD_TYPES.map((bt) => (
+                      <th key={bt} style={{ padding: "8px 6px", fontWeight: 700, fontSize: 12, textAlign: "center", color: selectedBloodType === bt ? "var(--red)" : "var(--text)", background: selectedBloodType === bt ? "var(--red-light)" : "transparent", borderRadius: 6 }}>{bt}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {BLOOD_TYPES.map((donor) => (
+                    <tr key={donor}>
+                      <td style={{ padding: "8px 6px", fontWeight: 700, fontSize: 12, textAlign: "center", color: selectedBloodType === donor ? "var(--red)" : "var(--text)", background: selectedBloodType === donor ? "var(--red-light)" : "transparent", borderRadius: 6 }}>{donor}</td>
+                      {BLOOD_TYPES.map((recipient) => {
+                        const compatible = COMPATIBILITY[donor].donateTo.includes(recipient);
+                        const isHighlighted = selectedBloodType === donor || selectedBloodType === recipient;
+                        return (
+                          <td key={recipient} style={{
+                            padding: "8px 6px", textAlign: "center", borderRadius: 6,
+                            background: compatible
+                              ? (isHighlighted ? "rgba(34,197,94,0.25)" : "rgba(34,197,94,0.1)")
+                              : (isHighlighted ? "rgba(239,68,68,0.1)" : "transparent"),
+                            transition: "background 0.2s ease",
+                          }}>
+                            {compatible ? "✅" : "❌"}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </AnimatedDiv>
+
+          {/* Universal donor/recipient badges */}
+          <AnimatedDiv delay={0.4}>
+            <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 28, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 50, background: "var(--green-light)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                <Heart size={16} color="var(--green)" fill="var(--green)" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--green)" }}>Universal Donor: O-</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 50, background: "var(--red-light)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                <Droplet size={16} color="var(--red)" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--red)" }}>Universal Recipient: AB+</span>
+              </div>
+            </div>
+          </AnimatedDiv>
         </div>
       </section>
 
@@ -495,6 +648,9 @@ export default function LandingPage() {
           .hero-arrow-left { left: 12px; }
           .hero-arrow-right { right: 12px; }
           .hero-content { padding: 0 16px; }
+          .compat-matrix { font-size: 11px; }
+          .compat-matrix th, .compat-matrix td { padding: 6px 3px !important; }
+          .compat-cards { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 480px) {
           .hero-banner-wrap { height: 300px; }
@@ -506,6 +662,8 @@ export default function LandingPage() {
           .hero-content { padding: 0 12px; }
           .hero-drops { display: none; }
           .btn-hero-primary { animation: none; }
+          .compat-matrix { font-size: 10px; }
+          .compat-matrix th, .compat-matrix td { padding: 5px 2px !important; }
         }
       `}</style>
     </div>
