@@ -3,6 +3,7 @@ import Request from "../models/Request.js";
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
 import auth from "../middleware/auth.js";
+import { sendBloodRequestEmails } from "../utils/email.js";
 
 const router = express.Router();
 
@@ -72,6 +73,19 @@ router.post("/", auth, async (req, res) => {
         message: `${req.user.name} needs ${req.body.unitsRequired} unit(s) of ${req.body.patientBloodGroup} blood at ${req.body.hospital || req.body.district}`,
       }));
       await Notification.insertMany(notifications);
+    }
+
+    // Send email notifications to matching donors with email addresses
+    const donorsWithEmail = await User.find({
+      _id: { $ne: req.user._id },
+      bloodGroup: req.body.patientBloodGroup,
+      email: { $exists: true, $ne: "" },
+    }).select("email name");
+
+    if (donorsWithEmail.length > 0) {
+      sendBloodRequestEmails(donorsWithEmail, req.body).catch((err) =>
+        console.error("[Email] Background send error:", err.message)
+      );
     }
 
     res.status(201).json({ request: populated });
