@@ -2,17 +2,25 @@
  * ConversationHeader.jsx — Chat Conversation Header
  *
  * Top bar of the active conversation matching the BloodDrop design:
- * - Back arrow (<) on left
+ * - Back arrow (<) on left (mobile only)
  * - Avatar with online dot
  * - Name (bold)
  * - Blood group in red text
  * - "Online" / "Offline" status with colored dot
- * - Right side: Phone, Video, Info icon buttons (red)
+ * - Right side: Phone call button (red)
  */
 
-import { ArrowLeft, Phone, Video, Info } from "lucide-react";
+import { ArrowLeft, Phone } from "lucide-react";
 
 export default function ConversationHeader({ user, onBack, isOnline }) {
+  const handleCall = () => {
+    if (user?.phone) {
+      window.open(`tel:${user.phone}`, "_self");
+    } else {
+      alert("Phone number not available");
+    }
+  };
+
   return (
     <div style={{
       display: "flex",
@@ -115,33 +123,26 @@ export default function ConversationHeader({ user, onBack, isOnline }) {
         </div>
       </div>
 
-      {/* Action icons */}
-      <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-        {[
-          { icon: Phone, label: "Call" },
-          { icon: Video, label: "Video" },
-          { icon: Info, label: "Info" },
-        ].map(({ icon: Icon, label }) => (
-          <button
-            key={label}
-            title={label}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#EF4444",
-              transition: "background 0.15s",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = "#FEE2E2"}
-            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-          >
-            <Icon size={20} />
-          </button>
-        ))}
-      </div>
+      {/* Call button */}
+      <button
+        onClick={handleCall}
+        title="Call"
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#EF4444",
+          transition: "background 0.15s",
+          flexShrink: 0,
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.background = "#FEE2E2"}
+        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+      >
+        <Phone size={20} />
+      </button>
     </div>
   );
 }

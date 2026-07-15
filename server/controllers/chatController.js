@@ -27,7 +27,7 @@ export const getConversations = async (req, res) => {
   try {
     const userId = req.user._id;
     const conversations = await Conversation.find({ participants: userId })
-      .populate("participants", "name photo bloodGroup district area isAvailable")
+      .populate("participants", "name photo bloodGroup district area isAvailable phone")
       .sort({ updatedAt: -1 });
 
     // Transform to show only the OTHER user's info (not the current user)
@@ -67,20 +67,20 @@ export const getOrCreateConversation = async (req, res) => {
     }
 
     // Check if other user exists
-    const otherUser = await User.findById(otherId).select("name photo bloodGroup district area isAvailable");
+    const otherUser = await User.findById(otherId).select("name photo bloodGroup district area isAvailable phone");
     if (!otherUser) return res.status(404).json({ error: "User not found" });
 
     // Check for existing conversation (participants in either order)
     let conversation = await Conversation.findOne({
       participants: { $all: [userId, otherId], $size: 2 },
-    }).populate("participants", "name photo bloodGroup district area isAvailable");
+    }).populate("participants", "name photo bloodGroup district area isAvailable phone");
 
     if (!conversation) {
       conversation = await Conversation.create({
         participants: [userId, otherId],
         unreadCount: {},
       });
-      conversation = await conversation.populate("participants", "name photo bloodGroup district area isAvailable");
+      conversation = await conversation.populate("participants", "name photo bloodGroup district area isAvailable phone");
     }
 
     res.json({ conversation });

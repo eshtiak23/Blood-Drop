@@ -2,27 +2,41 @@
  * ChatInput.jsx — Message Input Area
  *
  * Bottom bar matching the BloodDrop design:
- * - Red "+" circle button on the left
- * - Pill-shaped input field with emoji and attach icons inside
+ * - Red "+" circle button on the left (image upload)
+ * - Pill-shaped input field with emoji icon inside
  * - Red circular send button on the right
  *
  * Press Enter to send (Shift+Enter for new line).
  * Sends typing indicator while user is typing.
+ * Emoji picker opens when clicking the smiley icon.
  *
  * Props:
  * - onSend(text, image) — callback when message is sent
  * - onTyping() / onStopTyping() — typing indicator callbacks
  */
 
-import { useState, useRef, useEffect } from "react";
-import { Send, Smile, Paperclip, Plus, X } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Send, Smile, Plus, X } from "lucide-react";
+
+/* ── Emoji data: ~80 common emojis in a grid ── */
+const EMOJI_ROWS = [
+  ["😀","😃","😄","😁","😆","😅","🤣","😂","🙂","😊","😇","🥰","😍","🤩","😘","😗"],
+  ["😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏"],
+  ["😒","🙄","😬","🤥","😌","😔","😪","🤤","😴","😷","🤒","🤕","🥵","🥶","🥴","😵"],
+  ["🤯","🤠","🥳","😎","🤓","🧐","😕","😟","🙁","☹️","😮","😯","😲","😱","😢","😭"],
+  ["😞","😓","😩","😫","🥱","😤","😡","🤬","👍","👎","👊","✊","🤛","🤜","👏","🙌"],
+  ["❤️","💔","💕","💖","💗","💓","💙","💚","💛","🙏","✨","🔥","🎉","🥳","💯","⭐"],
+  ["👋","🤙","💪","🖐️","✋","🤚","🤞","☝️","👆","👇","👈","👉","🤌","🤏","👀","🧠"],
+];
 
 export default function ChatInput({ onSend, onTyping, onStopTyping }) {
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const textareaRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const emojiPanelRef = useRef(null);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -31,6 +45,38 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
       el.style.height = "auto";
       el.style.height = Math.min(el.scrollHeight, 100) + "px";
     }
+  }, [text]);
+
+  // Close emoji picker on click outside or Escape
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+    const handleClickOutside = (e) => {
+      if (emojiPanelRef.current && !emojiPanelRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    const handleEsc = (e) => { if (e.key === "Escape") setShowEmojiPicker(false); };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [showEmojiPicker]);
+
+  // Insert emoji at cursor position
+  const handleEmojiSelect = useCallback((emoji) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const newText = text.slice(0, start) + emoji + text.slice(end);
+    setText(newText);
+    // Move cursor after the inserted emoji
+    requestAnimationFrame(() => {
+      el.selectionStart = el.selectionEnd = start + emoji.length;
+      el.focus();
+    });
   }, [text]);
 
   // Handle typing indicator
@@ -73,6 +119,7 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
     setText("");
     setImage(null);
     setImagePreview("");
+    setShowEmojiPicker(false);
     onStopTyping?.();
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     textareaRef.current?.focus();
@@ -130,6 +177,51 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
           >
             <X size={10} />
           </button>
+        </div>
+      )}
+
+      {/* Emoji picker panel */}
+      {showEmojiPicker && (
+        <div
+          ref={emojiPanelRef}
+          style={{
+            background: "#fff",
+            border: "1px solid #E5E7EB",
+            borderRadius: 16,
+            padding: "10px 8px",
+            marginBottom: 10,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+            maxHeight: 240,
+            overflowY: "auto",
+          }}
+        >
+          {EMOJI_ROWS.map((row, ri) => (
+            <div key={ri} style={{ display: "flex", justifyContent: "center", gap: 2, marginBottom: 2 }}>
+              {row.map((emoji) => (
+                <button
+                  key={emoji}
+                  onClick={() => handleEmojiSelect(emoji)}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 22,
+                    background: "transparent",
+                    border: "none",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    transition: "background 0.1s",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "#F3F4F6"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          ))}
         </div>
       )}
 
@@ -203,8 +295,23 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
               padding: 0,
             }}
           />
-          <Smile size={20} color="#9CA3AF" style={{ flexShrink: 0, cursor: "pointer" }} />
-          <Paperclip size={20} color="#9CA3AF" style={{ flexShrink: 0, cursor: "pointer" }} />
+          <button
+            onClick={() => setShowEmojiPicker((v) => !v)}
+            style={{
+              flexShrink: 0,
+              background: "none",
+              border: "none",
+              padding: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: showEmojiPicker ? "#EF4444" : "#9CA3AF",
+              transition: "color 0.15s",
+            }}
+          >
+            <Smile size={20} />
+          </button>
         </div>
 
         {/* Send button */}
