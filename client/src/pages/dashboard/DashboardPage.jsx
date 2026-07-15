@@ -271,38 +271,35 @@ export default function DashboardPage() {
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Quick Actions</h2>
         <div className="dash-quick-actions" style={{ display: "flex", flexWrap: "wrap", gap: 16, justifyContent: "center" }}>
           {[
-            { to: "/requests/create", icon: Plus, label: "Create Request", gradient: "linear-gradient(135deg, #EF4444, #EC4899)" },
-            { to: "/donors", icon: Search, label: "Find Donors", gradient: "linear-gradient(135deg, #3B82F6, #06B6D4)" },
-            { to: "/requests", icon: AlertCircle, label: "View Requests", gradient: "linear-gradient(135deg, #F97316, #EAB308)" },
-            { action: "scroll-donation", icon: Droplets, label: "Log Donation", gradient: "linear-gradient(135deg, #8B5CF6, #EC4899)" },
-            { to: "/bookmarks", icon: Heart, label: "Bookmarks", gradient: "linear-gradient(135deg, #10B981, #14B8A6)" },
-            { to: "/notifications", icon: Bell, label: "Notifications", gradient: "linear-gradient(135deg, #6366F1, #8B5CF6)" },
+            { to: "/requests/create", icon: Plus, shortLabel: "Create", gradient: "linear-gradient(135deg, #EF4444, #EC4899)" },
+            { to: "/donors", icon: Search, shortLabel: "Donors", gradient: "linear-gradient(135deg, #3B82F6, #06B6D4)" },
+            { to: "/requests", icon: AlertCircle, shortLabel: "Requests", gradient: "linear-gradient(135deg, #F97316, #EAB308)" },
+            { action: "scroll-donation", icon: Droplets, shortLabel: "Log", gradient: "linear-gradient(135deg, #8B5CF6, #EC4899)" },
+            { to: "/bookmarks", icon: Heart, shortLabel: "Saved", gradient: "linear-gradient(135deg, #10B981, #14B8A6)" },
+            { to: "/notifications", icon: Bell, shortLabel: "Alerts", gradient: "linear-gradient(135deg, #6366F1, #8B5CF6)" },
           ].map((item) => {
             const inner = (
-              <div style={{
-                width: 56, height: 56, borderRadius: "50%",
-                background: item.gradient,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#fff", cursor: "pointer",
-                transition: "all 0.2s ease",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-              }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.1)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)"; }}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer", transition: "transform 0.2s ease" }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
               >
-                <item.icon size={22} />
+                <div style={{ width: 56, height: 56, borderRadius: "50%", background: item.gradient, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+                  <item.icon size={22} />
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text)", textAlign: "center", lineHeight: 1.2, maxWidth: 70 }}>
+                  {item.shortLabel}
+                </span>
               </div>
             );
             if (item.action === "scroll-donation") {
               return (
-                <button key={item.label} title={item.label}
-                  onClick={() => document.getElementById("log-donation")?.scrollIntoView({ behavior: "smooth" })}
-                  style={{ background: "none", border: "none", padding: 0 }}
-                >{inner}</button>
+                <button key={item.shortLabel} onClick={() => document.getElementById("log-donation")?.scrollIntoView({ behavior: "smooth" })} style={{ background: "none", border: "none", padding: 0 }}>
+                  {inner}
+                </button>
               );
             }
             return (
-              <Link key={item.label} to={item.to} title={item.label} style={{ textDecoration: "none" }}>
+              <Link key={item.shortLabel} to={item.to} style={{ textDecoration: "none" }}>
                 {inner}
               </Link>
             );
@@ -456,18 +453,11 @@ export default function DashboardPage() {
         @media(max-width:768px){
           .dash-stats{grid-template-columns:repeat(2,1fr) !important;}
           .dash-two-col{grid-template-columns:1fr !important;}
-          .dash-quick-actions{
-            display:grid !important;
-            grid-template-columns:repeat(3,1fr) !important;
-            justify-items:center;
-            gap:16px !important;
-          }
+          .dash-quick-actions{display:grid !important; grid-template-columns:repeat(3,1fr) !important; justify-items:center;}
         }
         @media(max-width:480px){
           .dash-stats{grid-template-columns:1fr !important;}
-          .dash-quick-actions{
-            grid-template-columns:repeat(2,1fr) !important;
-          }
+          .dash-quick-actions{grid-template-columns:repeat(3,1fr) !important;}
           .dash-toggle{width:100% !important; justify-content:center; padding:8px 16px 8px 8px !important;}
         }
       `}</style>
