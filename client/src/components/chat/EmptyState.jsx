@@ -21,26 +21,26 @@ export default function EmptyState() {
       alignItems: "center",
       justifyContent: "center",
       padding: 40,
-      background: "var(--bg-secondary)",
+      background: "#F9FAFB",
       textAlign: "center",
     }}>
       <div style={{
         width: 80,
         height: 80,
         borderRadius: "50%",
-        background: "var(--red-light)",
+        background: "#FEE2E2",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 20,
       }}>
-        <MessageCircle size={36} color="var(--red)" />
+        <MessageCircle size={36} color="#EF4444" />
       </div>
 
-      <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>
+      <h3 style={{ fontSize: 20, fontWeight: 800, color: "#1E1B4B", marginBottom: 8 }}>
         Welcome to Chat
       </h3>
-      <p style={{ fontSize: 14, color: "var(--text-secondary)", marginBottom: 20, maxWidth: 280, lineHeight: 1.6 }}>
+      <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 20, maxWidth: 280, lineHeight: 1.6 }}>
         Select a conversation from the sidebar or start a new one by visiting a donor's profile.
       </p>
 
@@ -52,7 +52,7 @@ export default function EmptyState() {
           gap: 8,
           padding: "10px 20px",
           borderRadius: 10,
-          background: "var(--red)",
+          background: "#EF4444",
           color: "#fff",
           textDecoration: "none",
           fontSize: 14,

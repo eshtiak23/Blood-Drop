@@ -76,6 +76,15 @@ export function ChatProvider({ children }) {
   useEffect(() => {
     if (!socket || !user) return;
 
+    // Rejoin active conversation room on reconnect
+    const handleConnect = () => {
+      const active = activeConversationRef.current;
+      if (active) {
+        socket.emit("chat:join", active._id);
+      }
+    };
+    socket.on("connect", handleConnect);
+
     // Track online users
     socket.on("user:online", ({ userId }) => {
       setOnlineUsers((prev) => new Set([...prev, userId]));
@@ -151,6 +160,7 @@ export function ChatProvider({ children }) {
     });
 
     return () => {
+      socket.off("connect", handleConnect);
       socket.off("user:online");
       socket.off("user:offline");
       socket.off("message:new");
@@ -231,19 +241,9 @@ export function ChatProvider({ children }) {
           return updated;
         });
 
-        // Emit via Socket.IO for real-time delivery
-        if (socket) {
-          socket.emit("message:send", {
-            _id: message._id,
-            conversationId: activeConversation._id,
-            senderId: { _id: user._id, name: user.name, photo: user.photo },
-            receiverId: activeConversation.participants.find((p) => p._id !== user._id)?._id,
-            text: message.text,
-            image: message.image,
-            seen: false,
-            createdAt: message.createdAt,
-          });
-        }
+        // Note: Real-time delivery to the receiver is handled by the server
+        // controller (chatController.js sendMessage) which emits via Socket.IO
+        // directly to the receiver. We don't emit here to avoid duplicate messages.
 
         return message;
       } catch (err) {

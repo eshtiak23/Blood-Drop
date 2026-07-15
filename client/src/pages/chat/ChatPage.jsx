@@ -143,7 +143,7 @@ export default function ChatPage() {
 
   // Get the other user in active conversation
   const otherUser = activeConversation?.participants?.find((p) => p._id !== user?._id);
-  const isOtherOnline = otherUser ? onlineUsers.has(otherUser._id) : false;
+  const isOtherOnline = otherUser ? onlineUsers.has(otherUser._id?.toString?.() || otherUser._id) : false;
 
   const otherUserId = otherUser?._id;
   const isOtherTyping = activeConversation && otherUserId

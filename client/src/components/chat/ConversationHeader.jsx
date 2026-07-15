@@ -23,25 +23,27 @@ export default function ConversationHeader({ user, onBack, isOnline }) {
       background: "#fff",
       flexShrink: 0,
     }}>
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: "50%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#6B7280",
-          transition: "background 0.15s",
-          flexShrink: 0,
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.background = "#F3F4F6"}
-        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-      >
-        <ArrowLeft size={20} />
-      </button>
+      {/* Back button — only on mobile */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#6B7280",
+            transition: "background 0.15s",
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "#F3F4F6"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+        >
+          <ArrowLeft size={20} />
+        </button>
+      )}
 
       {/* Avatar with online dot */}
       <div style={{ position: "relative", flexShrink: 0 }}>

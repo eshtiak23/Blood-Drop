@@ -153,7 +153,7 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
         ) : (
           filtered.map((conv) => {
             const isActive = conv._id === activeId;
-            const isOnline = onlineUsers.has(conv.otherUser?._id);
+            const isOnline = onlineUsers.has(conv.otherUser?._id?.toString?.() || conv.otherUser?._id);
             return (
               <div
                 key={conv._id}
