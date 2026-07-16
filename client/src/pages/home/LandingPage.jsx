@@ -181,20 +181,27 @@ export default function LandingPage() {
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>How It Works</h2>
           <p style={{ color: "var(--text-secondary)", marginTop: 8 }}>Simple steps to save a life</p>
-          <div className="grid grid-4" style={{ marginTop: 48 }}>
+          <div className="how-it-works-row" style={{ marginTop: 48 }}>
             {[{ icon: Search, title: "Search", desc: "Find donors by blood group and location" },
               { icon: Phone, title: "Connect", desc: "Reach out to verified donors" },
               { icon: Heart, title: "Donate", desc: "Meet and donate blood" },
               { icon: History, title: "Track", desc: "Track donation history" }].map((s, i) => (
-              <AnimatedDiv key={s.title} delay={i * 0.1}>
-                <div style={{ textAlign: "center", padding: "0 12px" }}>
-                  <div style={{ width: 60, height: 60, borderRadius: "50%", background: "var(--red-light)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
-                    <s.icon size={28} color="var(--red)" />
+              <div key={s.title} className="how-it-works-step-wrap">
+                <AnimatedDiv delay={i * 0.1}>
+                  <div className="how-it-works-card">
+                    <div className="how-it-works-icon">
+                      <s.icon size={28} color="var(--red)" />
+                    </div>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, marginTop: 16 }}>{s.title}</h3>
+                    <p style={{ fontSize: 14, color: "var(--text-secondary)", marginTop: 6 }}>{s.desc}</p>
                   </div>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, marginTop: 16 }}>{s.title}</h3>
-                  <p style={{ fontSize: 14, color: "var(--text-secondary)", marginTop: 6 }}>{s.desc}</p>
-                </div>
-              </AnimatedDiv>
+                </AnimatedDiv>
+                {i < 3 && (
+                  <div className="how-it-works-arrow">
+                    <ArrowRight size={28} color="var(--lavender)" />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>

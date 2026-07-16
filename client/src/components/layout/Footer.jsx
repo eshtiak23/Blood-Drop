@@ -15,7 +15,7 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, Heart, ArrowUp, Globe, MessageCircle, Share2, Code } from "lucide-react";
+import { Mail, Phone, MapPin, Heart, ArrowUp, Globe, MessageCircle, Share2, Code, Users } from "lucide-react";
 
 export default function Footer() {
   const [showTop, setShowTop] = useState(false);
@@ -91,6 +91,12 @@ export default function Footer() {
                 <span className="footer-contact-item"><Mail size={14} /> bloodadmin009@gmail.com</span>
                 <span className="footer-contact-item"><Phone size={14} /> 0198984061</span>
                 <span className="footer-contact-item"><MapPin size={14} /> Rajshai Sadar, Rajshahi</span>
+                <Link to="/developers" className="footer-contact-item" style={{ display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.7)", marginTop: 8, padding: "8px 12px", background: "rgba(255,255,255,0.08)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", transition: "all 0.2s" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)"; e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)"; e.currentTarget.style.color = "#fff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
+                >
+                  <Users size={14} /> Meet Our Developers
+                </Link>
               </div>
             </div>
           </div>

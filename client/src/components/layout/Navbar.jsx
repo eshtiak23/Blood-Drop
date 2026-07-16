@@ -149,7 +149,7 @@ export default function Navbar() {
           {isAuthenticated ? (
             <>
               {/* Chat Button — only shown on desktop */}
-              <button className="hide-mobile" onClick={() => navigate("/chat")} style={{ position: "relative", padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <button className="hide-mobile" onClick={() => navigate("/chat")} style={{ position: "relative", padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text)" }}>
                 <MessageCircle size={18} />
                 {unreadTotal > 0 && (
                   <span style={{ position: "absolute", top: 2, right: 2, width: 18, height: 18, borderRadius: "50%", background: "var(--red)", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid var(--bg-card)" }}>
@@ -170,7 +170,7 @@ export default function Navbar() {
               
               {/* User Avatar Dropdown Menu */}
               <div className="dropdown">
-                <button onClick={() => setMenuOpen(!menuOpen)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 8px", borderRadius: 8, transition: "background 0.2s" }}>
+                <button onClick={() => setMenuOpen(!menuOpen)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 8px", borderRadius: 8, transition: "background 0.2s", color: "var(--text)" }}>
                   <div className="avatar avatar-sm" style={user?.photo ? { padding: 0, overflow: "hidden" } : {}}>
                     {user?.photo ? (
                       <img src={user.photo} alt={user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />

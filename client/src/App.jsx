@@ -49,6 +49,7 @@ import SettingsPage from "./pages/settings/SettingsPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import ChatPage from "./pages/chat/ChatPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import DevelopersPage from "./pages/DevelopersPage";
 import LoadingAnimation from "./components/ui/LoadingAnimation";
 
 // React Query client — manages data caching. staleTime=300000 means data is "fresh" for 5 minutes
@@ -142,6 +143,7 @@ function AppContent() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/donors" element={<DonorSearchPage />} />
             <Route path="/donors/:id" element={<DonorProfilePage />} />
+            <Route path="/developers" element={<DevelopersPage />} />
 
             {/* Protected pages — must be logged in */}
             <Route path="/dashboard" element={<Protected><DashboardPage /></Protected>} />
