@@ -4,6 +4,7 @@ import Notification from "../models/Notification.js";
 import User from "../models/User.js";
 import auth from "../middleware/auth.js";
 import { sendBloodRequestEmails, sendEmail } from "../utils/email.js";
+import { validateRequestForm } from "../utils/validate.js";
 
 const router = express.Router();
 
@@ -84,6 +85,12 @@ router.get("/:id", auth, async (req, res) => {
 // POST /api/requests
 router.post("/", auth, async (req, res) => {
   try {
+    const { valid, errors } = validateRequestForm(req.body);
+    if (!valid) {
+      const firstErr = Object.values(errors)[0];
+      return res.status(400).json({ error: firstErr, errors });
+    }
+
     const request = await Request.create({ ...req.body, requester: req.user._id });
     const populated = await request.populate("requester", "name email");
 

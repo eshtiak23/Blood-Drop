@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import auth from "../middleware/auth.js";
 import adminAuth from "../middleware/adminAuth.js";
+import { validateRegisterForm } from "../utils/validate.js";
 
 const router = express.Router();
 
@@ -17,11 +18,16 @@ const sanitizeUser = (user) => {
 // POST /api/auth/register
 router.post("/register", async (req, res) => {
   try {
+    const { valid, errors } = validateRegisterForm(req.body);
+    if (!valid) {
+      const firstErr = Object.values(errors)[0];
+      return res.status(400).json({ error: firstErr, errors });
+    }
+
     const { name, email, password, phone, age, bloodGroup, lastDonationDate, district, area } = req.body;
-    if (!name || !email || !password) return res.status(400).json({ error: "Name, email and password are required" });
-    const exists = await User.findOne({ email });
+    const exists = await User.findOne({ email: email.trim() });
     if (exists) return res.status(400).json({ error: "Email already registered" });
-    const user = await User.create({ name, email, password, phone, age, bloodGroup, lastDonationDate, district, area });
+    const user = await User.create({ name: name.trim(), email: email.trim(), password, phone: phone.trim(), age: Number(age), bloodGroup, lastDonationDate, district, area });
     const token = generateToken(user._id);
     res.status(201).json({ user: sanitizeUser(user), token });
   } catch (err) {

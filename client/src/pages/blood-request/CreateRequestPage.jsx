@@ -9,6 +9,7 @@ import { BLOOD_GROUPS, DISTRICTS, AREAS, URGENCY } from "../../data/constants";
 import { useAuth } from "../../context/AuthContext";
 import { createRequest } from "../../services/localStore";
 import { ArrowLeft } from "lucide-react";
+import { validateRequestForm } from "../../utils/validate";
 import toast from "react-hot-toast";
 
 export default function CreateRequestPage() {
@@ -16,11 +17,22 @@ export default function CreateRequestPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ patientName: "", hospital: "", patientBloodGroup: "", unitsRequired: 1, urgency: "normal", dateNeeded: "", contactNumber: user?.phone || "", district: "", area: "", description: "" });
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const areas = form.district ? (AREAS[form.district] || []) : [];
   const set = (k, v) => setForm({ ...form, [k]: v });
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); setError("");
+    e.preventDefault(); setError(""); setFieldErrors({});
+
+    const { valid, errors } = validateRequestForm(form);
+    if (!valid) {
+      setFieldErrors(errors);
+      const firstErr = Object.values(errors)[0];
+      setError(firstErr);
+      toast.error(firstErr);
+      return;
+    }
+
     try {
       await createRequest(form);
       toast.success("Request created successfully!");
@@ -38,17 +50,24 @@ export default function CreateRequestPage() {
         <form onSubmit={handleSubmit}>
           {error && <div className="alert alert-error" style={{ marginBottom: 16 }}>{error}</div>}
           <div className="grid grid-2" style={{ marginBottom: 16 }}>
-            <div className="input-group"><label>Patient Name</label><input className="input" value={form.patientName} onChange={(e) => set("patientName", e.target.value)} required /></div>
-            <div className="input-group"><label>Hospital</label><input className="input" value={form.hospital} onChange={(e) => set("hospital", e.target.value)} required /></div>
+            <div className="input-group"><label>Patient Name <span style={{ color: "var(--red)" }}>*</span></label><input className="input" value={form.patientName} onChange={(e) => set("patientName", e.target.value)} required />
+              {fieldErrors.patientName && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.patientName}</div>}
+            </div>
+            <div className="input-group"><label>Hospital <span style={{ color: "var(--red)" }}>*</span></label><input className="input" value={form.hospital} onChange={(e) => set("hospital", e.target.value)} required />
+              {fieldErrors.hospital && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.hospital}</div>}
+            </div>
           </div>
           <div className="grid grid-2" style={{ marginBottom: 16 }}>
             <div className="input-group">
-              <label>Blood Group Needed</label>
+              <label>Blood Group Needed <span style={{ color: "var(--red)" }}>*</span></label>
               <select className="input" value={form.patientBloodGroup} onChange={(e) => set("patientBloodGroup", e.target.value)} required>
                 <option value="">Select</option>{BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
+              {fieldErrors.patientBloodGroup && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.patientBloodGroup}</div>}
             </div>
-            <div className="input-group"><label>Units Required</label><input className="input" type="number" min={1} max={10} value={form.unitsRequired} onChange={(e) => { const v = parseInt(e.target.value, 10); set("unitsRequired", isNaN(v) ? 1 : v); }} required /></div>
+            <div className="input-group"><label>Units Required <span style={{ color: "var(--red)" }}>*</span></label><input className="input" type="number" min={1} max={10} value={form.unitsRequired} onChange={(e) => { const v = parseInt(e.target.value, 10); set("unitsRequired", isNaN(v) ? 1 : v); }} required />
+              {fieldErrors.unitsRequired && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.unitsRequired}</div>}
+            </div>
           </div>
           <div className="grid grid-2" style={{ marginBottom: 16 }}>
             <div className="input-group">
@@ -57,25 +76,30 @@ export default function CreateRequestPage() {
                 {URGENCY.map((u) => <option key={u.value} value={u.value}>{u.label}</option>)}
               </select>
             </div>
-            <div className="input-group"><label>Date Needed</label><input className="input" type="date" value={form.dateNeeded} onChange={(e) => set("dateNeeded", e.target.value)} required /></div>
+            <div className="input-group"><label>Date Needed <span style={{ color: "var(--red)" }}>*</span></label><input className="input" type="date" value={form.dateNeeded} onChange={(e) => set("dateNeeded", e.target.value)} required />
+              {fieldErrors.dateNeeded && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.dateNeeded}</div>}
+            </div>
           </div>
           <div className="grid grid-2" style={{ marginBottom: 16 }}>
             <div className="input-group">
-              <label>District</label>
+              <label>District <span style={{ color: "var(--red)" }}>*</span></label>
               <select className="input" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, area: "" })} required>
                 <option value="">Select</option>{DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>
+              {fieldErrors.district && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.district}</div>}
             </div>
             <div className="input-group">
-              <label>Area</label>
+              <label>Area <span style={{ color: "var(--red)" }}>*</span></label>
               <select className="input" value={form.area} onChange={(e) => set("area", e.target.value)} disabled={!form.district} required>
                 <option value="">{form.district ? "Select" : "Select district first"}</option>{areas.map((a) => <option key={a} value={a}>{a}</option>)}
               </select>
+              {fieldErrors.area && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.area}</div>}
             </div>
           </div>
           <div className="input-group" style={{ marginBottom: 16 }}>
-            <label>Contact Number</label>
-            <input className="input" type="tel" value={form.contactNumber} onChange={(e) => set("contactNumber", e.target.value)} required />
+            <label>Contact Number <span style={{ color: "var(--red)" }}>*</span></label>
+            <input className="input" type="tel" placeholder="01XXXXXXXXX" value={form.contactNumber} onChange={(e) => set("contactNumber", e.target.value)} required />
+            {fieldErrors.contactNumber && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.contactNumber}</div>}
           </div>
           <div className="input-group" style={{ marginBottom: 20 }}>
             <label>Description (Optional)</label>

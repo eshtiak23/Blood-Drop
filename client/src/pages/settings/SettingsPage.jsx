@@ -17,6 +17,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { DISTRICTS, AREAS } from "../../data/constants";
 import { Moon, Lock, LogOut, Camera, User, Save, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { validateName, validatePhone, validateRequired } from "../../utils/validate";
 import toast from "react-hot-toast";
 
 export default function SettingsPage() {
@@ -35,6 +36,7 @@ export default function SettingsPage() {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const areas = form.district ? (AREAS[form.district] || []) : [];
 
@@ -79,6 +81,23 @@ export default function SettingsPage() {
 
   /** Save profile changes */
   const handleSave = () => {
+    setFieldErrors({});
+    const errs = {};
+    const nameErr = validateName(form.name);
+    const phoneErr = validatePhone(form.phone);
+    const districtErr = validateRequired(form.district, "District");
+    const areaErr = validateRequired(form.area, "Area");
+    if (nameErr) errs.name = nameErr;
+    if (phoneErr) errs.phone = phoneErr;
+    if (districtErr) errs.district = districtErr;
+    if (areaErr) errs.area = areaErr;
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      const firstErr = Object.values(errs)[0];
+      toast.error(firstErr);
+      return;
+    }
+
     setSaving(true);
     setTimeout(() => {
       updateUser(form);
@@ -130,29 +149,33 @@ export default function SettingsPage() {
 
           <div className="grid grid-2" style={{ marginBottom: 16 }}>
             <div className="input-group">
-              <label style={{ fontSize: 13, fontWeight: 500 }}>Full Name</label>
+              <label style={{ fontSize: 13, fontWeight: 500 }}>Full Name <span style={{ color: "var(--red)" }}>*</span></label>
               <input className="input" value={form.name} onChange={(e) => set("name", e.target.value)} />
+              {fieldErrors.name && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.name}</div>}
             </div>
             <div className="input-group">
-              <label style={{ fontSize: 13, fontWeight: 500 }}>Phone</label>
+              <label style={{ fontSize: 13, fontWeight: 500 }}>Phone <span style={{ color: "var(--red)" }}>*</span></label>
               <input className="input" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+              {fieldErrors.phone && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.phone}</div>}
             </div>
           </div>
 
           <div className="grid grid-2" style={{ marginBottom: 16 }}>
             <div className="input-group">
-              <label style={{ fontSize: 13, fontWeight: 500 }}>District</label>
+              <label style={{ fontSize: 13, fontWeight: 500 }}>District <span style={{ color: "var(--red)" }}>*</span></label>
               <select className="input" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, area: "" })}>
                 <option value="">Select district</option>
                 {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>
+              {fieldErrors.district && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.district}</div>}
             </div>
             <div className="input-group">
-              <label style={{ fontSize: 13, fontWeight: 500 }}>Area</label>
+              <label style={{ fontSize: 13, fontWeight: 500 }}>Area <span style={{ color: "var(--red)" }}>*</span></label>
               <select className="input" value={form.area} onChange={(e) => set("area", e.target.value)} disabled={!form.district}>
                 <option value="">{form.district ? "Select area" : "Select district first"}</option>
                 {areas.map((a) => <option key={a} value={a}>{a}</option>)}
               </select>
+              {fieldErrors.area && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.area}</div>}
             </div>
           </div>
 

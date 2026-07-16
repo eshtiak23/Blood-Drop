@@ -11,6 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { BLOOD_GROUPS, DISTRICTS, AREAS } from "../../data/constants";
 import { Heart, Loader2, Eye, EyeOff } from "lucide-react";
+import { validateRegisterForm } from "../../utils/validate";
 import toast from "react-hot-toast";
 
 export default function RegisterPage() {
@@ -19,18 +20,27 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", phone: "", age: "", bloodGroup: "", lastDonationDate: "", district: "", area: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   // Derive area options from the selected district (empty until a district is chosen)
   const areas = form.district ? (AREAS[form.district] || []) : [];
 
-  // Validate passwords match, strip confirmPassword, then call AuthContext.register()
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (form.password !== form.confirmPassword) { setError("Passwords don't match"); return; }
-    if (form.age < 18 || form.age > 65) { setError("Age must be between 18 and 65"); return; }
+    setFieldErrors({});
+
+    const { valid, errors } = validateRegisterForm(form);
+    if (!valid) {
+      setFieldErrors(errors);
+      const firstErr = Object.values(errors)[0];
+      setError(firstErr);
+      toast.error(firstErr);
+      return;
+    }
+
     setLoading(true);
     try {
       const { confirmPassword, ...data } = form;
@@ -61,67 +71,78 @@ export default function RegisterPage() {
             {error && <div className="alert alert-error" style={{ marginBottom: 16 }}>{error}</div>}
 
             <div className="grid grid-2" style={{ marginBottom: 16 }}>
-              <div className="input-group"><label>Full Name</label><input className="input" placeholder="John Doe" value={form.name} onChange={(e) => set("name", e.target.value)} required /></div>
-              <div className="input-group"><label>Phone</label><input className="input" placeholder="01XXXXXXXXX" value={form.phone} onChange={(e) => set("phone", e.target.value)} required /></div>
+              <div className="input-group"><label>Full Name <span style={{ color: "var(--red)" }}>*</span></label><input className="input" placeholder="John Doe" value={form.name} onChange={(e) => set("name", e.target.value)} required />
+                {fieldErrors.name && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.name}</div>}
+              </div>
+              <div className="input-group"><label>Phone <span style={{ color: "var(--red)" }}>*</span></label><input className="input" placeholder="01XXXXXXXXX" value={form.phone} onChange={(e) => set("phone", e.target.value)} required />
+                {fieldErrors.phone && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.phone}</div>}
+              </div>
             </div>
 
             <div className="input-group" style={{ marginBottom: 16 }}>
-              <label>Email</label>
+              <label>Email <span style={{ color: "var(--red)" }}>*</span></label>
               <input className="input" type="email" placeholder="you@example.com" value={form.email} onChange={(e) => set("email", e.target.value)} required />
+              {fieldErrors.email && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.email}</div>}
             </div>
 
             <div className="grid grid-2" style={{ marginBottom: 16 }}>
-              <div className="input-group"><label>Password</label>
+              <div className="input-group"><label>Password <span style={{ color: "var(--red)" }}>*</span></label>
                 <div style={{ position: "relative" }}>
-                  <input className="input" type={showPass ? "text" : "password"} placeholder="••••••••" value={form.password} onChange={(e) => set("password", e.target.value)} required style={{ paddingRight: 40 }} />
+                  <input className="input" type={showPass ? "text" : "password"} placeholder="Min 6 characters" value={form.password} onChange={(e) => set("password", e.target.value)} required style={{ paddingRight: 40 }} />
                   <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", padding: 4, background: "none", border: "none", cursor: "pointer" }}>
                     {showPass ? <EyeOff size={16} color="var(--text-muted)" /> : <Eye size={16} color="var(--text-muted)" />}
                   </button>
                 </div>
+                {fieldErrors.password && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.password}</div>}
               </div>
-              <div className="input-group"><label>Confirm</label>
+              <div className="input-group"><label>Confirm <span style={{ color: "var(--red)" }}>*</span></label>
                 <div style={{ position: "relative" }}>
-                  <input className="input" type={showConfirm ? "text" : "password"} placeholder="••••••••" value={form.confirmPassword} onChange={(e) => set("confirmPassword", e.target.value)} required style={{ paddingRight: 40 }} />
+                  <input className="input" type={showConfirm ? "text" : "password"} placeholder="Repeat password" value={form.confirmPassword} onChange={(e) => set("confirmPassword", e.target.value)} required style={{ paddingRight: 40 }} />
                   <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", padding: 4, background: "none", border: "none", cursor: "pointer" }}>
                     {showConfirm ? <EyeOff size={16} color="var(--text-muted)" /> : <Eye size={16} color="var(--text-muted)" />}
                   </button>
                 </div>
+                {fieldErrors.confirmPassword && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.confirmPassword}</div>}
               </div>
             </div>
 
             {/* Blood group, district, and area — shown for all users */}
             <div className="input-group" style={{ marginBottom: 16 }}>
-              <label>Blood Group</label>
+              <label>Blood Group <span style={{ color: "var(--red)" }}>*</span></label>
               <select className="input" value={form.bloodGroup} onChange={(e) => set("bloodGroup", e.target.value)} required>
                 <option value="">Select blood group</option>
                 {BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
+              {fieldErrors.bloodGroup && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.bloodGroup}</div>}
             </div>
             <div className="grid grid-2" style={{ marginBottom: 16 }}>
               <div className="input-group">
                 <label>Age <span style={{ color: "var(--red)" }}>*</span></label>
                 <input className="input" type="number" min="18" max="65" placeholder="18-65" value={form.age} onChange={(e) => set("age", e.target.value)} required />
+                {fieldErrors.age && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.age}</div>}
               </div>
               <div className="input-group">
                 <label>Last Donation Date <span style={{ color: "var(--red)" }}>*</span></label>
                 <input className="input" type="date" value={form.lastDonationDate} onChange={(e) => set("lastDonationDate", e.target.value)} required />
+                {fieldErrors.lastDonationDate && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.lastDonationDate}</div>}
               </div>
             </div>
             <div className="grid grid-2" style={{ marginBottom: 20 }}>
               <div className="input-group">
-                {/* Selecting a district resets the area field */}
-                <label>District</label>
-                <select className="input" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, area: "" })}>
+                <label>District <span style={{ color: "var(--red)" }}>*</span></label>
+                <select className="input" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, area: "" })} required>
                   <option value="">Select district</option>
                   {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
+                {fieldErrors.district && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.district}</div>}
               </div>
               <div className="input-group">
-                <label>Area</label>
-                <select className="input" value={form.area} onChange={(e) => set("area", e.target.value)} disabled={!form.district}>
+                <label>Area <span style={{ color: "var(--red)" }}>*</span></label>
+                <select className="input" value={form.area} onChange={(e) => set("area", e.target.value)} disabled={!form.district} required>
                   <option value="">{form.district ? "Select area" : "Select district first"}</option>
                   {areas.map((a) => <option key={a} value={a}>{a}</option>)}
                 </select>
+                {fieldErrors.area && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.area}</div>}
               </div>
             </div>
 
