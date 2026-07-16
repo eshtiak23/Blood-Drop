@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { searchRequests, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
-import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2, MessageCircle } from "lucide-react";
+import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2, MessageCircle, Droplets } from "lucide-react";
 import toast from "react-hot-toast";
 
 /** Returns themed background/text colors for a blood group badge. */
