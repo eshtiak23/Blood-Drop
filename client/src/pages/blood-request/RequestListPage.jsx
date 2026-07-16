@@ -75,33 +75,31 @@ export default function RequestListPage() {
               const isOwn = user?._id && user._id === r.requester?._id;
               const rc = getBloodGroupColor(r.patientBloodGroup);
               return (
-                <div key={r._id} className="contact-card" style={{ position: "relative" }}>
-                  {/* Delete button — only for own requests */}
-                  {isOwn && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setShowDelete(r); }}
-                      style={{ position: "absolute", top: 12, right: 12, background: "none", border: "none", color: "var(--text-muted)", padding: 4, borderRadius: 6, transition: "all 0.2s", zIndex: 2 }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "var(--red-light)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.background = "none"; }}
-                      title="Delete request"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-
+                <div key={r._id} className="contact-card">
                   <div className="contact-card-top">
-                  <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${rc.text || "#EF4444"}, ${rc.text || "#DC2626"}88)`, overflow: "hidden", padding: 0 }}>
-                    {r.requester?.photo ? (
-                      <img src={r.requester.photo} alt={r.patientName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : (
-                      r.patientName?.charAt(0)?.toUpperCase()
-                    )}
-                  </div>
-                    {r.patientBloodGroup && (
-                      <div className="contact-card-blood-badge" style={{ background: rc.text || "#EF4444" }}>
-                        {r.patientBloodGroup}
-                      </div>
-                    )}
+                    <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${rc.text || "#EF4444"}, ${rc.text || "#DC2626"}88)`, overflow: "hidden", padding: 0 }}>
+                      {r.requester?.photo ? (
+                        <img src={r.requester.photo} alt={r.patientName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        r.patientName?.charAt(0)?.toUpperCase()
+                      )}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      {isOwn && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowDelete(r); }}
+                          className="contact-card-delete-btn"
+                          title="Delete request"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                      {r.patientBloodGroup && (
+                        <div className="contact-card-blood-badge" style={{ background: rc.text || "#EF4444" }}>
+                          {r.patientBloodGroup}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <Link to={`/requests/${r._id}`} style={{ textDecoration: "none", color: "inherit" }}>
                     <div className="contact-card-name">{r.patientName}</div>
@@ -120,12 +118,12 @@ export default function RequestListPage() {
                   {!isOwn && (
                     <div className="contact-card-actions">
                       {r.contactNumber && (
-                        <a href={`tel:${r.contactNumber}`} className="contact-card-btn-call" onClick={(e) => e.stopPropagation()}>
+                        <a href={`tel:${r.contactNumber}`} className="contact-card-icon-btn contact-card-icon-call" onClick={(e) => e.stopPropagation()}>
                           <Phone size={18} />
                         </a>
                       )}
-                      <Link to={`/chat/${r.requester?._id}`} className="contact-card-btn-primary" onClick={(e) => e.stopPropagation()}>
-                        <MessageCircle size={14} /> Chat
+                      <Link to={`/chat/${r.requester?._id}`} className="contact-card-icon-btn contact-card-icon-chat" onClick={(e) => e.stopPropagation()}>
+                        <MessageCircle size={18} />
                       </Link>
                     </div>
                   )}

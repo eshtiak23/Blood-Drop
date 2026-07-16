@@ -295,14 +295,14 @@ export default function DonorSearchPage() {
                     <span style={{ color: canDonate ? "#22C55E" : "var(--text-muted)" }}>{canDonate ? "Available" : "Not Available"}</span>
                   </div>
                   <div className="contact-card-actions">
-                    <a href={d.phone ? `tel:${d.phone}` : "#"} className="contact-card-btn-call" onClick={(e) => e.stopPropagation()}>
+                    <a href={d.phone ? `tel:${d.phone}` : "#"} className="contact-card-icon-btn contact-card-icon-call" onClick={(e) => e.stopPropagation()}>
                       <Phone size={18} />
                     </a>
-                    <button className="contact-card-btn-primary" onClick={() => {
+                    <button className="contact-card-icon-btn contact-card-icon-chat" onClick={() => {
                       if (!isAuthenticated) { navigate("/login"); return; }
                       setSelectedDonor(d);
                     }}>
-                      <Phone size={14} /> Details
+                      Details
                     </button>
                   </div>
                 </div>

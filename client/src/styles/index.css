@@ -277,6 +277,75 @@ textarea.input { min-height: 100px; resize: vertical; }
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
   transform: translateY(-1px);
 }
+.contact-card-delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.contact-card-delete-btn:hover {
+  color: #EF4444;
+  background: var(--red-light);
+}
+.contact-card-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.contact-card-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.contact-card-icon-call {
+  color: #22C55E;
+  border-color: #22C55E30;
+}
+.contact-card-icon-call:hover {
+  background: #22C55E;
+  color: #fff;
+  border-color: #22C55E;
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.4), 0 0 32px rgba(34, 197, 94, 0.2);
+  transform: translateY(-2px);
+}
+.contact-card-icon-chat {
+  flex: 1;
+  width: auto;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: #fff;
+  border: none;
+}
+.contact-card-icon-chat:hover {
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4), 0 0 32px rgba(239, 68, 68, 0.2);
+  transform: translateY(-2px);
+}
+@keyframes iconGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.2); }
+  50% { box-shadow: 0 0 16px rgba(239, 68, 68, 0.4); }
+}
+@keyframes callGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(34, 197, 94, 0.2); }
+  50% { box-shadow: 0 0 16px rgba(34, 197, 94, 0.4); }
+}
 .dark .contact-card { background: var(--bg-card); border-color: var(--border-light); }
 .dark .contact-card::before { background: radial-gradient(circle, rgba(239, 68, 68, 0.12) 0%, transparent 70%); }
 
