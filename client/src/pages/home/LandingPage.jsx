@@ -233,11 +233,11 @@ export default function LandingPage() {
                 background: "var(--bg-card)",
                 border: "1px solid var(--border-light)",
                 borderRadius: "var(--radius-xl)",
-                padding: "40px 32px",
+                padding: "48px 40px",
                 textAlign: "center",
                 cursor: "pointer",
                 transition: "all 0.3s ease",
-                maxWidth: 700,
+                maxWidth: 780,
                 margin: "0 auto",
               }}
               onMouseEnter={(e) => {
@@ -790,83 +790,98 @@ export default function LandingPage() {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          width: 80px;
-          height: 100px;
+          width: 110px;
+          height: 120px;
           z-index: 5;
           pointer-events: none;
         }
-        .blood-man-left { left: -30px; }
-        .blood-man-right { right: -30px; }
+        .blood-man-left { left: 10px; }
+        .blood-man-right { right: 10px; }
         .blood-man-body {
-          width: 60px;
-          height: 72px;
+          width: 90px;
+          height: 100px;
           background: linear-gradient(135deg, #EF4444, #DC2626);
           border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
           position: relative;
           margin: 0 auto;
           animation: bloodManBounce 2s ease-in-out infinite;
-          box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+          box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
         }
         .blood-man-eyes {
           position: absolute;
-          top: 22px;
+          top: 28px;
           left: 50%;
           transform: translateX(-50%);
           display: flex;
-          gap: 10px;
+          gap: 14px;
         }
         .blood-man-eye {
-          width: 12px;
-          height: 12px;
+          width: 16px;
+          height: 16px;
           background: #fff;
           border-radius: 50%;
           position: relative;
           overflow: hidden;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .blood-man-pupil {
-          width: 6px;
-          height: 6px;
+          width: 8px;
+          height: 8px;
           background: #1E1B4B;
           border-radius: 50%;
           position: absolute;
-          top: 3px;
-          left: 3px;
-          animation: eyeFlip 3s ease-in-out infinite;
+          top: 4px;
+          left: 4px;
+          animation: eyeFlip 2.5s ease-in-out infinite;
+        }
+        .blood-man-pupil::after {
+          content: "";
+          position: absolute;
+          top: 1px;
+          right: 1px;
+          width: 3px;
+          height: 3px;
+          background: #fff;
+          border-radius: 50%;
         }
         .blood-man-smile {
           position: absolute;
-          bottom: 15px;
+          bottom: 20px;
           left: 50%;
           transform: translateX(-50%);
-          width: 16px;
-          height: 8px;
-          border-bottom: 2.5px solid #fff;
+          width: 20px;
+          height: 10px;
+          border-bottom: 3px solid #fff;
           border-radius: 0 0 50% 50%;
         }
         .blood-man-cheeks {
           position: absolute;
-          top: 32px;
+          top: 42px;
           width: 100%;
           display: flex;
           justify-content: space-between;
-          padding: 0 6px;
+          padding: 0 8px;
           pointer-events: none;
         }
         .blood-man-cheek {
-          width: 8px;
-          height: 5px;
-          background: rgba(255, 180, 180, 0.6);
+          width: 10px;
+          height: 6px;
+          background: rgba(255, 170, 170, 0.6);
           border-radius: 50%;
         }
         @keyframes bloodManBounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
+          0%, 100% { transform: translateY(0) rotate(0deg) scaleY(1); }
+          30% { transform: translateY(-12px) rotate(-3deg) scaleY(1.02); }
+          50% { transform: translateY(-14px) rotate(0deg) scaleY(1.02); }
+          70% { transform: translateY(-12px) rotate(3deg) scaleY(1.02); }
+          85% { transform: translateY(2px) rotate(0deg) scaleY(0.92); }
+          92% { transform: translateY(0) rotate(0deg) scaleY(1); }
         }
         @keyframes eyeFlip {
-          0%, 35%, 100% { transform: translateY(0) translateX(0); }
-          40%, 50% { transform: translateY(-5px) scaleY(0.1); }
-          55%, 85% { transform: translateY(0) translateX(3px); }
-          90% { transform: translateY(0) translateX(-3px); }
+          0%, 30%, 100% { transform: translateY(0) translateX(0) scaleY(1); }
+          35%, 45% { transform: translateY(0) translateX(0) scaleY(0.08); }
+          50%, 80% { transform: translateY(0) translateX(3px) scaleY(1); }
+          85%, 95% { transform: translateY(0) translateX(-3px) scaleY(1); }
         }
 
         @media (max-width: 768px) {
