@@ -265,51 +265,42 @@ export default function DonorSearchPage() {
                 const canDonate = isDonationCooledDown(d.lastDonationDate);
                 const c = getBloodGroupColor(d.bloodGroup);
                 return (
-                <div key={d._id} className="card" style={{ padding: 20, transition: "all 0.3s" }}>
-                  <Link to={`/donors/${d._id}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
-                    <div style={{ display: "flex", alignItems: "start", gap: 12 }}>
-                      <div className="avatar" style={{ background: c.bg || "var(--border-light)", color: c.text || "var(--text)" }}>
-                        {d.name?.charAt(0)?.toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-                          <div>
-                            <div style={{ fontWeight: 600 }}>{d.name}</div>
-                            <div style={{ fontSize: 13, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
-                              <MapPin size={12} /> {d.area}, {d.district}
-                            </div>
-                          </div>
-                          {d.bloodGroup && (
-                            <span className="badge" style={{ background: c.bg, color: c.text }}>
-                              {d.bloodGroup}
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ display: "flex", gap: 14, marginTop: 12, fontSize: 13, color: "var(--text-secondary)", flexWrap: "wrap" }}>
-                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Droplets size={12} /> {d.totalDonations || 0} donations</span>
-                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Calendar size={12} /> {d.lastDonationDate ? new Date(d.lastDonationDate).toLocaleDateString() : "Never"}</span>
-                          {d.distance != null && (
-                            <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--red)", fontWeight: 600 }}>
-                              <Navigation size={12} /> {formatDistance(d.distance)}
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap", alignItems: "center" }}>
-                          {d.isVerified && <span className="badge badge-green"><Shield size={10} /> Verified</span>}
-                          <span className={`badge ${canDonate ? "badge-green" : "badge-gray"}`}>{canDonate ? "Available" : "Not Available"}</span>
-                        </div>
-                      </div>
+                <div key={d._id} className="contact-card">
+                  <div className="contact-card-top">
+                    <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${c.text || "#EF4444"}, ${c.text || "#DC2626"}88)` }}>
+                      {d.name?.charAt(0)?.toUpperCase()}
                     </div>
+                    {d.bloodGroup && (
+                      <div className="contact-card-blood-badge" style={{ background: c.text || "#EF4444" }}>
+                        {d.bloodGroup}
+                      </div>
+                    )}
+                  </div>
+                  <Link to={`/donors/${d._id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                    <div className="contact-card-name">{d.name}</div>
                   </Link>
-                  <button className="btn btn-primary btn-sm" style={{ marginTop: 12, width: "100%", gap: 6, position: "relative", zIndex: 2 }} onClick={() => {
-                    if (!isAuthenticated) {
-                      navigate("/login");
-                      return;
-                    }
-                    setSelectedDonor(d);
-                  }}>
-                    <Phone size={12} /> Contact
-                  </button>
+                  <div className="contact-card-location">
+                    <MapPin size={13} /> {d.area}, {d.district}
+                  </div>
+                  <div className="contact-card-stats">
+                    <span className="contact-card-stat"><Droplets size={13} /> {d.totalDonations || 0} donations</span>
+                    <span className="contact-card-stat"><Calendar size={13} /> {d.lastDonationDate ? new Date(d.lastDonationDate).toLocaleDateString() : "Never"}</span>
+                  </div>
+                  <div className="contact-card-status">
+                    <span className="contact-card-status-dot" style={{ background: canDonate ? "#22C55E" : "#9CA3AF" }} />
+                    <span style={{ color: canDonate ? "#22C55E" : "var(--text-muted)" }}>{canDonate ? "Available" : "Not Available"}</span>
+                  </div>
+                  <div className="contact-card-actions">
+                    <a href={d.phone ? `tel:${d.phone}` : "#"} className="contact-card-btn-call" onClick={(e) => e.stopPropagation()}>
+                      <Phone size={18} />
+                    </a>
+                    <button className="contact-card-btn-primary" onClick={() => {
+                      if (!isAuthenticated) { navigate("/login"); return; }
+                      setSelectedDonor(d);
+                    }}>
+                      <Phone size={14} /> Contact
+                    </button>
+                  </div>
                 </div>
                 );
               })}

@@ -47,20 +47,29 @@ export default function BookmarksPage() {
               const d = b.donorId;
               const c = getBloodGroupColor(d.bloodGroup);
               return (
-                <div key={b._id} className="card" style={{ padding: 20 }}>
-                  <div style={{ display: "flex", alignItems: "start", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                      <div className="avatar" style={{ background: c.bg, color: c.text }}>{d.name?.charAt(0)}</div>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>{d.name}</div>
-                        <div style={{ fontSize: 13, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 4 }}><MapPin size={12} /> {d.area}, {d.district}</div>
-                      </div>
+                <div key={b._id} className="contact-card">
+                  <div className="contact-card-top">
+                    <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${c.text || "#EF4444"}, ${c.text || "#DC2626"}88)` }}>
+                      {d.name?.charAt(0)?.toUpperCase()}
                     </div>
-                    {d.bloodGroup && <span className="badge" style={{ background: c.bg, color: c.text }}>{d.bloodGroup}</span>}
+                    {d.bloodGroup && (
+                      <div className="contact-card-blood-badge" style={{ background: c.text || "#EF4444" }}>
+                        {d.bloodGroup}
+                      </div>
+                    )}
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
-                    <span style={{ fontSize: 13, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: 4 }}><Droplets size={12} /> {d.totalDonations || 0} donations</span>
-                    <button className="btn btn-ghost btn-sm" style={{ color: "var(--red)" }} onClick={() => remove(d._id)}><Trash2 size={14} /> Remove</button>
+                  <div className="contact-card-name">{d.name}</div>
+                  <div className="contact-card-location">
+                    <MapPin size={13} /> {d.area}, {d.district}
+                  </div>
+                  <div className="contact-card-stats">
+                    <span className="contact-card-stat"><Droplets size={13} /> {d.totalDonations || 0} donations</span>
+                    <span className="contact-card-stat"><Calendar size={13} /> {d.lastDonationDate ? new Date(d.lastDonationDate).toLocaleDateString() : "Never"}</span>
+                  </div>
+                  <div className="contact-card-actions">
+                    <button className="contact-card-btn-primary" style={{ background: "var(--red-light)", color: "var(--red)" }} onClick={() => remove(d._id)}>
+                      <Trash2 size={14} /> Remove
+                    </button>
                   </div>
                 </div>
               );

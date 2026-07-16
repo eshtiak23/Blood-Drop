@@ -73,13 +73,14 @@ export default function RequestListPage() {
             {requests.map((r) => {
               const u = URGENCY.find((x) => x.value === r.urgency);
               const isOwn = user?._id && user._id === r.requester?._id;
+              const rc = getBloodGroupColor(r.patientBloodGroup);
               return (
-                <div key={r._id} className="card" style={{ padding: 20, position: "relative" }}>
+                <div key={r._id} className="contact-card" style={{ position: "relative" }}>
                   {/* Delete button — only for own requests */}
                   {isOwn && (
                     <button
                       onClick={(e) => { e.stopPropagation(); setShowDelete(r); }}
-                      style={{ position: "absolute", top: 12, right: 12, background: "none", border: "none", color: "var(--text-muted)", padding: 4, borderRadius: 6, transition: "all 0.2s" }}
+                      style={{ position: "absolute", top: 12, right: 12, background: "none", border: "none", color: "var(--text-muted)", padding: 4, borderRadius: 6, transition: "all 0.2s", zIndex: 2 }}
                       onMouseEnter={(e) => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "var(--red-light)"; }}
                       onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.background = "none"; }}
                       title="Delete request"
@@ -88,40 +89,38 @@ export default function RequestListPage() {
                     </button>
                   )}
 
+                  <div className="contact-card-top">
+                    <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${rc.text || "#EF4444"}, ${rc.text || "#DC2626"}88)` }}>
+                      {r.patientName?.charAt(0)?.toUpperCase()}
+                    </div>
+                    {r.patientBloodGroup && (
+                      <div className="contact-card-blood-badge" style={{ background: rc.text || "#EF4444" }}>
+                        {r.patientBloodGroup}
+                      </div>
+                    )}
+                  </div>
                   <Link to={`/requests/${r._id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                    <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                      <span className="badge" style={{ background: getBloodGroupColor(r.patientBloodGroup).bg, color: getBloodGroupColor(r.patientBloodGroup).text }}>{r.patientBloodGroup}</span>
-                      <span className={`badge ${u?.color || "badge-gray"}`}>{u?.label}</span>
-                      <span className={`badge ${r.status === "open" ? "badge-green" : r.status === "completed" ? "badge-gray" : "badge-blue"}`}>{r.status}</span>
+                    <div className="contact-card-name">{r.patientName}</div>
+                    <div className="contact-card-location">
+                      <MapPin size={13} /> {r.area}, {r.district}
                     </div>
-                    <h3 style={{ fontSize: 16, fontWeight: 700 }}>{r.patientName}</h3>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8, fontSize: 13, color: "var(--text-secondary)" }}>
-                      <span>{r.hospital}</span>
-                      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><MapPin size={12} /> {r.area}, {r.district}</span>
-                      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Clock size={12} /> {r.dateNeeded ? new Date(r.dateNeeded).toLocaleDateString() : "ASAP"}</span>
-                    </div>
-                    <div style={{ marginTop: 12, fontSize: 13, color: "var(--text-muted)" }}>{r.unitsRequired} unit(s) needed</div>
                   </Link>
-
-                  {/* Action buttons — for other users only */}
+                  <div className="contact-card-stats">
+                    <span className="contact-card-stat"><Droplets size={13} /> {r.unitsRequired} unit(s)</span>
+                    <span className="contact-card-stat"><Clock size={13} /> {r.dateNeeded ? new Date(r.dateNeeded).toLocaleDateString() : "ASAP"}</span>
+                  </div>
+                  <div className="contact-card-status">
+                    <span className="contact-card-status-dot" style={{ background: r.status === "open" ? "#22C55E" : "#9CA3AF" }} />
+                    <span style={{ color: r.status === "open" ? "#22C55E" : "var(--text-muted)" }}>{r.status === "open" ? "Open" : "Completed"}</span>
+                  </div>
                   {!isOwn && (
-                    <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                    <div className="contact-card-actions">
                       {r.contactNumber && (
-                        <a
-                          href={`tel:${r.contactNumber}`}
-                          className="btn btn-secondary btn-sm"
-                          style={{ flex: 1, gap: 6, textDecoration: "none", justifyContent: "center" }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Phone size={14} /> Call
+                        <a href={`tel:${r.contactNumber}`} className="contact-card-btn-call" onClick={(e) => e.stopPropagation()}>
+                          <Phone size={18} />
                         </a>
                       )}
-                      <Link
-                        to={`/chat/${r.requester?._id}`}
-                        className="btn btn-primary btn-sm"
-                        style={{ flex: 1, gap: 6, justifyContent: "center" }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <Link to={`/chat/${r.requester?._id}`} className="contact-card-btn-primary" onClick={(e) => e.stopPropagation()}>
                         <MessageCircle size={14} /> Chat
                       </Link>
                     </div>
