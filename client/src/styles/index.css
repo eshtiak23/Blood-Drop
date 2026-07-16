@@ -517,6 +517,53 @@ textarea.input { min-height: 100px; resize: vertical; }
   to { --border-angle: 360deg; }
 }
 
+/* ── Floating Avatar ── */
+@keyframes avatarFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ── Staggered Text Reveal ── */
+.dev-text-reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: devTextReveal 0.5s ease forwards;
+}
+@keyframes devTextReveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Lead Badge Animation ── */
+.lead-badge {
+  position: relative;
+  overflow: hidden;
+}
+.lead-badge::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 999px;
+  background: conic-gradient(
+    from 0deg,
+    #C4B5FD, #EC4899, #A78BFA, #7C3AED, #C4B5FD
+  );
+  z-index: -1;
+  animation: leadBadgeSpin 3s linear infinite;
+}
+.lead-badge::after {
+  content: "";
+  position: absolute;
+  inset: 1.5px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #7C3AED, #6D28D9);
+  z-index: -1;
+}
+@keyframes leadBadgeSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* ── Alert ── */
 .alert {
   padding: 14px 18px; border-radius: var(--radius-sm); font-size: 14px; display: flex; align-items: center; gap: 10px;

@@ -66,11 +66,11 @@ const DEVELOPERS = [
     role: "QA Engineer",
     roleColor: "#7C3AED",
     desc: "Ensures quality, performance and bug-free experience.",
-    initials: "RI",
-    photo: "",
+    initials: "AA",
+    photo: "/al-yeamin.jpg",
     gradient: "linear-gradient(135deg, #DDD6FE, #A78BFA)",
     lead: false,
-    email: "rakibul@lifedrop.com",
+    email: "al.yeamin@lifedrop.com",
     github: "#!",
     linkedin: "#!",
   },
@@ -173,13 +173,12 @@ export default function DevelopersPage() {
               maxWidth: 340,
               textAlign: "center",
               boxShadow: "0 4px 20px rgba(124, 58, 237, 0.06)",
-              transition: "all 0.4s ease",
+              transition: "box-shadow 0.4s ease",
               animation: `devCardFadeIn 0.5s ease forwards`,
-              animationDelay: `${i * 0.1}s`,
+              animationDelay: `${i * 0.12}s`,
               opacity: 0,
-              transformStyle: "preserve-3d",
-              perspective: 800,
               cursor: "pointer",
+              overflow: "hidden",
             }}
               onMouseEnter={(e) => {
                 const card = e.currentTarget;
@@ -196,43 +195,53 @@ export default function DevelopersPage() {
                 const rotateX = ((y - centerY) / centerY) * -8;
                 const rotateY = ((x - centerX) / centerX) * 8;
                 card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+                const glare = card.querySelector(".dev-card-glare");
+                if (glare) {
+                  glare.style.opacity = "1";
+                  glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 40%, transparent 70%)`;
+                }
               }}
               onMouseLeave={(e) => {
                 const card = e.currentTarget;
                 card.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) translateZ(0px)";
                 card.style.boxShadow = "0 4px 20px rgba(124, 58, 237, 0.06)";
                 card.classList.remove("dev-card-hover");
+                const glare = card.querySelector(".dev-card-glare");
+                if (glare) { glare.style.opacity = "0"; }
               }}
             >
-              {/* Card color accent */}
-              <div style={{
-                position: "absolute", top: 0, left: 0, right: 0, height: 4,
-                borderRadius: "24px 24px 0 0",
-                background: `linear-gradient(90deg, ${dev.roleColor}, ${dev.roleColor}88)`,
+              {/* Cursor spotlight glare */}
+              <div className="dev-card-glare" style={{
+                position: "absolute", inset: 0, borderRadius: 24,
+                pointerEvents: "none", opacity: 0, transition: "opacity 0.3s ease",
+                zIndex: 10,
               }} />
 
               {/* Lead badge */}
               {dev.lead && (
-                <div style={{
-                  position: "absolute", top: -12, left: 18,
+                <div className="lead-badge" style={{
+                  position: "absolute", top: 10, left: 14,
                   display: "flex", alignItems: "center", gap: 5,
                   background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
                   color: "#fff", fontSize: 12, fontWeight: 700,
                   padding: "6px 14px", borderRadius: 999,
                   boxShadow: "0 2px 10px rgba(124, 58, 237, 0.4)",
                   letterSpacing: 0.5,
+                  zIndex: 12,
                 }}>
                   <Star size={13} fill="#fff" /> LEAD
                 </div>
               )}
 
               {/* Avatar */}
-              <div style={{
+              <div className="dev-avatar" style={{
                 width: 100, height: 100, borderRadius: "50%",
                 background: dev.gradient,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 margin: "0 auto 18px",
                 boxShadow: `0 0 28px ${dev.roleColor}22, 0 0 56px ${dev.roleColor}11`,
+                animation: `avatarFloat 3s ease-in-out infinite`,
+                animationDelay: `${i * 0.3}s`,
               }}>
                 {dev.photo ? (
                   <img src={dev.photo} alt={dev.name} style={{
@@ -252,13 +261,13 @@ export default function DevelopersPage() {
               </div>
 
               {/* Name */}
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: "#1E1B4B", marginBottom: 4 }}>{dev.name}</h3>
+              <h3 className="dev-text-reveal" style={{ fontSize: 17, fontWeight: 700, color: "#1E1B4B", marginBottom: 4, animationDelay: `${0.3 + i * 0.12}s` }}>{dev.name}</h3>
 
               {/* Role */}
-              <p style={{ fontSize: 14, fontWeight: 600, color: dev.roleColor, marginBottom: 14 }}>{dev.role}</p>
+              <p className="dev-text-reveal" style={{ fontSize: 14, fontWeight: 600, color: dev.roleColor, marginBottom: 14, animationDelay: `${0.4 + i * 0.12}s` }}>{dev.role}</p>
 
               {/* Description */}
-              <p style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.6, marginBottom: 20 }}>{dev.desc}</p>
+              <p className="dev-text-reveal" style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.6, marginBottom: 20, animationDelay: `${0.5 + i * 0.12}s` }}>{dev.desc}</p>
 
               {/* Social icons */}
               <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
