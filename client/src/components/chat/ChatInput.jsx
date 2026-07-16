@@ -35,9 +35,15 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [sending, setSending] = useState(false);
   const textareaRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const emojiPanelRef = useRef(null);
+
+  // Clean up typing timeout on unmount
+  useEffect(() => {
+    return () => { if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current); };
+  }, []);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -113,10 +119,15 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
   };
 
   // Send message
-  const handleSend = () => {
+  const handleSend = async () => {
     const trimmed = text.trim();
-    if (!trimmed && !image) return;
-    onSend(trimmed, image);
+    if ((!trimmed && !image) || sending) return;
+    setSending(true);
+    try {
+      await onSend(trimmed, image);
+    } finally {
+      setSending(false);
+    }
     setText("");
     setImage(null);
     setImagePreview("");

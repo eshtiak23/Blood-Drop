@@ -33,6 +33,6 @@ const conversationSchema = new mongoose.Schema(
 );
 
 // Ensure only one conversation per pair of users
-conversationSchema.index({ participants: 1 });
+conversationSchema.index({ participants: 1 }, { unique: true });
 
 export default mongoose.model("Conversation", conversationSchema);

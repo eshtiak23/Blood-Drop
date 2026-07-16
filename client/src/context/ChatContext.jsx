@@ -41,6 +41,9 @@ export function ChatProvider({ children }) {
   const activeConversationRef = useRef(activeConversation);
   activeConversationRef.current = activeConversation;
 
+  const conversationsRef = useRef(conversations);
+  conversationsRef.current = conversations;
+
   // Load conversations on mount
   const loadConversations = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -153,10 +156,10 @@ export function ChatProvider({ children }) {
       });
     });
 
-    // Messages seen
+    // Messages seen — only update received messages, not sent ones
     socket.on("message:seen", ({ conversationId }) => {
       setMessages((prev) =>
-        prev.map((m) => (m.conversationId === conversationId ? { ...m, seen: true } : m))
+        prev.map((m) => (m.conversationId === conversationId && m.senderId?._id !== user._id ? { ...m, seen: true } : m))
       );
     });
 
@@ -192,7 +195,7 @@ export function ChatProvider({ children }) {
           // Mark as seen
           await chatService.markSeen(conv._id);
           setUnreadTotal((prev) => {
-            const unreadInConv = conversations.find((c) => c._id === conv._id)?.unreadCount || 0;
+            const unreadInConv = conversationsRef.current.find((c) => c._id === conv._id)?.unreadCount || 0;
             return Math.max(0, prev - unreadInConv);
           });
 
@@ -215,21 +218,22 @@ export function ChatProvider({ children }) {
         return null;
       }
     },
-    [socket, user, conversations]
+    [socket, user]
   );
 
   // Send a message
   const sendChatMessage = useCallback(
     async (text, image = "") => {
-      if (!activeConversation) return null;
+      const active = activeConversationRef.current;
+      if (!active) return null;
       try {
-        const message = await chatService.sendMessage(activeConversation._id, text, image);
+        const message = await chatService.sendMessage(active._id, text, image);
         setMessages((prev) => [...prev, message]);
 
         // Update conversation in list
         setConversations((prev) => {
           const updated = [...prev];
-          const idx = updated.findIndex((c) => c._id === activeConversation._id);
+          const idx = updated.findIndex((c) => c._id === active._id);
           if (idx !== -1) {
             updated[idx] = {
               ...updated[idx],
@@ -242,10 +246,6 @@ export function ChatProvider({ children }) {
           return updated;
         });
 
-        // Note: Real-time delivery to the receiver is handled by the server
-        // controller (chatController.js sendMessage) which emits via Socket.IO
-        // directly to the receiver. We don't emit here to avoid duplicate messages.
-
         return message;
       } catch (err) {
         console.error("[Chat] Failed to send message:", err);
@@ -253,7 +253,7 @@ export function ChatProvider({ children }) {
         return null;
       }
     },
-    [activeConversation, socket, user]
+    [socket, user]
   );
 
   // Start typing indicator

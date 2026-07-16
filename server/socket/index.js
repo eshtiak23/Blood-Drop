@@ -21,11 +21,37 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 export function initSocket(io) {
-  // Map of userId → socketId for online users
+  // Map of userId → Set<socketId> for multi-device support
   const onlineUsers = new Map();
 
-  // Make onlineUsers available to Express routes via req.onlineUsers
-  io.onlineUsers = onlineUsers;
+  function addSocket(userId, socketId) {
+    if (!onlineUsers.has(userId)) onlineUsers.set(userId, new Set());
+    onlineUsers.get(userId).add(socketId);
+  }
+
+  function removeSocket(userId, socketId) {
+    const sockets = onlineUsers.get(userId);
+    if (sockets) {
+      sockets.delete(socketId);
+      if (sockets.size === 0) onlineUsers.delete(userId);
+    }
+  }
+
+  function getAnySocketId(userId) {
+    const sockets = onlineUsers.get(userId);
+    if (!sockets || sockets.size === 0) return null;
+    return sockets.values().next().value;
+  }
+
+  function isUserOnline(userId) {
+    return onlineUsers.has(userId) && onlineUsers.get(userId).size > 0;
+  }
+
+  // Expose helper for Express routes
+  io.onlineUsers = {
+    get: (userId) => getAnySocketId(userId),
+    has: (userId) => isUserOnline(userId),
+  };
 
   // Authentication middleware — runs before every connection
   io.use(async (socket, next) => {
@@ -44,10 +70,8 @@ export function initSocket(io) {
   });
 
   io.on("connection", (socket) => {
-    console.log(`[Socket] ${socket.userName} connected (${socket.userId})`);
-
-    // Register user as online
-    onlineUsers.set(socket.userId, socket.id);
+    // Register user as online (multi-device: add socket to set)
+    addSocket(socket.userId, socket.id);
     io.emit("user:online", { userId: socket.userId });
 
     // Join a conversation room
@@ -58,12 +82,6 @@ export function initSocket(io) {
     // Leave a conversation room
     socket.on("chat:leave", (conversationId) => {
       socket.leave(conversationId);
-    });
-
-    // Send message — broadcast to conversation room
-    socket.on("message:send", (data) => {
-      const { conversationId } = data;
-      socket.to(conversationId).emit("message:new", data);
     });
 
     // Typing indicator — broadcast to conversation room except sender
@@ -82,17 +100,18 @@ export function initSocket(io) {
       });
     });
 
-    // Mark messages as seen — notify the sender
+    // Mark messages as seen — validate seenBy matches the socket user
     socket.on("message:seen", (data) => {
-      const { conversationId, seenBy } = data;
-      socket.to(conversationId).emit("message:seen", { conversationId, seenBy });
+      const { conversationId } = data;
+      socket.to(conversationId).emit("message:seen", { conversationId, seenBy: socket.userId });
     });
 
-    // Handle disconnect
+    // Handle disconnect — remove this socket, keep user online if other tabs exist
     socket.on("disconnect", () => {
-      console.log(`[Socket] ${socket.userName} disconnected (${socket.userId})`);
-      onlineUsers.delete(socket.userId);
-      io.emit("user:offline", { userId: socket.userId });
+      removeSocket(socket.userId, socket.id);
+      if (!isUserOnline(socket.userId)) {
+        io.emit("user:offline", { userId: socket.userId });
+      }
     });
   });
 

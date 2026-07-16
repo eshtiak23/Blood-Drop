@@ -20,7 +20,7 @@ export default function CreateRequestPage() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const areas = form.district ? (AREAS[form.district] || []) : [];
-  const set = (k, v) => setForm({ ...form, [k]: v });
+  const set = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setError(""); setFieldErrors({});
@@ -86,7 +86,7 @@ export default function CreateRequestPage() {
           <div className="grid grid-2" style={{ marginBottom: 16 }}>
             <div className="input-group">
               <label>District <span style={{ color: "var(--red)" }}>*</span></label>
-              <select className="input" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, area: "" })} required>
+              <select className="input" value={form.district} onChange={(e) => setForm((prev) => ({ ...prev, district: e.target.value, area: "" }))} required>
                 <option value="">Select</option>{DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>
               {fieldErrors.district && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.district}</div>}

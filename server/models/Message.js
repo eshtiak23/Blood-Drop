@@ -33,7 +33,7 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    text: { type: String, default: "" },
+    text: { type: String, default: "", maxlength: 5000 },
     image: { type: String, default: "" },
     seen: { type: Boolean, default: false },
   },

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getBookmarks, removeBookmark } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
-import { Bookmark, MapPin, Droplets, Trash2 } from "lucide-react";
+import { Bookmark, MapPin, Droplets, Trash2, Calendar } from "lucide-react";
 import toast from "react-hot-toast";
 
 /** Returns blood group badge colors based on dark/light theme */
@@ -45,6 +45,7 @@ export default function BookmarksPage() {
           <div className="grid grid-3">
             {bookmarks.map((b) => {
               const d = b.donorId;
+              if (!d) return null;
               const c = getBloodGroupColor(d.bloodGroup);
               return (
                 <div key={b._id} className="contact-card">

@@ -28,9 +28,9 @@ export default function NotificationsPage() {
 
   useEffect(() => { refresh(); }, []);
 
-  const markRead = async (id) => { await markNotificationRead(id); refresh(); toast.success("Marked as read"); };
-  const markAll = async () => { await markAllNotificationsRead(); refresh(); toast.success("All notifications marked as read"); };
-  const remove = async (id) => { await deleteNotification(id); refresh(); toast.success("Notification deleted"); };
+  const markRead = async (id) => { try { await markNotificationRead(id); refresh(); toast.success("Marked as read"); } catch { toast.error("Failed"); } };
+  const markAll = async () => { try { await markAllNotificationsRead(); refresh(); toast.success("All notifications marked as read"); } catch { toast.error("Failed"); } };
+  const remove = async (id) => { try { await deleteNotification(id); refresh(); toast.success("Notification deleted"); } catch { toast.error("Failed"); } };
 
   const getStyle = (type) => NOTIFICATION_STYLES[type] || NOTIFICATION_STYLES.blood_request;
 

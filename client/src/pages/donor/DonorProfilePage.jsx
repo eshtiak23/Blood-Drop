@@ -7,7 +7,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
 import { addBookmark, isBookmarked, removeBookmark } from "../../services/localStore";
 import api from "../../services/api";
-import { MapPin, Phone, Calendar, Droplets, Shield, Bookmark, ArrowLeft, MessageCircle } from "lucide-react";
+import { MapPin, Phone, Calendar, Droplets, Shield, Bookmark, ArrowLeft, MessageCircle, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 /** Returns blood group badge colors based on dark/light theme */
@@ -22,12 +22,15 @@ export default function DonorProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [donor, setDonor] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     api.get(`/donors/${id}`)
       .then((res) => setDonor(res.data.donor))
-      .catch(() => setDonor(null));
+      .catch(() => setDonor(null))
+      .finally(() => setLoading(false));
     isBookmarked(id).then(setBookmarked).catch(() => setBookmarked(false));
   }, [id]);
 
@@ -40,6 +43,7 @@ export default function DonorProfilePage() {
     }
   };
 
+  if (loading) return <div className="container" style={{ padding: 40, textAlign: "center" }}><Loader2 size={24} className="animate-pulse" style={{ color: "var(--red)" }} /></div>;
   if (!donor) return <div className="container" style={{ padding: 40, textAlign: "center" }}>Donor not found</div>;
 
   const c = getBloodGroupColor(donor.bloodGroup);

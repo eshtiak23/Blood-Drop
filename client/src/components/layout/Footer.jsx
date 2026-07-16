@@ -55,10 +55,10 @@ export default function Footer() {
               </p>
               {/* Social Icons */}
               <div className="footer-socials">
-                <a href="#" className="footer-social-link" aria-label="Facebook"><Globe size={16} /></a>
-                <a href="#" className="footer-social-link" aria-label="Twitter"><MessageCircle size={16} /></a>
-                <a href="#" className="footer-social-link" aria-label="Instagram"><Share2 size={16} /></a>
-                <a href="#" className="footer-social-link" aria-label="GitHub"><Code size={16} /></a>
+                <a href="#!" className="footer-social-link" aria-label="Facebook"><Globe size={16} /></a>
+                <a href="#!" className="footer-social-link" aria-label="Twitter"><MessageCircle size={16} /></a>
+                <a href="#!" className="footer-social-link" aria-label="Instagram"><Share2 size={16} /></a>
+                <a href="#!" className="footer-social-link" aria-label="GitHub"><Code size={16} /></a>
               </div>
             </div>
 
@@ -77,10 +77,10 @@ export default function Footer() {
             <div className="footer-col">
               <h4 className="footer-heading">Support</h4>
               <div className="footer-links">
-                <a href="#" className="footer-link">Help Center</a>
-                <a href="#" className="footer-link">Privacy Policy</a>
-                <a href="#" className="footer-link">Terms of Service</a>
-                <a href="#" className="footer-link">FAQ</a>
+                <a href="#!" className="footer-link">Help Center</a>
+                <a href="#!" className="footer-link">Privacy Policy</a>
+                <a href="#!" className="footer-link">Terms of Service</a>
+                <a href="#!" className="footer-link">FAQ</a>
               </div>
             </div>
 

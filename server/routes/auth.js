@@ -31,7 +31,7 @@ router.post("/register", async (req, res) => {
     const token = generateToken(user._id);
     res.status(201).json({ user: sanitizeUser(user), token });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
@@ -40,12 +40,14 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
-    const user = await User.findOne({ email }).select("+password");
-    if (!user || !(await user.comparePassword(password))) return res.status(401).json({ error: "Invalid email or password" });
+    const user = await User.findOne({ email: email.trim() }).select("+password");
+    if (!user) return res.status(401).json({ error: "Invalid email or password" });
+    if (!user.isActive) return res.status(401).json({ error: "Account is deactivated" });
+    if (!(await user.comparePassword(password))) return res.status(401).json({ error: "Invalid email or password" });
     const token = generateToken(user._id);
     res.json({ user: sanitizeUser(user), token });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
@@ -57,13 +59,13 @@ router.get("/me", auth, async (req, res) => {
 // PUT /api/auth/me
 router.put("/me", auth, async (req, res) => {
   try {
-    const allowed = ["name", "phone", "age", "bloodGroup", "district", "area", "bio", "photo", "isAvailable", "lastDonationDate", "totalDonations"];
+    const allowed = ["name", "phone", "age", "bloodGroup", "district", "area", "bio", "photo", "isAvailable", "lastDonationDate"];
     const updates = {};
     allowed.forEach((field) => { if (req.body[field] !== undefined) updates[field] = req.body[field]; });
     const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true, runValidators: true });
     res.json({ user: sanitizeUser(user) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
@@ -73,7 +75,7 @@ router.get("/users", auth, adminAuth, async (req, res) => {
     const users = await User.find().select("-password").sort({ createdAt: -1 });
     res.json({ users });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
@@ -84,7 +86,7 @@ router.patch("/users/:id/verify", auth, adminAuth, async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json({ user });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Server error" });
   }
 });
 

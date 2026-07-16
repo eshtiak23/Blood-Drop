@@ -7,9 +7,9 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
-import { getRequests, acceptRequest, completeRequest, addRating, hasRated, deleteRequest } from "../../services/localStore";
+import { acceptRequest, completeRequest, addRating, hasRated, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS, URGENCY } from "../../data/constants";
-import { MapPin, Phone, Calendar, Clock, User, Hospital, CheckCircle, ArrowLeft, Star, Trash2 } from "lucide-react";
+import { MapPin, Phone, Calendar, Clock, Hospital, CheckCircle, ArrowLeft, Star, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 /** Returns themed background/text colors for a blood group badge. */
@@ -145,8 +145,8 @@ export default function RequestDetailPage() {
         {canDelete && <button className="btn btn-danger" onClick={() => setShowModal("delete")}><Trash2 size={16} /> Delete</button>}
       </div>
 
-      {/* ── Rate After Completion ── */}
-      {request.status === "completed" && user?._id && (
+      {/* ── Rate After Completion (only for participants) ── */}
+      {request.status === "completed" && user?._id && (canAccept || (user?._id === request.requester?._id && request.acceptedBy)) && (
         <div className="card animate-fadeIn" style={{ marginTop: 20 }}>
           <div className="card-body">
             {rated ? (

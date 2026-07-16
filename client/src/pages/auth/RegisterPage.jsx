@@ -53,7 +53,7 @@ export default function RegisterPage() {
   };
 
   // Shorthand to update a single field in the form state
-  const set = (k, v) => setForm({ ...form, [k]: v });
+  const set = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
 
   return (
     <div style={{ minHeight: "calc(100vh - 64px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
@@ -130,7 +130,7 @@ export default function RegisterPage() {
             <div className="grid grid-2" style={{ marginBottom: 20 }}>
               <div className="input-group">
                 <label>District <span style={{ color: "var(--red)" }}>*</span></label>
-                <select className="input" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, area: "" })} required>
+                <select className="input" value={form.district} onChange={(e) => setForm((prev) => ({ ...prev, district: e.target.value, area: "" }))} required>
                   <option value="">Select district</option>
                   {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>

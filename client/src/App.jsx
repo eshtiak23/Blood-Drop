@@ -100,6 +100,7 @@ function PageTransition({ children }) {
 }
 
 function ScrollReveal() {
+  const { pathname } = useLocation();
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -116,7 +117,7 @@ function ScrollReveal() {
       document.querySelectorAll(".reveal:not(.revealed)").forEach((el) => observer.observe(el));
     }, 100);
     return () => { clearTimeout(timer); observer.disconnect(); };
-  }, [useLocation().pathname]);
+  }, [pathname]);
   return null;
 }
 
@@ -125,7 +126,7 @@ function AppContent() {
   const isChatPage = location.pathname.startsWith("/chat");
 
   return (
-    <div style={{ height: isChatPage ? "100vh" : "auto", minHeight: isChatPage ? "100vh" : "100vh", display: "flex", flexDirection: "column", overflow: isChatPage ? "hidden" : "visible" }}>
+    <div style={{ height: isChatPage ? "100vh" : "auto", minHeight: "100vh", display: "flex", flexDirection: "column", overflow: isChatPage ? "hidden" : "visible" }}>
       {!isChatPage && <Navbar />}
       <ScrollReveal />
       <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>

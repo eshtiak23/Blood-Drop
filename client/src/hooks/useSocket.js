@@ -42,22 +42,10 @@ export default function useSocket() {
 
     const newSocket = io(SERVER_URL, {
       auth: { token },
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,
-    });
-
-    newSocket.on("connect", () => {
-      console.log("[Socket] Connected:", newSocket.id);
-    });
-
-    newSocket.on("disconnect", (reason) => {
-      console.log("[Socket] Disconnected:", reason);
-    });
-
-    newSocket.on("connect_error", (err) => {
-      console.error("[Socket] Connection error:", err.message);
     });
 
     socketRef.current = newSocket;

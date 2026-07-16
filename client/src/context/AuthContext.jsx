@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
   /** login — Sign in with email and password via API */
   const login = async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
+    if (!res.data?.token || !res.data?.user) throw new Error("Invalid server response");
     localStorage.setItem("blooddrop_token", res.data.token);
     localStorage.setItem("blooddrop_user", JSON.stringify(res.data.user));
     setUser(res.data.user);
@@ -49,6 +50,7 @@ export function AuthProvider({ children }) {
   /** register — Create a new account and log in via API */
   const register = async (data) => {
     const res = await api.post("/auth/register", data);
+    if (!res.data?.token || !res.data?.user) throw new Error("Invalid server response");
     localStorage.setItem("blooddrop_token", res.data.token);
     localStorage.setItem("blooddrop_user", JSON.stringify(res.data.user));
     setUser(res.data.user);
@@ -75,4 +77,8 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() { return useContext(AuthContext); }
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+}

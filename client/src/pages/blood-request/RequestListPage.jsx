@@ -4,7 +4,7 @@
  * Each card links to the full detail view of that request.
  * Contact button shows requester phone. Delete button for own requests.
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { searchRequests, deleteRequest } from "../../services/localStore";
@@ -23,6 +23,8 @@ function getBloodGroupColor(bloodGroup) {
 export default function RequestListPage() {
   const { user } = useAuth();
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", urgency: "" });
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
   const [requests, setRequests] = useState([]);
   const [showDelete, setShowDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -42,7 +44,7 @@ export default function RequestListPage() {
     } catch (err) {
       toast.error("Failed to delete request");
       // Re-fetch to restore the item if delete failed
-      searchRequests(filters).then(setRequests).catch(() => {});
+      searchRequests(filtersRef.current).then(setRequests).catch(() => {});
     } finally {
       setDeleting(false);
     }

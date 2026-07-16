@@ -22,8 +22,8 @@ export default function TypingIndicator({ userName }) {
         gap: 3,
         padding: "6px 12px",
         borderRadius: 14,
-        background: "var(--bg-card)",
-        border: "1px solid var(--border-light)",
+        background: "#fff",
+        border: "1px solid #F3F4F6",
         boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
       }}>
         {[0, 1, 2].map((i) => (
@@ -33,13 +33,13 @@ export default function TypingIndicator({ userName }) {
               width: 6,
               height: 6,
               borderRadius: "50%",
-              background: "var(--text-muted)",
+              background: "#9CA3AF",
               animation: `typingBounce 1.2s ease-in-out ${i * 0.15}s infinite`,
             }}
           />
         ))}
       </div>
-      <span style={{ fontSize: 11, color: "var(--text-muted)", fontStyle: "italic" }}>
+      <span style={{ fontSize: 11, color: "#9CA3AF", fontStyle: "italic" }}>
         {userName} is typing...
       </span>
 

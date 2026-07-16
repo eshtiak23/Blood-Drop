@@ -132,11 +132,13 @@ export const sendMessage = async (req, res) => {
 
     if (!conversationId) return res.status(400).json({ error: "conversationId is required" });
     if (!text && !image) return res.status(400).json({ error: "Message must have text or image" });
+    if (text && text.length > 5000) return res.status(400).json({ error: "Message too long (max 5000 characters)" });
+    if (image && image.length > 3 * 1024 * 1024) return res.status(400).json({ error: "Image too large (max 2MB)" });
 
     // Verify conversation exists and user is a participant
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) return res.status(404).json({ error: "Conversation not found" });
-    if (!conversation.participants.includes(senderId)) {
+    if (!conversation.participants.some((p) => p.equals(senderId))) {
       return res.status(403).json({ error: "Not a participant" });
     }
 
