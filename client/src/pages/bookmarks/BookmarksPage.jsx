@@ -49,9 +49,13 @@ export default function BookmarksPage() {
               return (
                 <div key={b._id} className="contact-card">
                   <div className="contact-card-top">
-                    <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${c.text || "#EF4444"}, ${c.text || "#DC2626"}88)` }}>
-                      {d.name?.charAt(0)?.toUpperCase()}
-                    </div>
+                  <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${c.text || "#EF4444"}, ${c.text || "#DC2626"}88)`, overflow: "hidden", padding: 0 }}>
+                    {d.photo ? (
+                      <img src={d.photo} alt={d.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      d.name?.charAt(0)?.toUpperCase()
+                    )}
+                  </div>
                     {d.bloodGroup && (
                       <div className="contact-card-blood-badge" style={{ background: c.text || "#EF4444" }}>
                         {d.bloodGroup}

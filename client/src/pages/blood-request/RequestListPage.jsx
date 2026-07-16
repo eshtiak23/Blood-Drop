@@ -90,9 +90,13 @@ export default function RequestListPage() {
                   )}
 
                   <div className="contact-card-top">
-                    <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${rc.text || "#EF4444"}, ${rc.text || "#DC2626"}88)` }}>
-                      {r.patientName?.charAt(0)?.toUpperCase()}
-                    </div>
+                  <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${rc.text || "#EF4444"}, ${rc.text || "#DC2626"}88)`, overflow: "hidden", padding: 0 }}>
+                    {r.requester?.photo ? (
+                      <img src={r.requester.photo} alt={r.patientName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      r.patientName?.charAt(0)?.toUpperCase()
+                    )}
+                  </div>
                     {r.patientBloodGroup && (
                       <div className="contact-card-blood-badge" style={{ background: rc.text || "#EF4444" }}>
                         {r.patientBloodGroup}
