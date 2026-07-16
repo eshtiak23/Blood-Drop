@@ -1,39 +1,42 @@
 /**
- * email.js — Email notification service using Nodemailer + Gmail SMTP
+ * email.js — Email notification service using Resend API
  *
  * Sends email alerts to donors when a blood request matches their blood group.
- * Requires SMTP_EMAIL and SMTP_PASSWORD in .env (Gmail App Password).
+ * Requires RESEND_API_KEY in .env (from https://resend.com).
+ *
+ * Resend free tier: 100 emails/day, 3000/month.
+ * No SMTP config needed — works from any cloud server (Render, AWS, etc.).
  */
 
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-// Create reusable transporter
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.SMTP_EMAIL,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+// Create reusable Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * Send an email
  * @param {Object} options - { to, subject, html }
  */
 export async function sendEmail({ to, subject, html }) {
-  if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
-    console.log("[Email] SMTP not configured, skipping email to", to);
+  if (!process.env.RESEND_API_KEY) {
+    console.log("[Email] RESEND_API_KEY not configured, skipping email to", to);
     return;
   }
 
   try {
-    await transporter.sendMail({
-      from: `"LifeDrop" <${process.env.SMTP_EMAIL}>`,
-      to,
+    const { data, error } = await resend.emails.send({
+      from: "LifeDrop <onboarding@resend.dev>",
+      to: [to],
       subject,
       html,
     });
-    console.log("[Email] Sent to", to);
+
+    if (error) {
+      console.error("[Email] Failed to send to", to, error.message);
+      return;
+    }
+
+    console.log("[Email] Sent to", to, "| ID:", data?.id);
   } catch (err) {
     console.error("[Email] Failed to send to", to, err.message);
   }
@@ -48,7 +51,7 @@ export async function sendBloodRequestEmails(donors, request) {
   const emailPromises = donors.map((donor) =>
     sendEmail({
       to: donor.email,
-      subject: `🩸 Urgent: ${request.patientBloodGroup} blood needed in ${request.district}`,
+      subject: `\u{1FA78} Urgent: ${request.patientBloodGroup} blood needed in ${request.district}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -56,7 +59,7 @@ export async function sendBloodRequestEmails(donors, request) {
         <body style="font-family: Arial, sans-serif; background: #f9fafb; padding: 20px;">
           <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
             <div style="background: linear-gradient(135deg, #EF4444, #DC2626); padding: 24px; text-align: center;">
-              <div style="font-size: 32px;">🩸</div>
+              <div style="font-size: 32px;">\u{1FA78}</div>
               <h1 style="color: white; margin: 8px 0 4px; font-size: 20px;">Blood Request Alert</h1>
               <p style="color: rgba(255,255,255,0.85); margin: 0; font-size: 14px;">A patient needs your help</p>
             </div>
