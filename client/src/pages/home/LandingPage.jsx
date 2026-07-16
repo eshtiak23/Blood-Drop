@@ -177,7 +177,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How It Works ── */}
-      <section className="section" style={{ background: "var(--bg-card)" }}>
+      <section className="section reveal" style={{ background: "var(--bg-card)" }}>
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>How It Works</h2>
           <p style={{ color: "var(--text-secondary)", marginTop: 8 }}>Simple steps to save a life</p>
@@ -201,7 +201,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Blood Compatibility Chart (Compact Trigger) ── */}
-      <section className="section">
+      <section className="section reveal">
         <div className="container" style={{ position: "relative" }}>
           {/* Left blood man */}
           <div className="blood-man blood-man-left">
@@ -471,7 +471,7 @@ export default function LandingPage() {
       )}
 
       {/* ── Features ── */}
-      <section className="section">
+      <section className="section reveal">
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>Why Choose LifeDrop?</h2>
           <div className="grid grid-3" style={{ marginTop: 48 }}>
@@ -494,26 +494,39 @@ export default function LandingPage() {
       </section>
 
       {/* ── Blood Groups ── */}
-      <section className="section" style={{ background: "var(--bg-card)" }}>
+      <section className="section reveal" style={{ background: "var(--bg-card)" }}>
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>Blood Groups We Serve</h2>
           <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 16, marginTop: 40 }}>
-            {BLOOD_GROUPS.map((g) => (
-              <Link key={g} to={`/donors?bloodGroup=${g}`} style={{
-                width: 72, height: 72, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center",
-                background: getBloodGroupColor(g).bg, color: getBloodGroupColor(g).text, fontSize: 16, fontWeight: 700,
-                boxShadow: "var(--shadow)", transition: "all 0.2s", cursor: "pointer",
-              }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
-                onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-              >{g}</Link>
-            ))}
+            {BLOOD_GROUPS.map((g) => {
+              const c = getBloodGroupColor(g);
+              return (
+                <Link key={g} to={`/donors?bloodGroup=${g}`} className="blood-group-card"
+                  style={{
+                    width: 80, height: 80, borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center",
+                    background: c.bg, color: c.text, fontSize: 17, fontWeight: 700,
+                    boxShadow: "var(--shadow)", transition: "all 0.3s ease", cursor: "pointer",
+                    border: `2px solid transparent`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-6px) scale(1.08)";
+                    e.currentTarget.style.boxShadow = `0 8px 30px ${c.text}30, 0 0 0 2px ${c.text}50`;
+                    e.currentTarget.style.borderColor = c.text + "60";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0) scale(1)";
+                    e.currentTarget.style.boxShadow = "var(--shadow)";
+                    e.currentTarget.style.borderColor = "transparent";
+                  }}
+                >{g}</Link>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="section">
+      <section className="section reveal">
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800 }}>What People Say</h2>
           <div className="grid grid-3" style={{ marginTop: 48 }}>
@@ -540,7 +553,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="section" style={{ background: "var(--bg-card)" }}>
+      <section className="section reveal" style={{ background: "var(--bg-card)" }}>
         <div className="container" style={{ maxWidth: 700, margin: "0 auto" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800, textAlign: "center" }}>Frequently Asked Questions</h2>
           <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 12 }}>
@@ -560,7 +573,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="section">
+      <section className="section reveal">
         <div className="container">
           <div style={{ background: "linear-gradient(135deg, #EF4444, #B91C1C)", borderRadius: "var(--radius-xl)", padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />

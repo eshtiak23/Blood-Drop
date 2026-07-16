@@ -275,6 +275,46 @@ textarea.input { min-height: 100px; resize: vertical; }
   to { transform: scale(4); opacity: 0; }
 }
 
+/* ── Bell Ring Animation ── */
+@keyframes bellRing {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-12deg); }
+  30% { transform: rotate(8deg); }
+  40% { transform: rotate(-6deg); }
+  50% { transform: rotate(3deg); }
+  60% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+.bell-ring { animation: bellRing 0.6s ease; }
+.bell-wobble {
+  animation: bellWobble 3s ease-in-out infinite;
+  animation-delay: 2s;
+}
+@keyframes bellWobble {
+  0%, 100% { transform: rotate(0deg); }
+  8% { transform: rotate(10deg); }
+  16% { transform: rotate(-8deg); }
+  24% { transform: rotate(5deg); }
+  32% { transform: rotate(-3deg); }
+  40% { transform: rotate(0deg); }
+}
+
+/* ── Scroll Reveal ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
 /* ── Page Transition ── */
 .page-enter { animation: pageEnter 0.35s ease forwards; }
 @keyframes pageEnter {

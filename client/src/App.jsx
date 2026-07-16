@@ -99,6 +99,27 @@ function PageTransition({ children }) {
   );
 }
 
+function ScrollReveal() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("revealed");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+    const timer = setTimeout(() => {
+      document.querySelectorAll(".reveal:not(.revealed)").forEach((el) => observer.observe(el));
+    }, 100);
+    return () => { clearTimeout(timer); observer.disconnect(); };
+  }, [useLocation().pathname]);
+  return null;
+}
+
 function AppContent() {
   const location = useLocation();
   const isChatPage = location.pathname.startsWith("/chat");
@@ -106,6 +127,7 @@ function AppContent() {
   return (
     <div style={{ height: isChatPage ? "100vh" : "auto", minHeight: isChatPage ? "100vh" : "100vh", display: "flex", flexDirection: "column", overflow: isChatPage ? "hidden" : "visible" }}>
       {!isChatPage && <Navbar />}
+      <ScrollReveal />
       <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
         {isChatPage ? (
           <Routes>
