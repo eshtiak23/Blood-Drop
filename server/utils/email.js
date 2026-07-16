@@ -10,7 +10,14 @@
 
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend;
+
+function getResend() {
+  if (!resend && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -22,7 +29,8 @@ function isRealEmail(email) {
 }
 
 export async function sendEmail({ to, subject, html }) {
-  if (!process.env.RESEND_API_KEY) {
+  const client = getResend();
+  if (!client) {
     console.log("[Email] RESEND_API_KEY not configured, skipping");
     return;
   }
@@ -33,7 +41,7 @@ export async function sendEmail({ to, subject, html }) {
   }
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await client.emails.send({
       from: "LifeDrop <onboarding@resend.dev>",
       to: [to],
       subject,
