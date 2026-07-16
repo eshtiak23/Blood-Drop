@@ -298,7 +298,7 @@ export default function DonorSearchPage() {
                       if (!isAuthenticated) { navigate("/login"); return; }
                       setSelectedDonor(d);
                     }}>
-                      <Phone size={14} /> Contact
+                      <Phone size={14} /> Details
                     </button>
                   </div>
                 </div>
