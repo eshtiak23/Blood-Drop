@@ -795,8 +795,8 @@ export default function LandingPage() {
           z-index: 5;
           pointer-events: none;
         }
-        .blood-man-left { left: -100px; }
-        .blood-man-right { right: -100px; }
+        .blood-man-left { left: -30px; }
+        .blood-man-right { right: -30px; }
         .blood-man-body {
           width: 60px;
           height: 72px;
