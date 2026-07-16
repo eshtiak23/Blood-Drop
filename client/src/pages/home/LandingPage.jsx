@@ -202,7 +202,30 @@ export default function LandingPage() {
 
       {/* ── Blood Compatibility Chart (Compact Trigger) ── */}
       <section className="section">
-        <div className="container">
+        <div className="container" style={{ position: "relative" }}>
+          {/* Left blood man */}
+          <div className="blood-man blood-man-left">
+            <div className="blood-man-body">
+              <div className="blood-man-eyes">
+                <div className="blood-man-eye"><div className="blood-man-pupil" /></div>
+                <div className="blood-man-eye"><div className="blood-man-pupil" style={{ animationDelay: "0.1s" }} /></div>
+              </div>
+              <div className="blood-man-cheeks"><div className="blood-man-cheek" /><div className="blood-man-cheek" /></div>
+              <div className="blood-man-smile" />
+            </div>
+          </div>
+          {/* Right blood man */}
+          <div className="blood-man blood-man-right">
+            <div className="blood-man-body">
+              <div className="blood-man-eyes">
+                <div className="blood-man-eye"><div className="blood-man-pupil" style={{ animationDelay: "1.5s" }} /></div>
+                <div className="blood-man-eye"><div className="blood-man-pupil" style={{ animationDelay: "1.6s" }} /></div>
+              </div>
+              <div className="blood-man-cheeks"><div className="blood-man-cheek" /><div className="blood-man-cheek" /></div>
+              <div className="blood-man-smile" />
+            </div>
+          </div>
+
           <AnimatedDiv>
             <div
               onClick={() => setShowCompatModal(true)}
@@ -761,7 +784,93 @@ export default function LandingPage() {
           color: var(--text-secondary);
           line-height: 1.7;
         }
+
+        /* ── Blood Man Character ── */
+        .blood-man {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 80px;
+          height: 100px;
+          z-index: 5;
+          pointer-events: none;
+        }
+        .blood-man-left { left: -100px; }
+        .blood-man-right { right: -100px; }
+        .blood-man-body {
+          width: 60px;
+          height: 72px;
+          background: linear-gradient(135deg, #EF4444, #DC2626);
+          border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+          position: relative;
+          margin: 0 auto;
+          animation: bloodManBounce 2s ease-in-out infinite;
+          box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+        }
+        .blood-man-eyes {
+          position: absolute;
+          top: 22px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 10px;
+        }
+        .blood-man-eye {
+          width: 12px;
+          height: 12px;
+          background: #fff;
+          border-radius: 50%;
+          position: relative;
+          overflow: hidden;
+        }
+        .blood-man-pupil {
+          width: 6px;
+          height: 6px;
+          background: #1E1B4B;
+          border-radius: 50%;
+          position: absolute;
+          top: 3px;
+          left: 3px;
+          animation: eyeFlip 3s ease-in-out infinite;
+        }
+        .blood-man-smile {
+          position: absolute;
+          bottom: 15px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 16px;
+          height: 8px;
+          border-bottom: 2.5px solid #fff;
+          border-radius: 0 0 50% 50%;
+        }
+        .blood-man-cheeks {
+          position: absolute;
+          top: 32px;
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          padding: 0 6px;
+          pointer-events: none;
+        }
+        .blood-man-cheek {
+          width: 8px;
+          height: 5px;
+          background: rgba(255, 180, 180, 0.6);
+          border-radius: 50%;
+        }
+        @keyframes bloodManBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        @keyframes eyeFlip {
+          0%, 35%, 100% { transform: translateY(0) translateX(0); }
+          40%, 50% { transform: translateY(-5px) scaleY(0.1); }
+          55%, 85% { transform: translateY(0) translateX(3px); }
+          90% { transform: translateY(0) translateX(-3px); }
+        }
+
         @media (max-width: 768px) {
+          .blood-man { display: none !important; }
           .hero-banner-wrap { height: 400px; }
           .hero-title { font-size: 34px; }
           .hero-subtitle { font-size: 14px; margin-top: 12px; max-width: 340px; }
