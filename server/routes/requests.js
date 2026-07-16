@@ -106,11 +106,17 @@ router.post("/", auth, async (req, res) => {
     // Send email notifications to matching donors with email addresses
     let emailsSent = 0;
     let emailError = null;
+
+    // Diagnostic: log all users with matching blood group (for debugging)
+    const allMatching = await User.find({ bloodGroup: req.body.patientBloodGroup }).select("email name bloodGroup");
+    console.log(`[Email] Request for ${req.body.patientBloodGroup} — Found ${allMatching.length} users with matching blood group:`, allMatching.map(u => `${u.name} (${u.email})`));
+
     const donorsWithEmail = await User.find({
       _id: { $ne: req.user._id },
       bloodGroup: req.body.patientBloodGroup,
       email: { $exists: true, $ne: "" },
     }).select("email name");
+    console.log(`[Email] ${donorsWithEmail.length} donors with email to notify:`, donorsWithEmail.map(u => u.email));
 
     if (donorsWithEmail.length > 0) {
       try {
