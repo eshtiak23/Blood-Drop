@@ -720,6 +720,9 @@ textarea.input { min-height: 100px; resize: vertical; }
 .dark .page-btn.active { background: var(--red); color: white; }
 .dark .dropdown-menu { background: var(--bg-card); border-color: var(--border); }
 .dark select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239B97B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
+.dark select.input option,
+.dark select.input optgroup { background: var(--bg-card); color: var(--text); }
+.dark .input:disabled { background: var(--bg-secondary); color: var(--text-muted); cursor: not-allowed; }
 .dark ::-webkit-scrollbar-thumb { background: var(--border); }
 .dark .mobile-menu-btn { color: #fff !important; }
 .dark header .theme-toggle,
