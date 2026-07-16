@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { searchRequests, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
-import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2, MessageCircle, Droplets } from "lucide-react";
+import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2, MessageCircle, Droplets, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 /** Returns themed background/text colors for a blood group badge. */
@@ -25,20 +25,26 @@ export default function RequestListPage() {
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", urgency: "" });
   const [requests, setRequests] = useState([]);
   const [showDelete, setShowDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     searchRequests(filters).then(setRequests).catch(() => setRequests([]));
   }, [filters]);
 
   const handleDelete = async (requestId) => {
+    setDeleting(true);
+    // Optimistic update — remove from UI immediately
+    setRequests((prev) => prev.filter((r) => r._id !== requestId));
+    setShowDelete(null);
     try {
       await deleteRequest(requestId);
       toast.success("Request deleted");
-      const updated = await searchRequests(filters);
-      setRequests(updated);
-      setShowDelete(null);
     } catch (err) {
       toast.error("Failed to delete request");
+      // Re-fetch to restore the item if delete failed
+      searchRequests(filters).then(setRequests).catch(() => {});
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -136,13 +142,15 @@ export default function RequestListPage() {
 
       {/* ── Delete Confirmation Modal ── */}
       {showDelete && (
-        <div className="modal-overlay" onClick={() => setShowDelete(null)}>
+        <div className="modal-overlay" onClick={() => !deleting && setShowDelete(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-title">Delete Request</div>
             <div className="modal-desc">Are you sure you want to delete the request for <strong>{showDelete.patientName}</strong>? This cannot be undone.</div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button className="btn btn-secondary" onClick={() => setShowDelete(null)}>Cancel</button>
-              <button className="btn btn-danger" onClick={() => handleDelete(showDelete._id)}>Delete</button>
+              <button className="btn btn-secondary" onClick={() => setShowDelete(null)} disabled={deleting}>Cancel</button>
+              <button className="btn btn-danger" onClick={() => handleDelete(showDelete._id)} disabled={deleting}>
+                {deleting ? <><Loader2 size={14} className="animate-pulse" /> Deleting...</> : "Delete"}
+              </button>
             </div>
           </div>
         </div>

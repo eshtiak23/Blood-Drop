@@ -110,69 +110,54 @@ router.post("/", auth, async (req, res) => {
       await Notification.insertMany(notifications);
     }
 
-    // Send email notifications to matching donors with email addresses
-    let emailsSent = 0;
-    let emailError = null;
+    // Respond immediately — emails go out in the background
+    res.status(201).json({ request: populated });
 
-    // Diagnostic: log all users with matching blood group (for debugging)
-    const allMatching = await User.find({ bloodGroup: req.body.patientBloodGroup }).select("email name bloodGroup");
-    console.log(`[Email] Request for ${req.body.patientBloodGroup} — Found ${allMatching.length} users with matching blood group:`, allMatching.map(u => `${u.name} (${u.email})`));
-
-    const donorsWithEmail = await User.find({
-      _id: { $ne: req.user._id },
-      bloodGroup: req.body.patientBloodGroup,
-      email: { $exists: true, $ne: "" },
-    }).select("email name");
-    console.log(`[Email] ${donorsWithEmail.length} donors with email to notify:`, donorsWithEmail.map(u => u.email));
-
-    if (donorsWithEmail.length > 0) {
+    // Fire-and-forget: send emails without blocking the response
+    (async () => {
       try {
-        const results = await Promise.allSettled(
-          donorsWithEmail.map((donor) =>
-            sendEmail({
-              to: donor.email,
-              subject: `🩸 Urgent: ${req.body.patientBloodGroup} blood needed in ${req.body.district}`,
-              html: `
-                <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
-                  <div style="background:linear-gradient(135deg,#EF4444,#DC2626);padding:24px;border-radius:16px 16px 0 0;text-align:center;">
-                    <div style="font-size:32px;">🩸</div>
-                    <h1 style="color:white;margin:8px 0 0;font-size:20px;">Blood Request Alert</h1>
-                    <p style="color:rgba(255,255,255,0.85);margin:4px 0 0;font-size:14px;">A patient needs your help</p>
+        const donorsWithEmail = await User.find({
+          _id: { $ne: req.user._id },
+          bloodGroup: req.body.patientBloodGroup,
+          email: { $exists: true, $ne: "" },
+        }).select("email name");
+        console.log(`[Email] ${donorsWithEmail.length} donors with email to notify for ${req.body.patientBloodGroup}`);
+
+        for (const donor of donorsWithEmail) {
+          sendEmail({
+            to: donor.email,
+            subject: `🩸 Urgent: ${req.body.patientBloodGroup} blood needed in ${req.body.district}`,
+            html: `
+              <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+                <div style="background:linear-gradient(135deg,#EF4444,#DC2626);padding:24px;border-radius:16px 16px 0 0;text-align:center;">
+                  <div style="font-size:32px;">🩸</div>
+                  <h1 style="color:white;margin:8px 0 0;font-size:20px;">Blood Request Alert</h1>
+                  <p style="color:rgba(255,255,255,0.85);margin:4px 0 0;font-size:14px;">A patient needs your help</p>
+                </div>
+                <div style="background:white;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px;">
+                  <div style="text-align:center;margin-bottom:16px;">
+                    <span style="display:inline-block;padding:8px 20px;border-radius:20px;font-size:18px;font-weight:700;background:#FEE2E2;color:#DC2626;">${req.body.patientBloodGroup} Blood Needed</span>
                   </div>
-                  <div style="background:white;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px;">
-                    <div style="text-align:center;margin-bottom:16px;">
-                      <span style="display:inline-block;padding:8px 20px;border-radius:20px;font-size:18px;font-weight:700;background:#FEE2E2;color:#DC2626;">${req.body.patientBloodGroup} Blood Needed</span>
-                    </div>
-                    <table style="width:100%;font-size:14px;color:#374151;">
-                      <tr><td style="padding:6px 0;color:#6B7280;">Patient</td><td style="padding:6px 0;font-weight:600;">${req.body.patientName}</td></tr>
-                      <tr><td style="padding:6px 0;color:#6B7280;">Hospital</td><td style="padding:6px 0;font-weight:600;">${req.body.hospital}</td></tr>
-                      <tr><td style="padding:6px 0;color:#6B7280;">Location</td><td style="padding:6px 0;font-weight:600;">${req.body.area}, ${req.body.district}</td></tr>
-                      <tr><td style="padding:6px 0;color:#6B7280;">Units</td><td style="padding:6px 0;font-weight:600;">${req.body.unitsRequired}</td></tr>
-                      <tr><td style="padding:6px 0;color:#6B7280;">Urgency</td><td style="padding:6px 0;font-weight:600;">${req.body.urgency}</td></tr>
-                      <tr><td style="padding:6px 0;color:#6B7280;">Contact</td><td style="padding:6px 0;font-weight:600;">${req.body.contactNumber}</td></tr>
-                    </table>
-                    <div style="text-align:center;margin-top:20px;">
-                      <a href="${process.env.CLIENT_URL || "https://blood-drop-jade.vercel.app"}/requests" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#EF4444,#DC2626);color:white;text-decoration:none;border-radius:8px;font-weight:700;">View Request</a>
-                    </div>
+                  <table style="width:100%;font-size:14px;color:#374151;">
+                    <tr><td style="padding:6px 0;color:#6B7280;">Patient</td><td style="padding:6px 0;font-weight:600;">${req.body.patientName}</td></tr>
+                    <tr><td style="padding:6px 0;color:#6B7280;">Hospital</td><td style="padding:6px 0;font-weight:600;">${req.body.hospital}</td></tr>
+                    <tr><td style="padding:6px 0;color:#6B7280;">Location</td><td style="padding:6px 0;font-weight:600;">${req.body.area}, ${req.body.district}</td></tr>
+                    <tr><td style="padding:6px 0;color:#6B7280;">Units</td><td style="padding:6px 0;font-weight:600;">${req.body.unitsRequired}</td></tr>
+                    <tr><td style="padding:6px 0;color:#6B7280;">Urgency</td><td style="padding:6px 0;font-weight:600;">${req.body.urgency}</td></tr>
+                    <tr><td style="padding:6px 0;color:#6B7280;">Contact</td><td style="padding:6px 0;font-weight:600;">${req.body.contactNumber}</td></tr>
+                  </table>
+                  <div style="text-align:center;margin-top:20px;">
+                    <a href="${process.env.CLIENT_URL || "https://blood-drop-jade.vercel.app"}/requests" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#EF4444,#DC2626);color:white;text-decoration:none;border-radius:8px;font-weight:700;">View Request</a>
                   </div>
                 </div>
-              `,
-            })
-          )
-        );
-        emailsSent = results.filter((r) => r.status === "fulfilled").length;
-        const failed = results.filter((r) => r.status === "rejected");
-        if (failed.length > 0) {
-          emailError = failed[0].reason?.message || "Some emails failed";
-          console.error("[Email] Send errors:", failed.map((f) => f.reason?.message));
+              </div>
+            `,
+          }).catch(err => console.error("[Email] Background send error:", err.message));
         }
       } catch (err) {
-        emailError = err.message;
-        console.error("[Email] Send error:", err.message);
+        console.error("[Email] Background error:", err.message);
       }
-    }
-
-    res.status(201).json({ request: populated, emailsSent, emailError });
+    })();
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { BLOOD_GROUPS, DISTRICTS, AREAS, URGENCY } from "../../data/constants";
 import { useAuth } from "../../context/AuthContext";
 import { createRequest } from "../../services/localStore";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { validateRequestForm } from "../../utils/validate";
 import toast from "react-hot-toast";
 
@@ -18,6 +18,7 @@ export default function CreateRequestPage() {
   const [form, setForm] = useState({ patientName: "", hospital: "", patientBloodGroup: "", unitsRequired: 1, urgency: "normal", dateNeeded: "", contactNumber: user?.phone || "", district: "", area: "", description: "" });
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
   const areas = form.district ? (AREAS[form.district] || []) : [];
   const set = (k, v) => setForm({ ...form, [k]: v });
 
@@ -33,11 +34,13 @@ export default function CreateRequestPage() {
       return;
     }
 
+    setSubmitting(true);
     try {
       await createRequest(form);
       toast.success("Request created successfully!");
       navigate("/requests");
     } catch (err) { setError(err.response?.data?.error || err.message); toast.error(err.response?.data?.error || err.message); }
+    finally { setSubmitting(false); }
   };
 
   return (
@@ -106,8 +109,10 @@ export default function CreateRequestPage() {
             <textarea className="input" value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} />
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)}>Cancel</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Create Request</button>
+            <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)} disabled={submitting}>Cancel</button>
+            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={submitting}>
+              {submitting ? <><Loader2 size={16} className="animate-pulse" /> Creating...</> : "Create Request"}
+            </button>
           </div>
         </form>
       </div></div>
