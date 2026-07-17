@@ -91,9 +91,9 @@ const DEVELOPERS = [
 
 export default function DevelopersPage() {
   return (
-    <div style={{ minHeight: "100vh" }}>
+    <div className="dev-page" style={{ minHeight: "100vh" }}>
       {/* ── Header Section ── */}
-      <section style={{
+      <section className="dev-page-header" style={{
         background: "linear-gradient(180deg, #F3E8FF 0%, #FDF2F8 40%, #FFFFFF 100%)",
         padding: "60px 20px 48px",
         textAlign: "center",
@@ -101,13 +101,13 @@ export default function DevelopersPage() {
         overflow: "hidden",
       }}>
         {/* Decorative elements */}
-        <div style={{ position: "absolute", top: 40, left: "15%", color: "#C4B5FD", fontSize: 28, opacity: 0.5 }}>+</div>
-        <div style={{ position: "absolute", top: 80, right: "10%", color: "#C4B5FD", fontSize: 20, opacity: 0.4 }}>✦</div>
-        <div style={{ position: "absolute", top: 30, right: "18%", color: "#DDD6FE", fontSize: 18, opacity: 0.5 }}>
+        <div className="dev-header-deco" style={{ position: "absolute", top: 40, left: "15%", color: "#C4B5FD", fontSize: 28, opacity: 0.5 }}>+</div>
+        <div className="dev-header-deco" style={{ position: "absolute", top: 80, right: "10%", color: "#C4B5FD", fontSize: 20, opacity: 0.4 }}>✦</div>
+        <div className="dev-header-deco" style={{ position: "absolute", top: 30, right: "18%", color: "#DDD6FE", fontSize: 18, opacity: 0.5 }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="6" cy="6" r="1.5"/><circle cx="18" cy="6" r="1.5"/><circle cx="6" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>
         </div>
-        <div style={{ position: "absolute", bottom: 60, left: "8%", color: "#DDD6FE", fontSize: 22, opacity: 0.35 }}>✦</div>
-        <div style={{ position: "absolute", bottom: 40, right: "6%", color: "#DDD6FE", fontSize: 18, opacity: 0.3 }}>
+        <div className="dev-header-deco" style={{ position: "absolute", bottom: 60, left: "8%", color: "#DDD6FE", fontSize: 22, opacity: 0.35 }}>✦</div>
+        <div className="dev-header-deco" style={{ position: "absolute", bottom: 40, right: "6%", color: "#DDD6FE", fontSize: 18, opacity: 0.3 }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="6" cy="6" r="1.5"/><circle cx="18" cy="6" r="1.5"/><circle cx="6" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/></svg>
         </div>
 
@@ -128,7 +128,7 @@ export default function DevelopersPage() {
         </div>
 
         {/* Badge */}
-        <div style={{
+        <div className="dev-header-badge" style={{
           display: "inline-flex", alignItems: "center", gap: 8,
           background: "rgba(124, 58, 237, 0.1)", border: "1px solid rgba(124, 58, 237, 0.2)",
           borderRadius: 999, padding: "8px 20px", marginBottom: 20,
@@ -138,7 +138,7 @@ export default function DevelopersPage() {
         </div>
 
         {/* Title */}
-        <h1 style={{ fontSize: 44, fontWeight: 800, lineHeight: 1.2, marginBottom: 12 }}>
+        <h1 className="dev-page-title" style={{ fontSize: 44, fontWeight: 800, lineHeight: 1.2, marginBottom: 12, color: "#1E1B4B" }}>
           Meet Our <span style={{
             background: "linear-gradient(135deg, #EC4899, #A78BFA)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
@@ -153,7 +153,7 @@ export default function DevelopersPage() {
         </div>
 
         {/* Subtitle */}
-        <p style={{ color: "#6B7280", fontSize: 16, maxWidth: 400, margin: "0 auto" }}>
+        <p className="dev-page-subtitle" style={{ color: "#6B7280", fontSize: 16, maxWidth: 400, margin: "0 auto" }}>
           Passionate minds working together to save lives
         </p>
       </section>
@@ -249,7 +249,7 @@ export default function DevelopersPage() {
                     objectFit: "cover",
                   }} />
                 ) : (
-                  <div style={{
+                  <div className="dev-card-initials" style={{
                     width: 92, height: 92, borderRadius: "50%",
                     background: "#fff",
                     display: "flex", alignItems: "center", justifyContent: "center",
@@ -261,43 +261,43 @@ export default function DevelopersPage() {
               </div>
 
               {/* Name */}
-              <h3 className="dev-text-reveal" style={{ fontSize: 17, fontWeight: 700, color: "#1E1B4B", marginBottom: 4, animationDelay: `${0.3 + i * 0.12}s` }}>{dev.name}</h3>
+              <h3 className="dev-text-reveal dev-card-name" style={{ fontSize: 17, fontWeight: 700, color: "#1E1B4B", marginBottom: 4, animationDelay: `${0.3 + i * 0.12}s` }}>{dev.name}</h3>
 
               {/* Role */}
               <p className="dev-text-reveal" style={{ fontSize: 14, fontWeight: 600, color: dev.roleColor, marginBottom: 14, animationDelay: `${0.4 + i * 0.12}s` }}>{dev.role}</p>
 
               {/* Description */}
-              <p className="dev-text-reveal" style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.6, marginBottom: 20, animationDelay: `${0.5 + i * 0.12}s` }}>{dev.desc}</p>
+              <p className="dev-text-reveal dev-card-desc" style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.6, marginBottom: 20, animationDelay: `${0.5 + i * 0.12}s` }}>{dev.desc}</p>
 
               {/* Social icons */}
               <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
-                <a href={dev.github} target="_blank" rel="noopener noreferrer" style={{
+                <a href={dev.github} target="_blank" rel="noopener noreferrer" className="dev-social-github" style={{
                   width: 38, height: 38, borderRadius: "50%",
                   background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center",
                   color: "#333", transition: "all 0.3s ease", border: "1px solid #E5E7EB",
                 }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = "#24292e"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.boxShadow = "0 0 16px rgba(36, 41, 46, 0.4)"; e.currentTarget.style.transform = "scale(1.1)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#F3F4F6"; e.currentTarget.style.color = "#333"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "scale(1)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = ""; e.currentTarget.style.color = ""; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "scale(1)"; }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                 </a>
-                <a href={dev.linkedin} target="_blank" rel="noopener noreferrer" style={{
+                <a href={dev.linkedin} target="_blank" rel="noopener noreferrer" className="dev-social-linkedin" style={{
                   width: 38, height: 38, borderRadius: "50%",
                   background: "#E8F4FD", display: "flex", alignItems: "center", justifyContent: "center",
                   color: "#0A66C2", transition: "all 0.3s ease", border: "1px solid #B8D8F0",
                 }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = "#0A66C2"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.boxShadow = "0 0 16px rgba(10, 102, 194, 0.4)"; e.currentTarget.style.transform = "scale(1.1)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#E8F4FD"; e.currentTarget.style.color = "#0A66C2"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "scale(1)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = ""; e.currentTarget.style.color = ""; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "scale(1)"; }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
                 </a>
-                <a href={`mailto:${dev.email}`} style={{
+                <a href={`mailto:${dev.email}`} className="dev-social-email" style={{
                   width: 38, height: 38, borderRadius: "50%",
                   background: "#FDE8EF", display: "flex", alignItems: "center", justifyContent: "center",
                   color: "#EC4899", transition: "all 0.3s ease", border: "1px solid #F5C2D4",
                 }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = "#EC4899"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.boxShadow = "0 0 16px rgba(236, 72, 153, 0.4)"; e.currentTarget.style.transform = "scale(1.1)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#FDE8EF"; e.currentTarget.style.color = "#EC4899"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "scale(1)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = ""; e.currentTarget.style.color = ""; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "scale(1)"; }}
                 >
                   <Mail size={18} />
                 </a>
@@ -352,7 +352,7 @@ export default function DevelopersPage() {
 
       {/* ── Footer Message ── */}
       <section style={{ padding: "0 20px 60px", maxWidth: 800, margin: "0 auto" }}>
-        <div style={{
+        <div className="dev-footer-msg" style={{
           background: "#fff", border: "1px solid #EDE9FE", borderRadius: 16,
           padding: "24px 32px", display: "flex", alignItems: "center",
           justifyContent: "space-between", flexWrap: "wrap", gap: 16,
@@ -360,7 +360,7 @@ export default function DevelopersPage() {
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Heart size={18} fill="#EC4899" color="#EC4899" />
-            <span style={{ fontSize: 14, color: "#6B7280" }}>
+            <span className="dev-footer-msg-text" style={{ fontSize: 14, color: "#6B7280" }}>
               LifeDrop is more than a platform, it's a mission to save lives.
             </span>
           </div>

@@ -188,7 +188,31 @@ export default function LandingPage() {
               { icon: History, title: "Track", desc: "Track donation history" }].map((s, i) => (
               <div key={s.title} className="how-it-works-step-wrap">
                 <AnimatedDiv delay={i * 0.1}>
-                  <div className="how-it-works-card">
+                  <div className="how-it-works-card how-it-works-card-3d"
+                    onMouseMove={(e) => {
+                      const card = e.currentTarget;
+                      const rect = card.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const y = e.clientY - rect.top;
+                      const centerX = rect.width / 2;
+                      const centerY = rect.height / 2;
+                      const rotateX = ((y - centerY) / centerY) * -5;
+                      const rotateY = ((x - centerX) / centerX) * 5;
+                      card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(6px)`;
+                      const glare = card.querySelector(".feature-card-glare");
+                      if (glare) {
+                        glare.style.opacity = "1";
+                        glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)`;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      const card = e.currentTarget;
+                      card.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg) translateZ(0px)";
+                      const glare = card.querySelector(".feature-card-glare");
+                      if (glare) { glare.style.opacity = "0"; }
+                    }}
+                  >
+                    <div className="feature-card-glare" />
                     <div className="how-it-works-icon">
                       <s.icon size={28} color="var(--red)" />
                     </div>
@@ -484,10 +508,31 @@ export default function LandingPage() {
           <div className="grid grid-3" style={{ marginTop: 48 }}>
             {FEATURES.map((f, i) => (
               <AnimatedDiv key={f.title} delay={i * 0.08}>
-                <div style={{ padding: 28, borderRadius: "var(--radius)", border: "1px solid var(--border-light)", background: "var(--bg-card)", transition: "all 0.3s", cursor: "default" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "var(--shadow-md)"; e.currentTarget.style.borderColor = "rgba(239,68,68,0.2)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "var(--border-light)"; }}
+                <div className="feature-card-3d" style={{ padding: 28, borderRadius: "var(--radius)", border: "1px solid var(--border-light)", background: "var(--bg-card)" }}
+                  onMouseMove={(e) => {
+                    const card = e.currentTarget;
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -5;
+                    const rotateY = ((x - centerX) / centerX) * 5;
+                    card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(6px)`;
+                    const glare = card.querySelector(".feature-card-glare");
+                    if (glare) {
+                      glare.style.opacity = "1";
+                      glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    const card = e.currentTarget;
+                    card.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg) translateZ(0px)";
+                    const glare = card.querySelector(".feature-card-glare");
+                    if (glare) { glare.style.opacity = "0"; }
+                  }}
                 >
+                  <div className="feature-card-glare" />
                   <div style={{ width: 48, height: 48, borderRadius: 12, background: "var(--red-light)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <f.icon size={24} color="var(--red)" />
                   </div>
@@ -508,7 +553,7 @@ export default function LandingPage() {
             {BLOOD_GROUPS.map((g) => {
               const c = getBloodGroupColor(g);
               return (
-                <Link key={g} to={`/donors?bloodGroup=${g}`} className="blood-group-card"
+                <Link key={g} to={`/donors?bloodGroup=${g}`} className="blood-group-card blood-group-pulse"
                   style={{
                     width: 80, height: 80, borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center",
                     background: c.bg, color: c.text, fontSize: 17, fontWeight: 700,
@@ -539,7 +584,31 @@ export default function LandingPage() {
           <div className="grid grid-3" style={{ marginTop: 48 }}>
             {allTestimonials.map((t, i) => (
               <AnimatedDiv key={t.name + i} delay={i * 0.1}>
-                <div style={{ padding: 28, borderRadius: "var(--radius)", border: "1px solid var(--border-light)", background: "var(--bg-card)", textAlign: "left", position: "relative", overflow: "hidden" }}>
+                <div className="testimonial-card-3d" style={{ padding: 28, borderRadius: "var(--radius)", border: "1px solid var(--border-light)", background: "var(--bg-card)", textAlign: "left", position: "relative", overflow: "hidden" }}
+                  onMouseMove={(e) => {
+                    const card = e.currentTarget;
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -5;
+                    const rotateY = ((x - centerX) / centerX) * 5;
+                    card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(6px)`;
+                    const glare = card.querySelector(".testimonial-card-glare");
+                    if (glare) {
+                      glare.style.opacity = "1";
+                      glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    const card = e.currentTarget;
+                    card.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg) translateZ(0px)";
+                    const glare = card.querySelector(".testimonial-card-glare");
+                    if (glare) { glare.style.opacity = "0"; }
+                  }}
+                >
+                  <div className="testimonial-card-glare" />
                   {t.isUserFeedback && <div style={{ position: "absolute", top: 12, right: 12, fontSize: 10, fontWeight: 600, color: "var(--red)", background: "var(--red-light)", padding: "2px 8px", borderRadius: 10 }}>User Review</div>}
                   <div style={{ display: "flex", gap: 2 }}>{[...Array(5)].map((_, j) => <Star key={j} size={14} fill={j < (t.rating || 5) ? "#FBBF24" : "none"} color={j < (t.rating || 5) ? "#FBBF24" : "var(--text-muted)"} />)}</div>
                   <p style={{ fontSize: 14, color: "var(--text-secondary)", marginTop: 14, lineHeight: 1.7 }}>"{t.content}"</p>

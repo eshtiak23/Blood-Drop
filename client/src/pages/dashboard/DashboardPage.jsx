@@ -497,7 +497,31 @@ export default function DashboardPage() {
 /** Reusable stat card component */
 function StatCard({ icon, label, value, valueColor }) {
   return (
-    <div className="card" style={{ padding: 16 }}>
+    <div className="card stat-card-3d" style={{ padding: 16 }}
+      onMouseMove={(e) => {
+        const card = e.currentTarget;
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -5;
+        const rotateY = ((x - centerX) / centerX) * 5;
+        card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(6px)`;
+        const glare = card.querySelector(".feature-card-glare");
+        if (glare) {
+          glare.style.opacity = "1";
+          glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)`;
+        }
+      }}
+      onMouseLeave={(e) => {
+        const card = e.currentTarget;
+        card.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg) translateZ(0px)";
+        const glare = card.querySelector(".feature-card-glare");
+        if (glare) { glare.style.opacity = "0"; }
+      }}
+    >
+      <div className="feature-card-glare" />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
         <div>
           <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>{label}</div>

@@ -265,7 +265,31 @@ export default function DonorSearchPage() {
                 const canDonate = isDonationCooledDown(d.lastDonationDate);
                 const c = getBloodGroupColor(d.bloodGroup);
                 return (
-                <div key={d._id} className="contact-card">
+                <div key={d._id} className="contact-card contact-card-entry" style={{ animationDelay: `${pagedResults.indexOf(d) * 0.08}s` }}
+                  onMouseMove={(e) => {
+                    const card = e.currentTarget;
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -6;
+                    const rotateY = ((x - centerX) / centerX) * 6;
+                    card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(8px)`;
+                    const glare = card.querySelector(".contact-card-glare");
+                    if (glare) {
+                      glare.style.opacity = "1";
+                      glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.1) 40%, transparent 70%)`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    const card = e.currentTarget;
+                    card.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg) translateZ(0px)";
+                    const glare = card.querySelector(".contact-card-glare");
+                    if (glare) { glare.style.opacity = "0"; }
+                  }}
+                >
+                  <div className="contact-card-glare" />
                   <div className="contact-card-top">
                   <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${c.text || "#EF4444"}, ${c.text || "#DC2626"}88)`, overflow: "hidden", padding: 0 }}>
                     {d.photo ? (
