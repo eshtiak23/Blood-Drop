@@ -35,6 +35,19 @@ router.get("/search", async (req, res) => {
   }
 });
 
+// GET /api/donors/leaderboard
+router.get("/leaderboard", async (req, res) => {
+  try {
+    const donors = await User.find({ bloodGroup: { $ne: "" } })
+      .select("-password -email -__v")
+      .sort({ totalDonations: -1, lastDonationDate: 1, createdAt: 1 })
+      .lean();
+    res.json({ donors });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/donors/:id
 router.get("/:id", async (req, res) => {
   try {

@@ -12,6 +12,7 @@ const demoUsers = [
   { name: "Fatima Begum", email: "fatima@example.com", password: "pass123", phone: "01700000003", bloodGroup: "O+", district: "Dhaka", area: "Mirpur", isVerified: true },
   { name: "Kamal Hossain", email: "kamal@example.com", password: "pass123", phone: "01700000004", bloodGroup: "AB+", district: "Chittagong", area: "Agrabad", isVerified: true },
   { name: "Nusrat Jahan", email: "nusrat@example.com", password: "pass123", phone: "01700000005", bloodGroup: "A-", district: "Sylhet", area: "Zindabazar", isVerified: true },
+  { name: "Eshtiak Ahmed", email: "eshtiakasha@gmail.com", password: "pass123", phone: "0198984061", bloodGroup: "A+", district: "Rajshahi", area: "Rajshahi Sadar", isVerified: true, totalDonations: 15, lastDonationDate: "2026-05-10" },
 ];
 
 const demoRequests = [
@@ -50,7 +51,7 @@ const seed = async () => {
         photo: d.photo || "",
         isVerified: true,
         isAvailable: true,
-        totalDonations: Math.floor(Math.random() * 10) + 1,
+        totalDonations: Math.floor(Math.random() * 45) + 1,
         lastDonationDate: d.lastDonated || null,
       };
     });

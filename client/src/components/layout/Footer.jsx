@@ -91,21 +91,21 @@ export default function Footer() {
                 <span className="footer-contact-item"><Mail size={14} /> bloodadmin009@gmail.com</span>
                 <span className="footer-contact-item"><Phone size={14} /> 0198984061</span>
                 <span className="footer-contact-item"><MapPin size={14} /> Rajshai Sadar, Rajshahi</span>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
-                  <Link to="/developers" aria-label="Meet Our Developers" style={{
+                <Link to="/developers" style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, textDecoration: "none" }}
+                  onMouseEnter={(e) => { e.currentTarget.querySelector(".dev-icon").style.boxShadow = "0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.2)"; e.currentTarget.querySelector(".dev-icon").style.background = "rgba(239, 68, 68, 0.25)"; e.currentTarget.querySelector(".dev-icon").style.transform = "scale(1.1)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.querySelector(".dev-icon").style.boxShadow = "0 0 12px rgba(239, 68, 68, 0.2)"; e.currentTarget.querySelector(".dev-icon").style.background = "rgba(239, 68, 68, 0.15)"; e.currentTarget.querySelector(".dev-icon").style.transform = "scale(1)"; }}
+                >
+                  <div className="dev-icon" style={{
                     width: 36, height: 36, borderRadius: "50%",
                     background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "#F87171", transition: "all 0.3s ease",
-                    boxShadow: "0 0 12px rgba(239, 68, 68, 0.2)",
-                  }}
-                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.2)"; e.currentTarget.style.background = "rgba(239, 68, 68, 0.25)"; e.currentTarget.style.transform = "scale(1.1)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 0 12px rgba(239, 68, 68, 0.2)"; e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)"; e.currentTarget.style.transform = "scale(1)"; }}
-                  >
+                    boxShadow: "0 0 12px rgba(239, 68, 68, 0.2)", flexShrink: 0,
+                  }}>
                     <Users size={16} />
-                  </Link>
+                  </div>
                   <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Meet Our Developers</span>
-                </div>
+                </Link>
               </div>
             </div>
           </div>

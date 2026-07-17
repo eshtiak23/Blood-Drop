@@ -110,6 +110,7 @@ export default function Navbar() {
     ["/", "Home"],
     ["/donors", "Find Donors"],
     ["/requests", "Requests"],
+    ["/leaderboard", "Leaderboard"],
   ];
 
   return (

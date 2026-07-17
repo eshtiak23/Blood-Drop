@@ -11,7 +11,8 @@ import { useAuth } from "../../context/AuthContext";
 import { MessageCircle } from "lucide-react";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
 import api from "../../services/api";
-import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, ChevronLeft, ChevronRight, SlidersHorizontal, Loader2 } from "lucide-react";
+import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, SlidersHorizontal, Loader2 } from "lucide-react";
+import Pagination from "../../components/ui/Pagination";
 
 const RADIUS_OPTIONS = [10, 20, 30, 50, 100];
 const PER_PAGE = 12;
@@ -335,32 +336,7 @@ export default function DonorSearchPage() {
             </div>
 
             {/* ---- Pagination ---- */}
-            {totalPages > 1 && (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 24 }}>
-                <button className="btn btn-secondary btn-sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
-                  <ChevronLeft size={16} /> Prev
-                </button>
-                <div style={{ display: "flex", gap: 4 }}>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      style={{
-                        width: 36, height: 36, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 14, fontWeight: 500, border: "none", cursor: "pointer",
-                        background: p === page ? "var(--purple)" : "transparent",
-                        color: p === page ? "white" : "var(--text-secondary)",
-                      }}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-                <button className="btn btn-secondary btn-sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
-                  Next <ChevronRight size={16} />
-                </button>
-              </div>
-            )}
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </>
         )}
       </div>

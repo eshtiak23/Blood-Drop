@@ -39,6 +39,36 @@ function AnimatedDiv({ children, delay = 0, style = {} }) {
   return <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(24px)", transition: `all 0.5s ease ${delay}s`, ...style }}>{children}</div>;
 }
 
+/* ── Component: Animated counter that counts up when scrolled into view ── */
+function CountUpStat({ target, suffix = "", label, delay = 0 }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const visible = useInView(ref);
+  const started = useRef(false);
+
+  useEffect(() => {
+    if (!visible || started.current || !target) return;
+    started.current = true;
+    const duration = 1500;
+    const start = performance.now();
+    const animate = (now) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * target));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [visible, target]);
+
+  return (
+    <div ref={ref} style={{ textAlign: "center", opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(24px)", transition: `all 0.5s ease ${delay}s` }}>
+      <div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>{count}{suffix}</div>
+      <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>{label}</div>
+    </div>
+  );
+}
+
 /* ── Data: Feature cards ── */
 const FEATURES = [
   { title: "Find Donors Instantly", desc: "Search by blood group, location, and availability.", icon: Search },
@@ -154,24 +184,20 @@ export default function LandingPage() {
       <section style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-card)", padding: "32px 0" }}>
         <div className="container">
           <div className="grid grid-4">
-            {(realStats ? [
-              { value: `${realStats.totalDonors}+`, label: "Registered Donors" },
-              { value: `${realStats.livesSaved}+`, label: "Lives Saved" },
-              { value: `${realStats.districtsCovered}`, label: "Districts Covered" },
-              { value: "24/7", label: "Emergency Support" },
-            ] : [
-              { value: "...", label: "Registered Donors" },
-              { value: "...", label: "Lives Saved" },
-              { value: "...", label: "Districts Covered" },
-              { value: "24/7", label: "Emergency Support" },
-            ]).map((s, i) => (
-              <AnimatedDiv key={s.label} delay={i * 0.1}>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>{s.value}</div>
-                  <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>{s.label}</div>
-                </div>
-              </AnimatedDiv>
-            ))}
+            {realStats ? (
+              <>
+                <CountUpStat target={realStats.totalDonors} suffix="+" label="Registered Donors" delay={0} />
+                <CountUpStat target={realStats.livesSaved} suffix="+" label="Lives Saved" delay={0.1} />
+                <CountUpStat target={realStats.districtsCovered} label="Districts Covered" delay={0.2} />
+              </>
+            ) : (
+              <>
+                <AnimatedDiv delay={0}><div style={{ textAlign: "center" }}><div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>...</div><div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>Registered Donors</div></div></AnimatedDiv>
+                <AnimatedDiv delay={0.1}><div style={{ textAlign: "center" }}><div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>...</div><div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>Lives Saved</div></div></AnimatedDiv>
+                <AnimatedDiv delay={0.2}><div style={{ textAlign: "center" }}><div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>...</div><div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>Districts Covered</div></div></AnimatedDiv>
+              </>
+            )}
+            <AnimatedDiv delay={0.3}><div style={{ textAlign: "center" }}><div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>24/7</div><div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>Emergency Support</div></div></AnimatedDiv>
           </div>
         </div>
       </section>
