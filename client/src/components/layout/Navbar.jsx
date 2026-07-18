@@ -75,7 +75,10 @@ export default function Navbar() {
     };
     fetchCounts();
     const interval = setInterval(fetchCounts, 30000);
-    return () => clearInterval(interval);
+    // Immediate refresh when ConnectPage fires this event
+    const onFriendsUpdated = () => fetchCounts();
+    window.addEventListener("friendsUpdated", onFriendsUpdated);
+    return () => { clearInterval(interval); window.removeEventListener("friendsUpdated", onFriendsUpdated); };
   }, [isAuthenticated]);
 
   // Close overlay on Escape key

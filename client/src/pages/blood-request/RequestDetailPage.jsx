@@ -39,13 +39,26 @@ export default function RequestDetailPage() {
     }
   }, [id, user]);
 
+  // Poll for status updates while request is still open (so requester sees when donor accepts)
+  useEffect(() => {
+    if (request?.status !== "open") return;
+    const interval = setInterval(() => {
+      api.get(`/requests/${id}`).then((res) => setRequest(res.data.request)).catch(() => {});
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [id, request?.status]);
+
   const handleAction = async (action) => {
     try {
-      if (action === "accept") await acceptRequest(id);
-      else if (action === "complete") await completeRequest(id);
+      let result;
+      if (action === "accept") result = await acceptRequest(id);
+      else if (action === "complete") result = await completeRequest(id);
       toast.success(action === "accept" ? "Request accepted!" : "Marked as complete!");
-      const res = await api.get(`/requests/${id}`);
-      setRequest(res.data.request);
+      if (result) setRequest(result);
+      else {
+        const res = await api.get(`/requests/${id}`);
+        setRequest(res.data.request);
+      }
       setShowModal("");
     } catch (err) {
       toast.error(`Failed to ${action}`);
@@ -157,6 +170,26 @@ export default function RequestDetailPage() {
                 </div>
               </>
             )}
+            {/* Show requester's phone to the accepted donor */}
+            {request.status === "accepted" && request.acceptedBy && user?._id === request.acceptedBy?._id && (
+              <>
+                <div className="separator" />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 8 }}>Requester Contact</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div className="avatar avatar-sm" style={{ background: "#EFF6FF", color: "#2563EB" }}>{request.requester?.name?.charAt(0)}</div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 14 }}>{request.requester?.name}</div>
+                      {request.contactNumber && (
+                        <a href={`tel:${request.contactNumber}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--red)", textDecoration: "none", fontSize: 13, fontWeight: 600, marginTop: 2 }}>
+                          <Phone size={12} /> {request.contactNumber}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div></div>
       </div>
@@ -168,7 +201,7 @@ export default function RequestDetailPage() {
       </div>
 
       {/* ── Rate After Completion (only for participants) ── */}
-      {request.status === "completed" && user?._id && (canAccept || (user?._id === request.requester?._id && request.acceptedBy)) && (
+      {request.status === "completed" && user?._id && (user?._id === request.requester?._id || user?._id === request.acceptedBy?._id) && request.acceptedBy && (
         <div className="card animate-fadeIn" style={{ marginTop: 20 }}>
           <div className="card-body">
             {rated ? (

@@ -54,6 +54,7 @@ export default function ConnectPage() {
       ]);
       setPending(pendingData);
       setFriends(friendsData);
+      window.dispatchEvent(new Event("friendsUpdated"));
       toast.success("Connected!");
     } catch {
       toast.error("Failed to accept");
@@ -67,6 +68,7 @@ export default function ConnectPage() {
     try {
       await friendService.rejectRequest(requestId);
       setPending((prev) => prev.filter((r) => r._id !== requestId));
+      window.dispatchEvent(new Event("friendsUpdated"));
       toast.success("Request rejected");
     } catch {
       toast.error("Failed to reject");
@@ -113,7 +115,7 @@ export default function ConnectPage() {
           <div className="connect-stat-icon" style={{ background: "linear-gradient(135deg, #EF4444, #DC2626)" }}>
             <Users size={20} color="#fff" />
           </div>
-          <div className="connect-stat-num">{friends.length}</div>
+          <div className="connect-stat-num">{friends.length + pending.length}</div>
           <div className="connect-stat-label">Total</div>
         </div>
         <div className="connect-stat-card">
@@ -219,8 +221,10 @@ export default function ConnectPage() {
             </div>
           ) : (
             <div className="connect-list">
-              {friends.map((friend) => (
-                <div key={friend._id} className="connect-friend-card">
+              {friends.map((f) => {
+                const friend = f.friend || f;
+                return (
+                <div key={f._id} className="connect-friend-card">
                   <div className="connect-card-left">
                     <div className="connect-avatar">
                       {friend.photo ? (
@@ -248,7 +252,8 @@ export default function ConnectPage() {
                     </Link>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )
         )}
