@@ -12,7 +12,7 @@ import { MessageCircle } from "lucide-react";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
 import api from "../../services/api";
 import * as friendService from "../../services/friendService";
-import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, User, Clock, CheckCircle, SlidersHorizontal, Loader2, UserPlus, Check, Clock3 } from "lucide-react";
+import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, User, Clock, CheckCircle, SlidersHorizontal, Loader2, UserPlus, Check, Clock3, X } from "lucide-react";
 import toast from "react-hot-toast";
 import Pagination from "../../components/ui/Pagination";
 

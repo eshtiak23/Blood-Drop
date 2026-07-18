@@ -51,6 +51,7 @@ import ChatPage from "./pages/chat/ChatPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import DevelopersPage from "./pages/DevelopersPage";
 import LeaderboardPage from "./pages/leaderboard/LeaderboardPage";
+import ConnectPage from "./pages/connect/ConnectPage";
 import LoadingAnimation from "./components/ui/LoadingAnimation";
 
 // React Query client — manages data caching. staleTime=300000 means data is "fresh" for 5 minutes
@@ -156,6 +157,7 @@ function AppContent() {
             <Route path="/requests/:id" element={<Protected><RequestDetailPage /></Protected>} />
             <Route path="/requests/create" element={<Protected><CreateRequestPage /></Protected>} />
             <Route path="/bookmarks" element={<Protected><BookmarksPage /></Protected>} />
+            <Route path="/connect" element={<Protected><ConnectPage /></Protected>} />
 
             {/* Public-only pages — redirect to dashboard if already logged in */}
             <Route path="/login" element={<Public><LoginPage /></Public>} />

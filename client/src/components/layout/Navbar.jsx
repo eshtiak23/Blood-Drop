@@ -24,6 +24,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useChat } from "../../context/ChatContext";
 import { X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus, MessageCircle, Home, Users, AlertCircle, Droplets } from "lucide-react";
 import api from "../../services/api";
+import * as friendService from "../../services/friendService";
 import toast from "react-hot-toast";
 
 export default function Navbar() {
@@ -35,6 +36,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
   const [isClosing, setIsClosing] = useState(false);
   const closingTimerRef = useRef(null);
 
@@ -67,9 +69,12 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    const fetchCount = () => api.get("/notifications").then((res) => setUnreadCount(res.data.notifications.filter((n) => !n.isRead).length)).catch(() => {});
-    fetchCount();
-    const interval = setInterval(fetchCount, 30000);
+    const fetchCounts = () => {
+      api.get("/notifications").then((res) => setUnreadCount(res.data.notifications.filter((n) => !n.isRead).length)).catch(() => {});
+      friendService.getPending().then((r) => setPendingCount(r.length)).catch(() => {});
+    };
+    fetchCounts();
+    const interval = setInterval(fetchCounts, 30000);
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
@@ -110,6 +115,7 @@ export default function Navbar() {
     ["/", "Home"],
     ["/donors", "Find Donors"],
     ["/requests", "Requests"],
+    ["/connect", "Connect"],
     ["/leaderboard", "Leaderboard"],
   ];
 
@@ -135,7 +141,12 @@ export default function Navbar() {
                   color: active ? "var(--red)" : "var(--text-secondary)",
                   background: active ? "var(--red-light)" : "transparent",
                 }}
-              >{label}</Link>
+              >
+                {label}
+                {path === "/connect" && pendingCount > 0 && (
+                  <span className="nav-badge">{pendingCount > 9 ? "9+" : pendingCount}</span>
+                )}
+              </Link>
             );
           })}
         </nav>
@@ -255,7 +266,7 @@ export default function Navbar() {
             {/* Navigation links */}
             {navLinks.map(([path, label]) => {
               const active = isActive(path);
-              const iconMap = { "/": Home, "/donors": Users, "/requests": AlertCircle };
+              const iconMap = { "/": Home, "/donors": Users, "/requests": AlertCircle, "/connect": UserPlus };
               const Icon = iconMap[path] || Droplets;
               return (
                 <Link
@@ -285,6 +296,15 @@ export default function Navbar() {
                   {unreadTotal > 0 && (
                     <span style={{ marginLeft: "auto", width: 22, height: 22, borderRadius: 11, background: "#EF4444", color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       {unreadTotal > 9 ? "9+" : unreadTotal}
+                    </span>
+                  )}
+                </Link>
+                <Link to="/connect" onClick={closeOverlay} className="mobile-overlay-link">
+                  <UserPlus size={20} />
+                  Connect
+                  {pendingCount > 0 && (
+                    <span style={{ marginLeft: "auto", width: 22, height: 22, borderRadius: 11, background: "#F59E0B", color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {pendingCount > 9 ? "9+" : pendingCount}
                     </span>
                   )}
                 </Link>
