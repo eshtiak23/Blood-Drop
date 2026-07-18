@@ -8,18 +8,107 @@
  *   - Rounded: 16px 16px 16px 4px (sharp bottom-left)
  * - Time + seen indicator (✓✓) inside bubble at bottom-right
  * - Supports image messages with lightbox viewer
+ * - Right-click or long-press on own messages shows delete option
  */
 
-import { useState } from "react";
-import { Check, CheckCheck, X } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Check, CheckCheck, X, Trash2 } from "lucide-react";
 
-export default function ChatBubble({ message, isMine, showAvatar = false }) {
+export default function ChatBubble({ message, isMine, showAvatar = false, onDelete }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [contextMenu, setContextMenu] = useState(null);
+  const longPressTimer = useRef(null);
+  const bubbleRef = useRef(null);
+  const closeListenerReady = useRef(false);
 
   const formatTime = (dateStr) => {
     const d = new Date(dateStr);
     return d.toLocaleTimeString("en-BD", { hour: "2-digit", minute: "2-digit", hour12: true });
   };
+
+  // Close context menu — delay listener attachment to avoid race with delete click
+  useEffect(() => {
+    if (!contextMenu) {
+      closeListenerReady.current = false;
+      return;
+    }
+    // Wait one tick before attaching close listener so the delete button click registers first
+    const raf = requestAnimationFrame(() => {
+      closeListenerReady.current = true;
+      const close = (e) => {
+        // Ignore clicks inside the context menu itself
+        const menu = document.querySelector(".chat-context-menu");
+        if (menu && menu.contains(e.target)) return;
+        setContextMenu(null);
+      };
+      document.addEventListener("click", close);
+      document.addEventListener("contextmenu", close);
+      document._chatBubbleCleanup = () => {
+        document.removeEventListener("click", close);
+        document.removeEventListener("contextmenu", close);
+      };
+    });
+    return () => {
+      cancelAnimationFrame(raf);
+      if (document._chatBubbleCleanup) {
+        document._chatBubbleCleanup();
+        document._chatBubbleCleanup = null;
+      }
+    };
+  }, [contextMenu]);
+
+  // Desktop right-click
+  const handleContextMenu = useCallback((e) => {
+    if (!isMine) return;
+    e.preventDefault();
+    e.stopPropagation();
+    // Boundary detection: ensure menu stays on screen
+    const menuWidth = 130;
+    const menuHeight = 40;
+    const x = Math.min(e.clientX, window.innerWidth - menuWidth - 8);
+    const y = Math.min(e.clientY, window.innerHeight - menuHeight - 8);
+    setContextMenu({ x, y });
+  }, [isMine]);
+
+  // Mobile long-press — cancelled on touchmove or touchend
+  const handleTouchStart = useCallback((e) => {
+    if (!isMine) return;
+    const touch = e.touches[0];
+    longPressTimer.current = setTimeout(() => {
+      const menuWidth = 130;
+      const menuHeight = 40;
+      const x = Math.min(touch.clientX, window.innerWidth - menuWidth - 8);
+      const y = Math.min(touch.clientY, window.innerHeight - menuHeight - 8);
+      setContextMenu({ x, y });
+    }, 500);
+  }, [isMine]);
+
+  // Cancel long-press when user starts scrolling
+  const handleTouchMove = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  const handleDelete = useCallback((e) => {
+    e.stopPropagation();
+    setContextMenu(null);
+    if (onDelete) onDelete(message._id);
+  }, [message._id, onDelete]);
+
+  // Prevent image click from triggering long-press
+  const handleImageClick = useCallback((e) => {
+    e.stopPropagation();
+    setLightboxOpen(true);
+  }, []);
 
   return (
     <>
@@ -59,23 +148,34 @@ export default function ChatBubble({ message, isMine, showAvatar = false }) {
         )}
 
         {/* Message bubble */}
-        <div style={{
-          maxWidth: "65%",
-          padding: message.image && !message.text ? "4px" : "10px 14px",
-          borderRadius: isMine ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-          background: isMine ? "#EF4444" : "#fff",
-          color: isMine ? "#fff" : "#1E1B4B",
-          boxShadow: isMine
-            ? "0 2px 8px rgba(239,68,68,0.25)"
-            : "0 1px 4px rgba(0,0,0,0.06)",
-          border: isMine ? "none" : "1px solid #F3F4F6",
-          wordBreak: "break-word",
-        }}>
+        <div
+          ref={bubbleRef}
+          onContextMenu={handleContextMenu}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            maxWidth: "70%",
+            padding: message.image && !message.text ? "4px" : "10px 14px",
+            borderRadius: isMine ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+            background: isMine ? "#EF4444" : "#fff",
+            color: isMine ? "#fff" : "#1E1B4B",
+            boxShadow: isMine
+              ? "0 2px 8px rgba(239,68,68,0.25)"
+              : "0 1px 4px rgba(0,0,0,0.06)",
+            border: isMine ? "none" : "1px solid #F3F4F6",
+            wordBreak: "break-word",
+            cursor: isMine ? "pointer" : "default",
+            userSelect: "none",
+            WebkitUserSelect: "none",
+          }}
+        >
           {/* Image */}
           {message.image && (
             <img
               src={message.image}
               alt="Shared"
+              onClick={handleImageClick}
               style={{
                 maxWidth: "100%",
                 maxHeight: 220,
@@ -83,7 +183,6 @@ export default function ChatBubble({ message, isMine, showAvatar = false }) {
                 marginBottom: message.text ? 8 : 0,
                 cursor: "pointer",
               }}
-              onClick={() => setLightboxOpen(true)}
             />
           )}
 
@@ -119,6 +218,27 @@ export default function ChatBubble({ message, isMine, showAvatar = false }) {
         </div>
       </div>
 
+      {/* Context Menu (right-click / long-press) */}
+      {contextMenu && isMine && (
+        <div
+          className="chat-context-menu"
+          style={{
+            position: "fixed",
+            left: contextMenu.x,
+            top: contextMenu.y,
+            zIndex: 10000,
+          }}
+        >
+          <button
+            className="chat-context-menu-item chat-context-menu-delete"
+            onClick={handleDelete}
+          >
+            <Trash2 size={14} />
+            <span>Delete</span>
+          </button>
+        </div>
+      )}
+
       {/* Image Lightbox */}
       {lightboxOpen && message.image && (
         <div
@@ -151,7 +271,7 @@ export default function ChatBubble({ message, isMine, showAvatar = false }) {
               alignItems: "center",
               justifyContent: "center",
               cursor: "pointer",
-              zIndex: 10000,
+              zIndex: 10001,
             }}
           >
             <X size={24} />

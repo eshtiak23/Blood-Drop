@@ -7,21 +7,11 @@
  * - Name (bold)
  * - Blood group in red text
  * - "Online" / "Offline" status with colored dot
- * - Right side: Phone call button (red)
  */
 
-import { ArrowLeft, Phone } from "lucide-react";
-import toast from "react-hot-toast";
+import { ArrowLeft } from "lucide-react";
 
 export default function ConversationHeader({ user, onBack, isOnline }) {
-  const handleCall = () => {
-    if (user?.phone) {
-      window.open(`tel:${user.phone}`, "_self");
-    } else {
-      toast.error("Phone number not available");
-    }
-  };
-
   return (
     <div style={{
       display: "flex",
@@ -123,27 +113,6 @@ export default function ConversationHeader({ user, onBack, isOnline }) {
           </span>
         </div>
       </div>
-
-      {/* Call button */}
-      <button
-        onClick={handleCall}
-        title="Call"
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: "50%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#EF4444",
-          transition: "background 0.15s",
-          flexShrink: 0,
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.background = "#FEE2E2"}
-        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-      >
-        <Phone size={20} />
-      </button>
     </div>
   );
 }

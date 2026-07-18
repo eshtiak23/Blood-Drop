@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { searchRequests, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
-import { MapPin, Clock, Plus, AlertCircle, Phone, Trash2, MessageCircle, Droplets, Loader2 } from "lucide-react";
+import { MapPin, Clock, Plus, AlertCircle, Trash2, MessageCircle, Droplets, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 /** Returns themed background/text colors for a blood group badge. */
@@ -144,16 +144,11 @@ export default function RequestListPage() {
                     <span className="contact-card-stat"><Clock size={13} /> {r.dateNeeded ? new Date(r.dateNeeded).toLocaleDateString() : "ASAP"}</span>
                   </div>
                   <div className="contact-card-status">
-                    <span className="contact-card-status-dot" style={{ background: r.status === "open" ? "#22C55E" : "#9CA3AF" }} />
-                    <span style={{ color: r.status === "open" ? "#22C55E" : "var(--text-muted)" }}>{r.status === "open" ? "Open" : "Completed"}</span>
+                    <span className="contact-card-status-dot" style={{ background: r.status === "open" ? "#22C55E" : r.status === "accepted" ? "#3B82F6" : "#9CA3AF" }} />
+                    <span style={{ color: r.status === "open" ? "#22C55E" : r.status === "accepted" ? "#3B82F6" : "var(--text-muted)" }}>{r.status === "open" ? "Open" : r.status === "accepted" ? "Accepted" : "Completed"}</span>
                   </div>
                   {!isOwn && (
                     <div className="contact-card-actions">
-                      {r.contactNumber && (
-                        <a href={`tel:${r.contactNumber}`} className="contact-card-icon-btn contact-card-icon-call" onClick={(e) => e.stopPropagation()}>
-                          <Phone size={18} />
-                        </a>
-                      )}
                       <Link to={`/chat/${r.requester?._id}`} className="contact-card-icon-btn contact-card-icon-chat" onClick={(e) => e.stopPropagation()}>
                         <MessageCircle size={18} />
                       </Link>

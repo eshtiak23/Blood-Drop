@@ -8,14 +8,43 @@
  * - List of conversations with avatar, name, last message, timestamp, unread badge
  * - Online status dots for each user
  * - Active conversation highlighted in light red
+ * - "..." menu on each conversation with delete option (visible on hover desktop, always on mobile)
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, ArrowLeft, Plus } from "lucide-react";
+import { Search, ArrowLeft, Plus, MoreVertical, Trash2 } from "lucide-react";
 
-export default function ChatSidebar({ conversations, onSelectConversation, activeId, onlineUsers, user }) {
+export default function ChatSidebar({ conversations, onSelectConversation, activeId, onlineUsers, user, onDeleteConversation }) {
   const [search, setSearch] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const menuRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile on mount and resize
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Close menu on outside click OR touch
+  useEffect(() => {
+    if (!openMenuId) return;
+    const close = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("touchstart", close);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("touchstart", close);
+    };
+  }, [openMenuId]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return conversations;
@@ -39,6 +68,17 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
     if (dayDiff === 1) return "Yesterday";
     if (dayDiff < 7) return d.toLocaleDateString("en-BD", { weekday: "short" });
     return d.toLocaleDateString("en-BD", { day: "numeric", month: "short" });
+  };
+
+  const handleMenuToggle = (e, convId) => {
+    e.stopPropagation();
+    setOpenMenuId(openMenuId === convId ? null : convId);
+  };
+
+  const handleDelete = (e, convId) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    if (onDeleteConversation) onDeleteConversation(convId);
   };
 
   return (
@@ -124,6 +164,7 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
           <Search size={16} color="#9CA3AF" />
           <input
             type="text"
+            inputMode="search"
             placeholder="Search conversations..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -154,6 +195,7 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
           filtered.map((conv) => {
             const isActive = conv._id === activeId;
             const isOnline = onlineUsers.has(conv.otherUser?._id?.toString?.() || conv.otherUser?._id);
+            const isMenuOpen = openMenuId === conv._id;
             return (
               <div
                 key={conv._id}
@@ -167,6 +209,7 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
                   background: isActive ? "#FEE2E2" : "transparent",
                   borderBottom: "1px solid #F3F4F6",
                   transition: "background 0.15s",
+                  position: "relative",
                 }}
                 onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = "#F9FAFB"; }}
                 onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
@@ -264,6 +307,79 @@ export default function ChatSidebar({ conversations, onSelectConversation, activ
                     )}
                   </div>
                 </div>
+
+                {/* "..." menu button — visible on hover (desktop) or always (mobile) */}
+                <button
+                  onClick={(e) => handleMenuToggle(e, conv._id)}
+                  className="chat-sidebar-menu-btn"
+                  style={{
+                    position: "absolute",
+                    top: 14,
+                    right: 8,
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    border: "none",
+                    background: isMenuOpen ? "#F3F4F6" : "transparent",
+                    color: "#9CA3AF",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    opacity: isMobile ? 0.6 : (isMenuOpen ? 1 : 0),
+                    transition: "opacity 0.15s, background 0.15s",
+                    zIndex: 2,
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#F3F4F6"; e.currentTarget.style.opacity = 1; }}
+                  onMouseLeave={(e) => { if (!isMenuOpen) { e.currentTarget.style.opacity = isMobile ? 0.6 : 0; e.currentTarget.style.background = "transparent"; } }}
+                >
+                  <MoreVertical size={16} />
+                </button>
+
+                {/* Dropdown menu */}
+                {isMenuOpen && (
+                  <div
+                    ref={menuRef}
+                    className="chat-sidebar-dropdown"
+                    style={{
+                      position: "absolute",
+                      top: 38,
+                      right: 12,
+                      background: "#fff",
+                      borderRadius: 10,
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+                      border: "1px solid #F3F4F6",
+                      zIndex: 10,
+                      minWidth: 160,
+                      padding: 4,
+                    }}
+                  >
+                    <button
+                      onClick={(e) => handleDelete(e, conv._id)}
+                      className="chat-sidebar-dropdown-item"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        width: "100%",
+                        padding: "10px 12px",
+                        border: "none",
+                        background: "transparent",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                        fontSize: 14,
+                        color: "#EF4444",
+                        fontWeight: 500,
+                        transition: "background 0.12s",
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = "#FEF2F2"}
+                      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                    >
+                      <Trash2 size={14} />
+                      <span>Delete conversation</span>
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })

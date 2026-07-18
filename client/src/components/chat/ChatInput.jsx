@@ -173,10 +173,10 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
             onClick={removeImage}
             style={{
               position: "absolute",
-              top: -6,
-              right: -6,
-              width: 22,
-              height: 22,
+              top: -8,
+              right: -8,
+              width: 28,
+              height: 28,
               borderRadius: "50%",
               background: "#EF4444",
               color: "#fff",
@@ -187,7 +187,7 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
               cursor: "pointer",
             }}
           >
-            <X size={10} />
+            <X size={12} />
           </button>
         </div>
       )}
@@ -205,10 +205,11 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
             boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
             maxHeight: 240,
             overflowY: "auto",
+            overflowX: "hidden",
           }}
         >
           {EMOJI_ROWS.map((row, ri) => (
-            <div key={ri} style={{ display: "flex", justifyContent: "center", gap: 2, marginBottom: 2 }}>
+            <div key={ri} style={{ display: "flex", justifyContent: "center", gap: 2, marginBottom: 2, flexWrap: "wrap" }}>
               {row.map((emoji) => (
                 <button
                   key={emoji}
@@ -292,7 +293,6 @@ export default function ChatInput({ onSend, onTyping, onStopTyping }) {
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             rows={1}
-            autoFocus
             style={{
               flex: 1,
               border: "none",

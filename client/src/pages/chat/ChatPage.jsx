@@ -57,28 +57,30 @@ export default function ChatPage() {
     loadingMessages,
     openConversation,
     sendChatMessage,
+    deleteChatMessage,
+    deleteChatConversation,
     startTyping,
     stopTyping,
     isUserTyping,
     closeConversation,
   } = useChat();
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 767px)").matches);
   const [showSidebar, setShowSidebar] = useState(!userId);
   const messagesEndRef = useRef(null);
   const conversationOpenedRef = useRef(false);
   const prevMessagesLengthRef = useRef(0);
   const hasScrolledRef = useRef(false);
 
-  // Track window resize
+  // Track window resize using matchMedia (no jank)
   useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (!mobile) setShowSidebar(true);
+    const mq = window.matchMedia("(max-width: 767px)");
+    const handler = (e) => {
+      setIsMobile(e.matches);
+      if (!e.matches) setShowSidebar(true);
     };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, []);
 
   // Auto-open conversation when navigating from /chat/:userId
@@ -191,6 +193,7 @@ export default function ChatPage() {
             activeId={activeConversation?._id}
             onlineUsers={onlineUsers}
             user={user}
+            onDeleteConversation={deleteChatConversation}
           />
         </div>
       )}
@@ -267,6 +270,7 @@ export default function ChatPage() {
                         message={msg}
                         isMine={isMine}
                         showAvatar={showAvatar}
+                        onDelete={isMine ? deleteChatMessage : null}
                       />
                     );
                   })
@@ -291,7 +295,6 @@ export default function ChatPage() {
         </div>
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

@@ -9,6 +9,8 @@
  * - Typing indicators
  * - Unread message count (for navbar badge)
  * - Sending/receiving messages
+ * - Deleting individual messages
+ * - Deleting entire conversations
  *
  * Usage:
  *   const { conversations, messages, sendMessage, ... } = useChat();
@@ -163,6 +165,34 @@ export function ChatProvider({ children }) {
       );
     });
 
+    // Message deleted — remove from active messages list
+    socket.on("message:deleted", ({ messageId, conversationId }) => {
+      setMessages((prev) => prev.filter((m) => m._id !== messageId));
+
+      // Update lastMessage in conversations list if needed
+      setConversations((prev) =>
+        prev.map((c) => {
+          if (c._id !== conversationId) return c;
+          // If the deleted message was the last message, clear the preview
+          return {
+            ...c,
+            lastMessage: { text: "Message deleted", senderId: null, createdAt: new Date().toISOString() },
+          };
+        })
+      );
+    });
+
+    // Conversation deleted — remove from conversations list and clear active if needed
+    socket.on("conversation:deleted", ({ conversationId }) => {
+      setConversations((prev) => prev.filter((c) => c._id !== conversationId));
+
+      const active = activeConversationRef.current;
+      if (active && active._id === conversationId) {
+        setActiveConversation(null);
+        setMessages([]);
+      }
+    });
+
     return () => {
       socket.off("connect", handleConnect);
       socket.off("user:online");
@@ -171,6 +201,8 @@ export function ChatProvider({ children }) {
       socket.off("typing:start");
       socket.off("typing:stop");
       socket.off("message:seen");
+      socket.off("message:deleted");
+      socket.off("conversation:deleted");
     };
   }, [socket, user]);
 
@@ -287,6 +319,43 @@ export function ChatProvider({ children }) {
     setMessages([]);
   }, [socket, activeConversation]);
 
+  // Delete a single message (sender only)
+  const deleteChatMessage = useCallback(
+    async (messageId) => {
+      try {
+        await chatService.deleteMessage(messageId);
+        // Optimistic local removal (in case Socket.IO event is slow)
+        setMessages((prev) => prev.filter((m) => m._id !== messageId));
+        toast.success("Message deleted");
+      } catch (err) {
+        console.error("[Chat] Failed to delete message:", err);
+        toast.error("Failed to delete message");
+      }
+    },
+    []
+  );
+
+  // Delete an entire conversation
+  const deleteChatConversation = useCallback(
+    async (conversationId) => {
+      try {
+        await chatService.deleteConversation(conversationId);
+        // Optimistic local removal
+        setConversations((prev) => prev.filter((c) => c._id !== conversationId));
+        const active = activeConversationRef.current;
+        if (active && active._id === conversationId) {
+          setActiveConversation(null);
+          setMessages([]);
+        }
+        toast.success("Conversation deleted");
+      } catch (err) {
+        console.error("[Chat] Failed to delete conversation:", err);
+        toast.error("Failed to delete conversation");
+      }
+    },
+    []
+  );
+
   const value = {
     conversations,
     activeConversation,
@@ -303,6 +372,8 @@ export function ChatProvider({ children }) {
     stopTyping,
     isUserTyping,
     closeConversation,
+    deleteChatMessage,
+    deleteChatConversation,
     setActiveConversation,
   };
 

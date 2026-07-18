@@ -135,6 +135,26 @@ export default function RequestDetailPage() {
                 <div><div style={{ fontWeight: 600, fontSize: 14 }}>{request.requester?.name}</div></div>
               </div>
             </div>
+            {/* Show accepted donor's phone to the request owner */}
+            {request.status === "accepted" && request.acceptedBy && user?._id === request.requester?._id && (
+              <>
+                <div className="separator" />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 8 }}>Donor Contact</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div className="avatar avatar-sm" style={{ background: "#ECFDF5", color: "#059669" }}>{request.acceptedBy.name?.charAt(0)}</div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 14 }}>{request.acceptedBy.name}</div>
+                      {request.acceptedBy.phone && (
+                        <a href={`tel:${request.acceptedBy.phone}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--red)", textDecoration: "none", fontSize: 13, fontWeight: 600, marginTop: 2 }}>
+                          <Phone size={12} /> {request.acceptedBy.phone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div></div>
       </div>

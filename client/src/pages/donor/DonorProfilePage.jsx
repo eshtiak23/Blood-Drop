@@ -4,10 +4,12 @@
  */
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
 import { addBookmark, isBookmarked, removeBookmark } from "../../services/localStore";
+import * as friendService from "../../services/friendService";
 import api from "../../services/api";
-import { MapPin, Phone, Calendar, Droplets, Shield, Bookmark, ArrowLeft, MessageCircle, Loader2 } from "lucide-react";
+import { MapPin, Calendar, Droplets, Shield, Bookmark, ArrowLeft, MessageCircle, Loader2, UserPlus, Check, Clock3 } from "lucide-react";
 import toast from "react-hot-toast";
 
 /** Returns blood group badge colors based on dark/light theme */
@@ -21,9 +23,11 @@ function getBloodGroupColor(bloodGroup) {
 export default function DonorProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [donor, setDonor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
+  const [friendStatus, setFriendStatus] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -32,7 +36,10 @@ export default function DonorProfilePage() {
       .catch(() => setDonor(null))
       .finally(() => setLoading(false));
     isBookmarked(id).then(setBookmarked).catch(() => setBookmarked(false));
-  }, [id]);
+    if (isAuthenticated && user?._id !== id) {
+      friendService.getStatus(id).then(setFriendStatus).catch(() => {});
+    }
+  }, [id, isAuthenticated, user]);
 
   const toggleBookmark = async () => {
     try {
@@ -40,6 +47,22 @@ export default function DonorProfilePage() {
       else { await addBookmark(id); setBookmarked(true); toast.success("Bookmark added"); }
     } catch (err) {
       toast.error("Failed to update bookmark");
+    }
+  };
+
+  const handleConnect = async () => {
+    if (!isAuthenticated) { navigate("/login"); return; }
+    try {
+      const result = await friendService.sendRequest(id);
+      if (result.autoAccepted) {
+        toast.success("You are now connected! Phone number revealed.");
+        setFriendStatus({ status: "accepted" });
+      } else {
+        toast.success("Connection request sent!");
+        setFriendStatus({ status: "pending_sent" });
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Failed to send request");
     }
   };
 
@@ -71,8 +94,13 @@ export default function DonorProfilePage() {
           <div className="grid grid-2">
             <div>
               <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Contact</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
-                <a href={`tel:${donor.phone}`} style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)", textDecoration: "none" }}><Phone size={14} /> {donor.phone}</a>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14, color: "var(--text-secondary)" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {friendStatus?.status === "accepted"
+                    ? <>Phone available in your connections</>
+                    : <>Send a connection request to see phone number</>
+                  }
+                </span>
               </div>
             </div>
             <div>
@@ -88,7 +116,15 @@ export default function DonorProfilePage() {
 
           <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
             <Link to={`/chat/${donor._id}`} className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: 6 }}><MessageCircle size={16} /> Chat</Link>
-            <a href={`tel:${donor.phone}`} className="btn btn-secondary" style={{ display: "flex", alignItems: "center", gap: 6 }}><Phone size={16} /> Call Donor</a>
+            {user?._id !== donor._id && (
+              friendStatus?.status === "accepted" ? (
+                <span className="btn btn-secondary" style={{ display: "flex", alignItems: "center", gap: 6, cursor: "default" }}><Check size={16} /> Connected</span>
+              ) : friendStatus?.status === "pending_sent" ? (
+                <span className="btn btn-secondary" style={{ display: "flex", alignItems: "center", gap: 6, cursor: "default", background: "#FEF3C7", color: "#D97706" }}><Clock3 size={16} /> Pending</span>
+              ) : (
+                <button className="btn btn-secondary" onClick={handleConnect} style={{ display: "flex", alignItems: "center", gap: 6 }}><UserPlus size={16} /> Connect</button>
+              )
+            )}
             <button className={`btn ${bookmarked ? "btn-primary" : "btn-secondary"}`} onClick={toggleBookmark}><Bookmark size={16} /> {bookmarked ? "Bookmarked" : "Bookmark"}</button>
           </div>
         </div>

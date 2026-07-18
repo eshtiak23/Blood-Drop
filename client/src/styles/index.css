@@ -2191,3 +2191,103 @@ textarea.input { min-height: 100px; resize: vertical; }
     font-size: 11px;
   }
 }
+
+/* ============================
+   Chat Context Menu (Message)
+   ============================ */
+.chat-context-menu {
+  animation: contextMenuFadeIn 0.12s ease;
+}
+
+.chat-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.12s;
+}
+
+.chat-context-menu-item:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.chat-context-menu-item:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.chat-context-menu-delete {
+  color: #EF4444;
+  border-radius: 8px;
+}
+
+.chat-context-menu-delete:hover {
+  background: #FEF2F2;
+}
+
+/* ============================
+   Chat Sidebar Dropdown Menu
+   ============================ */
+.chat-sidebar-menu-btn:hover {
+  opacity: 1 !important;
+  background: #F3F4F6 !important;
+}
+
+.chat-sidebar-dropdown {
+  animation: contextMenuFadeIn 0.12s ease;
+}
+
+/* ============================
+   Chat Responsive Styles
+   ============================ */
+@media (max-width: 767px) {
+  /* Context menu — smaller on mobile, ensure it doesn't overflow */
+  .chat-context-menu {
+    max-width: calc(100vw - 32px);
+  }
+  .chat-context-menu-item {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  /* Sidebar dropdown — full width on mobile */
+  .chat-sidebar-dropdown {
+    right: 4px !important;
+    min-width: 180px;
+  }
+
+  /* Emoji picker rows — allow wrapping on narrow screens */
+  .chat-sidebar-item {
+    padding: 12px 14px !important;
+  }
+}
+
+/* Touch device: show sidebar menu button with reduced opacity */
+@media (hover: none) and (pointer: coarse) {
+  .chat-sidebar-menu-btn {
+    opacity: 0.5 !important;
+  }
+  .chat-sidebar-menu-btn:active {
+    opacity: 1 !important;
+    background: #F3F4F6 !important;
+  }
+}
+
+/* ============================
+   Animations
+   ============================ */
+@keyframes contextMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

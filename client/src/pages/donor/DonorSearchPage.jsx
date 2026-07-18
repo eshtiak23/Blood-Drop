@@ -11,7 +11,9 @@ import { useAuth } from "../../context/AuthContext";
 import { MessageCircle } from "lucide-react";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
 import api from "../../services/api";
-import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, Phone, X, User, Clock, CheckCircle, SlidersHorizontal, Loader2 } from "lucide-react";
+import * as friendService from "../../services/friendService";
+import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, User, Clock, CheckCircle, SlidersHorizontal, Loader2, UserPlus, Check, Clock3 } from "lucide-react";
+import toast from "react-hot-toast";
 import Pagination from "../../components/ui/Pagination";
 
 const RADIUS_OPTIONS = [10, 20, 30, 50, 100];
@@ -67,6 +69,7 @@ export default function DonorSearchPage() {
   const [selectedDonor, setSelectedDonor] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [friendStatuses, setFriendStatuses] = useState({});
   const areas = filters.district ? (AREAS[filters.district] || []) : [];
 
   // Fetch donors from API
@@ -86,6 +89,22 @@ export default function DonorSearchPage() {
     const interval = setInterval(() => fetchDonors(false), 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleConnect = async (donorId) => {
+    if (!isAuthenticated) { navigate("/login"); return; }
+    try {
+      const result = await friendService.sendRequest(donorId);
+      if (result.autoAccepted) {
+        toast.success("You are now connected! Phone number revealed.");
+        setFriendStatuses((prev) => ({ ...prev, [donorId]: { status: "accepted" } }));
+      } else {
+        toast.success("Connection request sent!");
+        setFriendStatuses((prev) => ({ ...prev, [donorId]: { status: "pending_sent" } }));
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Failed to send request");
+    }
+  };
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -118,6 +137,18 @@ export default function DonorSearchPage() {
 
   const totalPages = Math.ceil(filteredResults.length / PER_PAGE);
   const pagedResults = filteredResults.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  // Load friend statuses for visible donors
+  useEffect(() => {
+    if (!isAuthenticated || pagedResults.length === 0) return;
+    pagedResults.forEach(async (d) => {
+      if (friendStatuses[d._id]) return;
+      try {
+        const data = await friendService.getStatus(d._id);
+        setFriendStatuses((prev) => ({ ...prev, [d._id]: data }));
+      } catch {}
+    });
+  }, [pagedResults, isAuthenticated]);
 
   const handleSearch = () => { setHasSearched(true); setPage(1); };
 
@@ -320,9 +351,28 @@ export default function DonorSearchPage() {
                     <span style={{ color: canDonate ? "#22C55E" : "var(--text-muted)" }}>{canDonate ? "Available" : "Not Available"}</span>
                   </div>
                   <div className="contact-card-actions">
-                    <a href={d.phone ? `tel:${d.phone}` : "#"} className="contact-card-icon-btn contact-card-icon-call" onClick={(e) => e.stopPropagation()}>
-                      <Phone size={18} />
-                    </a>
+                    {(() => {
+                      const fs = friendStatuses[d._id]?.status;
+                      if (fs === "accepted") {
+                        return (
+                          <span className="contact-card-icon-btn" style={{ background: "#ECFDF5", color: "#059669", fontSize: 12, fontWeight: 600, width: "auto", padding: "0 12px", gap: 4, display: "flex", alignItems: "center" }}>
+                            <Check size={14} /> Connected
+                          </span>
+                        );
+                      }
+                      if (fs === "pending_sent") {
+                        return (
+                          <span className="contact-card-icon-btn" style={{ background: "#FEF3C7", color: "#D97706", fontSize: 12, fontWeight: 600, width: "auto", padding: "0 12px", gap: 4, display: "flex", alignItems: "center" }}>
+                            <Clock3 size={14} /> Pending
+                          </span>
+                        );
+                      }
+                      return (
+                        <button className="contact-card-icon-btn" onClick={(e) => { e.stopPropagation(); handleConnect(d._id); }} style={{ background: "#EFF6FF", color: "#2563EB", fontSize: 12, fontWeight: 600, width: "auto", padding: "0 12px", gap: 4, display: "flex", alignItems: "center" }}>
+                          <UserPlus size={14} /> Connect
+                        </button>
+                      );
+                    })()}
                     <button className="contact-card-icon-btn contact-card-icon-chat" onClick={() => {
                       if (!isAuthenticated) { navigate("/login"); return; }
                       setSelectedDonor(d);
@@ -390,15 +440,40 @@ export default function DonorSearchPage() {
                   </div>
                 </div>
 
-                {/* Phone */}
+                {/* Connect section */}
                 <div style={{ padding: "10px 20px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10, background: "var(--bg-secondary)" }}>
-                    <Phone size={18} color="var(--red)" />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5 }}>Phone</div>
-                      <a href={`tel:${selectedDonor.phone}`} style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", textDecoration: "none" }}>{selectedDonor.phone || "Not provided"}</a>
-                    </div>
-                  </div>
+                  {(() => {
+                    const fs = friendStatuses[selectedDonor._id]?.status;
+                    if (fs === "accepted") {
+                      return (
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10, background: "#ECFDF5" }}>
+                          <Check size={18} color="#059669" />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 9, color: "#059669", textTransform: "uppercase", letterSpacing: 0.5 }}>Status</div>
+                            <div style={{ fontSize: 14, fontWeight: 700, color: "#059669" }}>Connected — Phone number visible in your connections</div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return (
+                      <button
+                        onClick={() => handleConnect(selectedDonor._id)}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 10,
+                          background: fs === "pending_sent" ? "#FEF3C7" : "#EFF6FF",
+                          border: "none", width: "100%", cursor: "pointer", textAlign: "left",
+                        }}
+                      >
+                        {fs === "pending_sent" ? <Clock3 size={18} color="#D97706" /> : <UserPlus size={18} color="#2563EB" />}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5 }}>Connect</div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: fs === "pending_sent" ? "#D97706" : "#2563EB" }}>
+                            {fs === "pending_sent" ? "Request Sent" : "Send Connection Request"}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })()}
                 </div>
 
                 {/* Actions */}
@@ -406,9 +481,6 @@ export default function DonorSearchPage() {
                   <Link to={`/chat/${selectedDonor._id}`} onClick={() => setSelectedDonor(null)} className="btn btn-primary" style={{ flex: 1, padding: "11px 0", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                     <MessageCircle size={15} /> Chat
                   </Link>
-                  <a href={`tel:${selectedDonor.phone}`} className="btn btn-secondary" style={{ flex: 1, padding: "11px 0", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                    <Phone size={15} /> Call Now
-                  </a>
                 </div>
               </div>
             );

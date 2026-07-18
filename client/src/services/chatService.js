@@ -12,6 +12,8 @@
  * - sendMessage(data) → Send a message (text or image)
  * - markSeen(conversationId) → Mark messages as read
  * - getUnreadCount() → Total unread messages (for navbar badge)
+ * - deleteMessage(messageId) → Delete own message
+ * - deleteConversation(conversationId) → Delete entire conversation
  */
 
 import api from "./api.js";
@@ -52,4 +54,16 @@ export const markSeen = async (conversationId) => {
 export const getUnreadCount = async () => {
   const res = await api.get("/chat/unread-count");
   return res.data.unreadCount;
+};
+
+/** Delete a single message (sender only) */
+export const deleteMessage = async (messageId) => {
+  const res = await api.delete(`/chat/message/${messageId}`);
+  return res.data;
+};
+
+/** Delete an entire conversation and all its messages */
+export const deleteConversation = async (conversationId) => {
+  const res = await api.delete(`/chat/conversation/${conversationId}`);
+  return res.data;
 };
