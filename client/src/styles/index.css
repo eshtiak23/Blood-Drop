@@ -1538,7 +1538,9 @@ textarea.input { min-height: 100px; resize: vertical; }
 .lb-header-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 16px;
+  text-align: center;
 }
 .lb-header-trophy {
   width: 56px;
@@ -2083,6 +2085,10 @@ textarea.input { min-height: 100px; resize: vertical; }
   }
 }
 @media (max-width: 768px) {
+  .lb-header-row {
+    flex-direction: column;
+    gap: 12px;
+  }
   .podium {
     gap: 8px;
   }

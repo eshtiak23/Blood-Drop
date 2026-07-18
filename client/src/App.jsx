@@ -128,8 +128,8 @@ function AppContent() {
   const isChatPage = location.pathname.startsWith("/chat");
 
   return (
-    <div style={{ height: isChatPage ? "100vh" : "auto", minHeight: "100vh", display: "flex", flexDirection: "column", overflow: isChatPage ? "hidden" : "visible" }}>
-      {!isChatPage && <Navbar />}
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", overflow: "visible" }}>
+      <Navbar />
       <ScrollReveal />
       <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
         {isChatPage ? (
