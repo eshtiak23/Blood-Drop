@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
 const facts = [
   "One donation can save up to 3 lives!",
   "Blood lasts up to 42 days on shelf.",
-  "You can donate blood every 56 days.",
+  "You can donate blood every 90 days.",
   "Type O- blood can be given to anyone.",
   "About 1 in 7 people need blood.",
   "A pint of blood weighs about 1 pound.",

@@ -37,7 +37,8 @@ export default function useSocket() {
     const token = localStorage.getItem("blooddrop_token");
     if (!token) return;
 
-    const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").trim();
+    const rawUrl = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").trim();
+    const API_URL = rawUrl.endsWith("/api") ? rawUrl : rawUrl.replace(/\/+$/, "") + "/api";
     const SERVER_URL = API_URL.replace("/api", "");
 
     const newSocket = io(SERVER_URL, {

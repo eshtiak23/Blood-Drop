@@ -94,5 +94,5 @@ export const FAQS = [
   { question: "How do I register as a donor?", answer: "Click on 'Become a Donor' and fill out the registration form. After verification, your profile will be visible to those in need." },
   { question: "Is there any cost to use LifeDrop?", answer: "No, LifeDrop is completely free for both donors and seekers. Our mission is to save lives." },
   { question: "How are donors verified?", answer: "Our team manually verifies each donor's information including their blood group and medical history." },
-  { question: "How often can I donate blood?", answer: "You can donate blood every 56 days (8 weeks). LifeDrop will remind you when you're eligible again." },
+  { question: "How often can I donate blood?", answer: "You can donate blood every 90 days (3 months). LifeDrop will remind you when you're eligible again." },
 ];

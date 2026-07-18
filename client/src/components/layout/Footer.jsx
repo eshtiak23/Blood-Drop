@@ -90,7 +90,7 @@ export default function Footer() {
               <div className="footer-contact">
                 <span className="footer-contact-item"><Mail size={14} /> bloodadmin009@gmail.com</span>
                 <span className="footer-contact-item"><Phone size={14} /> 0198984061</span>
-                <span className="footer-contact-item"><MapPin size={14} /> Rajshai Sadar, Rajshahi</span>
+                <span className="footer-contact-item"><MapPin size={14} /> Rajshahi Sadar, Rajshahi</span>
                 <Link to="/developers" style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, textDecoration: "none" }}
                   onMouseEnter={(e) => { e.currentTarget.querySelector(".dev-icon").style.boxShadow = "0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.2)"; e.currentTarget.querySelector(".dev-icon").style.background = "rgba(239, 68, 68, 0.25)"; e.currentTarget.querySelector(".dev-icon").style.transform = "scale(1.1)"; }}
                   onMouseLeave={(e) => { e.currentTarget.querySelector(".dev-icon").style.boxShadow = "0 0 12px rgba(239, 68, 68, 0.2)"; e.currentTarget.querySelector(".dev-icon").style.background = "rgba(239, 68, 68, 0.15)"; e.currentTarget.querySelector(".dev-icon").style.transform = "scale(1)"; }}
