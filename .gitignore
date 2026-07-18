@@ -34,3 +34,6 @@ coverage/
 
 # Misc
 *.log
+
+# Server (separate repo)
+Blood-Drop_Server/
