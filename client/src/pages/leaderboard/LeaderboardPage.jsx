@@ -215,15 +215,21 @@ export default function LeaderboardPage() {
   const [page, setPage] = useState(1);
   const PER_PAGE = 10;
 
-  useEffect(() => {
+  const fetchLeaderboard = () => {
+    setLoading(true);
     api.get("/donors/leaderboard").then((res) => {
       setDonors(res.data.donors);
       setLoading(false);
-    }).catch(() => {
-      toast.error("Failed to load leaderboard");
+    }).catch((err) => {
+      const msg = err.response?.status === 500
+        ? "Server is waking up. Please try again in a few seconds."
+        : "Failed to load leaderboard. Please try again.";
+      toast.error(msg);
       setLoading(false);
     });
-  }, []);
+  };
+
+  useEffect(() => { fetchLeaderboard(); }, []);
 
   const filtered = useMemo(() => {
     let list = [...donors];
@@ -255,8 +261,19 @@ export default function LeaderboardPage() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16 }}>
         <Loader2 size={32} className="animate-spin" color="var(--red)" />
+        <span style={{ color: "var(--text-muted)", fontSize: 14 }}>Loading leaderboard...</span>
+      </div>
+    );
+  }
+
+  if (donors.length === 0) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16 }}>
+        <Trophy size={40} color="var(--red)" style={{ opacity: 0.4 }} />
+        <span style={{ color: "var(--text-muted)", fontSize: 14 }}>No data available</span>
+        <button className="btn btn-primary btn-sm" onClick={fetchLeaderboard}>Retry</button>
       </div>
     );
   }
