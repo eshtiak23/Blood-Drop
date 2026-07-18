@@ -125,7 +125,9 @@ export default function RequestDetailPage() {
         <div className="card"><div className="card-body">
           <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Contact Details</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)" }}><Phone size={14} /> {request.contactNumber}</span>
+            {user?._id === request.requester?._id && (
+              <span style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)" }}><Phone size={14} /> {request.contactNumber}</span>
+            )}
             {request.description && <div style={{ background: "var(--red-light)", padding: 12, borderRadius: 8, fontSize: 14 }}>{request.description}</div>}
             <div className="separator" />
             <div>

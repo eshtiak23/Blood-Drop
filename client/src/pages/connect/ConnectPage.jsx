@@ -48,9 +48,12 @@ export default function ConnectPage() {
     setActionId(requestId);
     try {
       await friendService.acceptRequest(requestId);
-      const req = pending.find((r) => r._id === requestId);
-      setPending((prev) => prev.filter((r) => r._id !== requestId));
-      if (req?.sender) setFriends((prev) => [req.sender, ...prev]);
+      const [pendingData, friendsData] = await Promise.all([
+        friendService.getPending(),
+        friendService.getFriends(),
+      ]);
+      setPending(pendingData);
+      setFriends(friendsData);
       toast.success("Connected!");
     } catch {
       toast.error("Failed to accept");
