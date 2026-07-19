@@ -9,10 +9,9 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import { acceptRequest, completeRequest, addRating, hasRated, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS, URGENCY } from "../../data/constants";
-import { MapPin, Phone, Calendar, Clock, Hospital, CheckCircle, ArrowLeft, Star, Trash2 } from "lucide-react";
+import { MapPin, Phone, Calendar, Clock, Hospital, CheckCircle, ArrowLeft, Star, Trash2, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
-/** Returns themed background/text colors for a blood group badge. */
 function getBloodGroupColor(bloodGroup) {
   const c = BLOOD_GROUP_COLORS[bloodGroup];
   if (!c) return {};
@@ -20,28 +19,41 @@ function getBloodGroupColor(bloodGroup) {
   return { bg: isDark ? c.darkBg : c.bg, text: isDark ? c.darkText : c.text };
 }
 
+function getStatusStyle(status) {
+  switch (status) {
+    case "open": return { color: "#22C55E", label: "Open", dot: "#22C55E" };
+    case "accepted": return { color: "#3B82F6", label: "Accepted", dot: "#3B82F6" };
+    case "completed": return { color: "#10B981", label: "Completed", dot: "#10B981" };
+    case "cancelled": return { color: "#9CA3AF", label: "Cancelled", dot: "#9CA3AF" };
+    default: return { color: "var(--text-muted)", label: status, dot: "var(--text-muted)" };
+  }
+}
+
 export default function RequestDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [request, setRequest] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [ratingForm, setRatingForm] = useState({ rating: 5, comment: "" });
   const [ratingSaving, setRatingSaving] = useState(false);
   const [rated, setRated] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     api.get(`/requests/${id}`)
-      .then((res) => setRequest(res.data.request))
-      .catch(() => setRequest(null));
+      .then((res) => { setRequest(res.data.request); setLoading(false); })
+      .catch(() => { setRequest(null); setLoading(false); });
     if (user?._id) {
       hasRated(id).then(setRated).catch(() => setRated(false));
     }
   }, [id, user]);
 
-  // Poll for status updates while request is still open (so requester sees when donor accepts)
+  // Poll for status updates while request is open or accepted
   useEffect(() => {
-    if (request?.status !== "open") return;
+    if (!request || request.status === "completed" || request.status === "cancelled") return;
     const interval = setInterval(() => {
       api.get(`/requests/${id}`).then((res) => setRequest(res.data.request)).catch(() => {});
     }, 15000);
@@ -49,24 +61,28 @@ export default function RequestDetailPage() {
   }, [id, request?.status]);
 
   const handleAction = async (action) => {
+    if (submitting) return;
+    setSubmitting(true);
     try {
       let result;
       if (action === "accept") result = await acceptRequest(id);
       else if (action === "complete") result = await completeRequest(id);
-      toast.success(action === "accept" ? "Request accepted!" : "Marked as complete!");
-      if (result) setRequest(result);
-      else {
+      if (result) {
+        setRequest(result);
+        toast.success(action === "accept" ? "Request accepted!" : "Marked as complete!");
+      } else {
         const res = await api.get(`/requests/${id}`);
         setRequest(res.data.request);
+        toast.success(action === "accept" ? "Request accepted!" : "Marked as complete!");
       }
       setShowModal("");
     } catch (err) {
-      toast.error(`Failed to ${action}`);
-      setShowModal("");
+      toast.error(err?.response?.data?.error || `Failed to ${action}`);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  /** Submit a rating for the other party after request completion */
   const handleRate = async (e) => {
     e.preventDefault();
     if (!ratingForm.comment.trim()) return;
@@ -77,23 +93,35 @@ export default function RequestDetailPage() {
       await addRating({ requestId: id, ratedUserId, rating: ratingForm.rating, comment: ratingForm.comment });
       setRated(true);
       toast.success("Thanks for your rating!");
-    } catch (err) {
+    } catch {
       toast.error("Failed to submit rating");
     } finally {
       setRatingSaving(false);
     }
   };
 
-  /** Delete the request and navigate back */
   const handleDelete = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     try {
       await deleteRequest(id);
       toast.success("Request deleted");
       navigate("/requests");
-    } catch (err) {
+    } catch {
       toast.error("Failed to delete request");
+      setShowModal("");
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+        <div className="loading-spinner" />
+      </div>
+    );
+  }
 
   if (!request) return (
     <div className="container" style={{ padding: 40, textAlign: "center" }}>
@@ -106,18 +134,22 @@ export default function RequestDetailPage() {
   );
 
   const u = URGENCY.find((x) => x.value === request.urgency);
+  const st = getStatusStyle(request.status);
   const canAccept = request.status === "open" && user?._id !== request.requester?._id;
   const canComplete = (user?._id === request.requester?._id || user?._id === request.acceptedBy?._id) && request.status === "accepted";
-  const canDelete = user?._id === request.requester?._id && request.status === "open";
+  const canDelete = user?._id === request.requester?._id && (request.status === "open" || request.status === "accepted");
+  const isParticipant = user?._id === request.requester?._id || user?._id === request.acceptedBy?._id;
 
   return (
     <div className="container" style={{ padding: "32px 20px", maxWidth: 800 }}>
       <button onClick={() => navigate(-1)} className="btn btn-ghost btn-sm" style={{ marginBottom: 16 }}><ArrowLeft size={16} /> Back</button>
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16, alignItems: "center" }}>
         <span className="badge" style={{ background: getBloodGroupColor(request.patientBloodGroup).bg, color: getBloodGroupColor(request.patientBloodGroup).text }}>{request.patientBloodGroup}</span>
-        <span className={`badge ${u?.color || "badge-gray"}`}>{u?.label || "Unknown"}</span>
-        <span className={`badge ${request.status === "open" ? "badge-green" : request.status === "completed" ? "badge-gray" : "badge-blue"}`}>{request.status}</span>
+        {u && <span className={`badge ${u.color || "badge-gray"}`}>{u.label}</span>}
+        <span className={`badge status-badge-animate ${request.status === "completed" ? "badge-green" : request.status === "accepted" ? "badge-blue" : request.status === "cancelled" ? "badge-gray" : "badge-green"}`}>
+          {st.label}
+        </span>
       </div>
 
       <h1 style={{ fontSize: 24, fontWeight: 800 }}>{request.patientName}</h1>
@@ -138,6 +170,7 @@ export default function RequestDetailPage() {
         <div className="card"><div className="card-body">
           <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Contact Details</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
+            {/* Requester sees their own phone */}
             {user?._id === request.requester?._id && (
               <span style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)" }}><Phone size={14} /> {request.contactNumber}</span>
             )}
@@ -150,7 +183,7 @@ export default function RequestDetailPage() {
                 <div><div style={{ fontWeight: 600, fontSize: 14 }}>{request.requester?.name}</div></div>
               </div>
             </div>
-            {/* Show accepted donor's phone to the request owner */}
+            {/* Requester sees donor contact after acceptance */}
             {request.status === "accepted" && request.acceptedBy && user?._id === request.requester?._id && (
               <>
                 <div className="separator" />
@@ -170,7 +203,7 @@ export default function RequestDetailPage() {
                 </div>
               </>
             )}
-            {/* Show requester's phone to the accepted donor */}
+            {/* Donor sees requester contact after acceptance */}
             {request.status === "accepted" && request.acceptedBy && user?._id === request.acceptedBy?._id && (
               <>
                 <div className="separator" />
@@ -195,13 +228,13 @@ export default function RequestDetailPage() {
       </div>
 
       <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-        {canAccept && <button className="btn btn-primary" onClick={() => setShowModal("accept")}><CheckCircle size={16} /> Accept Request</button>}
-        {canComplete && <button className="btn btn-success" onClick={() => setShowModal("complete")}><CheckCircle size={16} /> Mark Complete</button>}
-        {canDelete && <button className="btn btn-danger" onClick={() => setShowModal("delete")}><Trash2 size={16} /> Delete</button>}
+        {canAccept && <button className="btn btn-primary" onClick={() => setShowModal("accept")} disabled={submitting}><CheckCircle size={16} /> Accept Request</button>}
+        {canComplete && <button className="btn btn-success" onClick={() => setShowModal("complete")} disabled={submitting}><CheckCircle size={16} /> Mark Complete</button>}
+        {canDelete && <button className="btn btn-danger" onClick={() => setShowModal("delete")} disabled={submitting}><Trash2 size={16} /> Delete</button>}
       </div>
 
-      {/* ── Rate After Completion (only for participants) ── */}
-      {request.status === "completed" && user?._id && (user?._id === request.requester?._id || user?._id === request.acceptedBy?._id) && request.acceptedBy && (
+      {/* Rating form after completion */}
+      {request.status === "completed" && user?._id && isParticipant && request.acceptedBy && (
         <div className="card animate-fadeIn" style={{ marginTop: 20 }}>
           <div className="card-body">
             {rated ? (
@@ -240,7 +273,7 @@ export default function RequestDetailPage() {
       )}
 
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal("")}>
+        <div className="modal-overlay" onClick={() => !submitting && setShowModal("")}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-title">
               {showModal === "accept" ? "Accept Blood Request" : showModal === "complete" ? "Complete Request" : "Delete Request"}
@@ -249,8 +282,10 @@ export default function RequestDetailPage() {
               {showModal === "accept" ? "Are you sure you want to accept this request?" : showModal === "complete" ? "Mark this request as completed?" : `Delete the request for ${request.patientName}? This cannot be undone.`}
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button className="btn btn-secondary" onClick={() => setShowModal("")}>Cancel</button>
-              <button className={showModal === "delete" ? "btn btn-danger" : "btn btn-primary"} onClick={() => showModal === "delete" ? handleDelete() : handleAction(showModal)}>Confirm</button>
+              <button className="btn btn-secondary" onClick={() => setShowModal("")} disabled={submitting}>Cancel</button>
+              <button className={showModal === "delete" ? "btn btn-danger" : "btn btn-primary"} onClick={() => showModal === "delete" ? handleDelete() : handleAction(showModal)} disabled={submitting}>
+                {submitting ? <><Loader2 size={14} className="animate-spin" /> Processing...</> : "Confirm"}
+              </button>
             </div>
           </div>
         </div>

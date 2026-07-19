@@ -51,7 +51,8 @@ export async function completeRequest(requestId) {
 
 /** Delete a blood request permanently */
 export async function deleteRequest(requestId) {
-  await api.delete(`/requests/${requestId}`);
+  const res = await api.delete(`/requests/${requestId}`);
+  return res.data;
 }
 
 /** Search/filter blood requests */
