@@ -18,10 +18,10 @@ const ML_PER_DONATION = 150;
 const RANKS = [
   { min: 0,  label: "Recruit",   icon: "🥉", color: "#9CA3AF", bg: "rgba(156,163,175,0.08)", glow: "",             next: 1,   tier: 1, desc: "Just joined the battle" },
   { min: 1,  label: "Healer",    icon: "🩹", color: "#10B981", bg: "rgba(16,185,129,0.1)",   glow: "",             next: 5,   tier: 2, desc: "First blood donated" },
-  { min: 5,  label: "Knight",    icon: "⚔️", color: "#3B82F6", bg: "rgba(59,130,246,0.1)",   glow: "rank-glow-knight",    next: 10,  tier: 3, desc: "Proven warrior" },
-  { min: 10, label: "Champion",  icon: "🛡️", color: "#8B5CF6", bg: "rgba(139,92,246,0.1)",   glow: "rank-glow-champion",  next: 20,  tier: 4, desc: "Defender of lives" },
-  { min: 20, label: "Hero",      icon: "🌟", color: "#F59E0B", bg: "rgba(245,158,11,0.1)",   glow: "rank-glow-hero",      next: 40,  tier: 5, desc: "Legendary savior" },
-  { min: 40, label: "Legend",    icon: "👑", color: "#EF4444", bg: "rgba(239,68,68,0.1)",    glow: "rank-glow-legend",    next: null, tier: 6, desc: "Immortal hero" },
+  { min: 5,  label: "Knight",    icon: "⚔️", color: "#3B82F6", bg: "rgba(59,130,246,0.1)",   glow: "rank-glow-knight",    next: 7,   tier: 3, desc: "Proven warrior" },
+  { min: 7,  label: "Champion",  icon: "🛡️", color: "#8B5CF6", bg: "rgba(139,92,246,0.1)",   glow: "rank-glow-champion",  next: 10,  tier: 4, desc: "Defender of lives" },
+  { min: 10, label: "Hero",      icon: "🌟", color: "#F59E0B", bg: "rgba(245,158,11,0.1)",   glow: "rank-glow-hero",      next: 12,  tier: 5, desc: "Legendary savior" },
+  { min: 12, label: "Legend",    icon: "👑", color: "#EF4444", bg: "rgba(239,68,68,0.1)",    glow: "rank-glow-legend",    next: null, tier: 6, desc: "Immortal hero" },
 ];
 
 function getRank(donations) {
