@@ -105,10 +105,11 @@ export default function RequestDetailPage() {
     setSubmitting(true);
     try {
       await deleteRequest(id);
+      setShowModal("");
       toast.success("Request deleted");
       navigate("/requests");
-    } catch {
-      toast.error("Failed to delete request");
+    } catch (err) {
+      toast.error(err?.response?.data?.error || "Failed to delete request");
       setShowModal("");
     } finally {
       setSubmitting(false);

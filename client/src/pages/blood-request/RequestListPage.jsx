@@ -4,7 +4,7 @@
  * Each card links to the full detail view of that request.
  */
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { searchRequests, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
@@ -30,6 +30,7 @@ function getStatusStyle(status) {
 
 export default function RequestListPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [filters, setFilters] = useState({ bloodGroup: "", district: "", urgency: "" });
   const filtersRef = useRef(filters);
   filtersRef.current = filters;
@@ -99,12 +100,12 @@ export default function RequestListPage() {
         ) : (
           <div className="grid grid-3">
             {requests.map((r, idx) => {
-              const u = URGENCY.find((x) => x.value === r.urgency);
-              const isOwn = user?._id && user._id === r.requester?._id;
+              const isOwn = user?._id && String(user._id) === String(r.requester?._id);
               const rc = getBloodGroupColor(r.patientBloodGroup);
               const st = getStatusStyle(r.status);
               return (
-                <div key={r._id} className="contact-card contact-card-entry" style={{ animationDelay: `${idx * 0.08}s` }}
+                <div key={r._id} className="contact-card contact-card-entry" style={{ animationDelay: `${idx * 0.08}s`, cursor: "pointer" }}
+                  onClick={() => navigate(`/requests/${r._id}`)}
                   onMouseMove={(e) => {
                     const card = e.currentTarget;
                     const rect = card.getBoundingClientRect();
@@ -129,44 +130,52 @@ export default function RequestListPage() {
                   }}
                 >
                   <div className="contact-card-glare" />
-                  <Link to={`/requests/${r._id}`} style={{ textDecoration: "none", color: "inherit", display: "contents" }}>
-                    <div className="contact-card-top">
-                      <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${rc.text || "#EF4444"}, ${rc.text || "#DC2626"}88)`, overflow: "hidden", padding: 0 }}>
-                        {r.requester?.photo ? (
-                          <img src={r.requester.photo} alt={r.patientName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        ) : (
-                          r.requester?.name?.charAt(0)?.toUpperCase() || r.patientName?.charAt(0)?.toUpperCase()
-                        )}
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        {r.patientBloodGroup && (
-                          <div className="contact-card-blood-badge" style={{ background: rc.text || "#EF4444" }}>
-                            {r.patientBloodGroup}
-                          </div>
-                        )}
-                      </div>
+                  <div className="contact-card-top">
+                    <div className="contact-card-avatar" style={{ background: `linear-gradient(135deg, ${rc.text || "#EF4444"}, ${rc.text || "#DC2626"}88)`, overflow: "hidden", padding: 0 }}>
+                      {r.requester?.photo ? (
+                        <img src={r.requester.photo} alt={r.patientName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        r.requester?.name?.charAt(0)?.toUpperCase() || r.patientName?.charAt(0)?.toUpperCase()
+                      )}
                     </div>
-                    <div className="contact-card-name">{r.patientName}</div>
-                    <div className="contact-card-location">
-                      <MapPin size={13} /> {r.area}, {r.district}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      {r.patientBloodGroup && (
+                        <div className="contact-card-blood-badge" style={{ background: rc.text || "#EF4444" }}>
+                          {r.patientBloodGroup}
+                        </div>
+                      )}
                     </div>
-                    <div className="contact-card-stats">
-                      <span className="contact-card-stat"><Droplets size={13} /> {r.unitsRequired} unit(s)</span>
-                      <span className="contact-card-stat"><Clock size={13} /> {r.dateNeeded ? new Date(r.dateNeeded).toLocaleDateString() : "ASAP"}</span>
-                    </div>
-                  </Link>
+                  </div>
+                  <div className="contact-card-name">{r.patientName}</div>
+                  <div className="contact-card-location">
+                    <MapPin size={13} /> {r.area}, {r.district}
+                  </div>
+                  <div className="contact-card-stats">
+                    <span className="contact-card-stat"><Droplets size={13} /> {r.unitsRequired} unit(s)</span>
+                    <span className="contact-card-stat"><Clock size={13} /> {r.dateNeeded ? new Date(r.dateNeeded).toLocaleDateString() : "ASAP"}</span>
+                  </div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
                     <div className={`contact-card-status ${r.status === "completed" ? "status-completed-glow" : ""}`}>
                       <span className="contact-card-status-dot" style={{ background: st.dot }} />
                       <span style={{ color: st.color, fontWeight: r.status === "completed" ? 700 : 500 }}>{st.label}</span>
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
-                      {isOwn ? (
-                        <button onClick={(e) => { e.stopPropagation(); setShowDelete(r); }} className="contact-card-icon-btn" title="Delete request" style={{ color: "var(--red)" }}>
+                      {isOwn && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowDelete(r); }}
+                          className="contact-card-icon-btn"
+                          title="Delete request"
+                          style={{ color: "var(--red)" }}
+                        >
                           <Trash2 size={16} />
                         </button>
-                      ) : (
-                        <Link to={`/chat/${r.requester?._id}`} className="contact-card-icon-btn contact-card-icon-chat" onClick={(e) => e.stopPropagation()}>
+                      )}
+                      {!isOwn && r.requester?._id && (
+                        <Link
+                          to={`/chat/${r.requester._id}`}
+                          className="contact-card-icon-btn contact-card-icon-chat"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <MessageCircle size={16} />
                         </Link>
                       )}
