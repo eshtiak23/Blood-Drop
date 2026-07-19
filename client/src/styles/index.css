@@ -1670,6 +1670,172 @@ textarea.input { min-height: 100px; resize: vertical; }
   white-space: nowrap;
 }
 
+/* ── RPG Rank System ── */
+.lb-rank-relative { position: relative; display: inline-block; }
+.lb-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: default;
+}
+.lb-rank-badge:hover { transform: scale(1.05); }
+.lb-rank-sm { padding: 2px 8px; font-size: 10px; }
+.lb-rank-md { padding: 3px 10px; font-size: 11px; }
+.lb-rank-icon { font-size: 14px; line-height: 1; }
+.lb-rank-sm .lb-rank-icon { font-size: 12px; }
+.lb-rank-label { line-height: 1; }
+
+/* XP Progress Bar */
+.lb-xp-wrap { width: 100%; margin-top: 6px; }
+.lb-xp-bar {
+  width: 100%;
+  height: 5px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.dark .lb-xp-bar { background: rgba(255,255,255,0.08); }
+.lb-xp-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  background: var(--red);
+}
+.lb-xp-fill-max {
+  background: linear-gradient(90deg, #EF4444, #F59E0B, #EF4444);
+  background-size: 200% 100%;
+  animation: xpMaxShimmer 2s linear infinite;
+}
+@keyframes xpMaxShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.lb-xp-text {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+/* Rank Glow Effects */
+.rank-glow-knight { box-shadow: 0 0 12px rgba(59,130,246,0.2); }
+.rank-glow-champion { box-shadow: 0 0 16px rgba(139,92,246,0.25); }
+.rank-glow-hero { animation: heroGlow 2.5s ease-in-out infinite alternate; }
+.rank-glow-legend { animation: legendGlow 2s ease-in-out infinite alternate; }
+
+@keyframes heroGlow {
+  from { box-shadow: 0 0 8px rgba(245,158,11,0.3); }
+  to { box-shadow: 0 0 20px rgba(245,158,11,0.6), 0 0 40px rgba(245,158,11,0.15); }
+}
+@keyframes legendGlow {
+  from { box-shadow: 0 0 8px rgba(239,68,68,0.4), 0 0 20px rgba(245,158,11,0.1); }
+  to { box-shadow: 0 0 24px rgba(239,68,68,0.7), 0 0 48px rgba(245,158,11,0.3); }
+}
+
+/* Achievement Card Tooltip */
+.lb-achievement-card {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  z-index: 50;
+  animation: achievePop 0.2s ease;
+  pointer-events: none;
+}
+.dark .lb-achievement-card { box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+@keyframes achievePop {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px) scale(0.96); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+.lb-achieve-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 11px 11px 0 0;
+}
+.lb-achieve-icon { font-size: 28px; }
+.lb-achieve-rank { font-size: 14px; font-weight: 800; }
+.lb-achieve-desc { font-size: 11px; color: var(--text-secondary); }
+.lb-achieve-body { padding: 10px 14px 12px; }
+.lb-achieve-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+}
+.lb-achieve-tier {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+.lb-achieve-tier-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.3s;
+}
+.lb-achieve-tier-dot.active { box-shadow: 0 0 4px currentColor; }
+
+/* Rank Legend Bar */
+.lb-rank-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.lb-rank-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+.lb-rank-legend-icon { font-size: 14px; }
+.lb-rank-legend-name { font-weight: 700; }
+.lb-rank-legend-req { color: var(--text-muted); font-weight: 500; }
+
+/* Scroll to Top */
+.lb-scroll-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(239,68,68,0.4);
+  z-index: 40;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: lbFadeIn 0.3s ease;
+}
+.lb-scroll-top:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(239,68,68,0.5);
+}
+
 @keyframes podiumBorderRotate {
   from { --podium-border-angle: 0deg; }
   to { --podium-border-angle: 360deg; }
@@ -1973,6 +2139,7 @@ textarea.input { min-height: 100px; resize: vertical; }
   font-weight: 600;
 }
 .lb-badge-pill {
+  /* Legacy — replaced by lb-rank-badge */
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -2142,6 +2309,13 @@ textarea.input { min-height: 100px; resize: vertical; }
   .lb-mobile-wrap {
     display: block;
   }
+  .lb-rank-legend {
+    gap: 6px;
+    padding: 10px 12px;
+  }
+  .lb-rank-legend-item {
+    font-size: 10px;
+  }
   .lb-cta {
     flex-direction: column;
     gap: 16px;
@@ -2150,6 +2324,12 @@ textarea.input { min-height: 100px; resize: vertical; }
   }
   .lb-cta-left {
     flex-direction: column;
+  }
+  .lb-scroll-top {
+    bottom: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
   }
 }
 @media (max-width: 480px) {
@@ -2189,6 +2369,22 @@ textarea.input { min-height: 100px; resize: vertical; }
     margin: 0 -16px;
     padding: 8px 0;
     font-size: 11px;
+  }
+  .lb-rank-legend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .lb-rank-legend-item {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .lb-mobile-stats {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
   }
 }
 

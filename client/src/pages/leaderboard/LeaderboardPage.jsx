@@ -1,25 +1,39 @@
 /**
- * LeaderboardPage — Blood donor leaderboard matching premium design.
- * Light header, podium with ml bars, stats row, table with ml, bottom CTA.
+ * LeaderboardPage — Blood donor leaderboard with RPG Hero Rank system.
+ * Gaming-style achievement ranks with XP progress bars, glowing effects,
+ * and responsive mobile-first design.
  */
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS } from "../../data/constants";
-import { Trophy, Search, MapPin, Droplets, X, Loader2, Shield, Users, Heart, Share2, Award } from "lucide-react";
+import { Trophy, Search, MapPin, Droplets, X, Loader2, Users, Heart, Share2, Award, ChevronUp } from "lucide-react";
 import Pagination from "../../components/ui/Pagination";
 import toast from "react-hot-toast";
 
 const ML_PER_DONATION = 150;
 
-/* ── Badge System ── */
-function getBadge(donations) {
-  if (donations >= 40) return { label: "Diamond", color: "#8B5CF6", bg: "rgba(139,92,246,0.1)" };
-  if (donations >= 20) return { label: "Platinum", color: "#3B82F6", bg: "rgba(59,130,246,0.1)" };
-  if (donations >= 10) return { label: "Gold", color: "#D97706", bg: "rgba(217,119,6,0.1)" };
-  if (donations >= 5)  return { label: "Silver", color: "#6B7280", bg: "rgba(107,114,128,0.1)" };
-  return              { label: "Bronze", color: "#D97706", bg: "rgba(217,119,6,0.08)" };
+/* ── RPG Rank System ── */
+const RANKS = [
+  { min: 0,  label: "Recruit",   icon: "🥉", color: "#9CA3AF", bg: "rgba(156,163,175,0.08)", glow: "",             next: 1,   tier: 1, desc: "Just joined the battle" },
+  { min: 1,  label: "Healer",    icon: "🩹", color: "#10B981", bg: "rgba(16,185,129,0.1)",   glow: "",             next: 5,   tier: 2, desc: "First blood donated" },
+  { min: 5,  label: "Knight",    icon: "⚔️", color: "#3B82F6", bg: "rgba(59,130,246,0.1)",   glow: "rank-glow-knight",    next: 10,  tier: 3, desc: "Proven warrior" },
+  { min: 10, label: "Champion",  icon: "🛡️", color: "#8B5CF6", bg: "rgba(139,92,246,0.1)",   glow: "rank-glow-champion",  next: 20,  tier: 4, desc: "Defender of lives" },
+  { min: 20, label: "Hero",      icon: "🌟", color: "#F59E0B", bg: "rgba(245,158,11,0.1)",   glow: "rank-glow-hero",      next: 40,  tier: 5, desc: "Legendary savior" },
+  { min: 40, label: "Legend",    icon: "👑", color: "#EF4444", bg: "rgba(239,68,68,0.1)",    glow: "rank-glow-legend",    next: null, tier: 6, desc: "Immortal hero" },
+];
+
+function getRank(donations) {
+  let rank = RANKS[0];
+  for (const r of RANKS) {
+    if (donations >= r.min) rank = r;
+  }
+  const isMax = rank.next === null;
+  const xpInTier = isMax ? 0 : donations - rank.min;
+  const xpNeeded = isMax ? 0 : rank.next - rank.min;
+  const xpPercent = isMax ? 100 : Math.min((xpInTier / xpNeeded) * 100, 100);
+  return { ...rank, xpInTier, xpNeeded, xpPercent, isMax, donations };
 }
 
 function getBloodGroupColor(bloodGroup) {
@@ -75,25 +89,94 @@ function StatCard({ icon, iconBg, value, label, sub, delay = 0 }) {
   );
 }
 
+/* ── XP Progress Bar ── */
+function XpBar({ rank, compact = false }) {
+  if (rank.isMax) {
+    return (
+      <div className="lb-xp-wrap">
+        <div className="lb-xp-bar">
+          <div className="lb-xp-fill lb-xp-fill-max" style={{ width: "100%" }} />
+        </div>
+        {!compact && <div className="lb-xp-text" style={{ color: rank.color }}>MAX RANK</div>}
+      </div>
+    );
+  }
+  return (
+    <div className="lb-xp-wrap">
+      <div className="lb-xp-bar">
+        <div className="lb-xp-fill" style={{ width: `${rank.xpPercent}%`, background: rank.color }} />
+      </div>
+      {!compact && <div className="lb-xp-text">XP: {rank.xpInTier}/{rank.xpNeeded}</div>}
+    </div>
+  );
+}
+
+/* ── Rank Badge ── */
+function RankBadge({ rank, size = "md" }) {
+  const [showCard, setShowCard] = useState(false);
+  const badgeRef = useRef(null);
+
+  return (
+    <div className="lb-rank-relative" ref={badgeRef}
+      onMouseEnter={() => setShowCard(true)}
+      onMouseLeave={() => setShowCard(false)}
+    >
+      <div className={`lb-rank-badge lb-rank-${size}`} style={{ background: rank.bg, color: rank.color, borderColor: `${rank.color}33` }}>
+        <span className="lb-rank-icon">{rank.icon}</span>
+        <span className="lb-rank-label">{rank.label}</span>
+      </div>
+      {showCard && (
+        <div className="lb-achievement-card">
+          <div className="lb-achieve-header" style={{ background: rank.bg }}>
+            <span className="lb-achieve-icon">{rank.icon}</span>
+            <div>
+              <div className="lb-achieve-rank" style={{ color: rank.color }}>{rank.label}</div>
+              <div className="lb-achieve-desc">{rank.desc}</div>
+            </div>
+          </div>
+          <div className="lb-achieve-body">
+            <div className="lb-achieve-stat">
+              <span>Donations</span>
+              <span style={{ fontWeight: 700 }}>{rank.donations}</span>
+            </div>
+            {!rank.isMax && (
+              <div className="lb-achieve-stat">
+                <span>Next Rank</span>
+                <span style={{ fontWeight: 700 }}>{rank.next - rank.donations} more</span>
+              </div>
+            )}
+            <XpBar rank={rank} />
+            <div className="lb-achieve-tier">
+              {RANKS.map((r) => (
+                <div key={r.tier} className={`lb-achieve-tier-dot ${rank.tier >= r.tier ? "active" : ""}`} style={{ background: rank.tier >= r.tier ? r.color : undefined }} title={r.label} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Podium Card ── */
 function PodiumCard({ donor, rank }) {
   const bc = getBloodGroupColor(donor.bloodGroup);
   const ml = (donor.totalDonations || 0) * ML_PER_DONATION;
-  const badge = getBadge(donor.totalDonations);
-  const rankColors = {
-    1: { border: "#F59E0B", bg: "rgba(245,158,11,0.04)", barBg: "linear-gradient(135deg, #F59E0B, #D97706)", numBg: "#F59E0B", pillBg: "#FEF3C7", pillColor: "#D97706" },
-    2: { border: "#9CA3AF", bg: "rgba(156,163,175,0.04)", barBg: "linear-gradient(135deg, #9CA3AF, #6B7280)", numBg: "#6B7280", pillBg: "#F3F4F6", pillColor: "#374151" },
-    3: { border: "#D97706", bg: "rgba(217,119,6,0.04)", barBg: "linear-gradient(135deg, #F59E0B, #EA580C)", numBg: "#D97706", pillBg: "#FEF3C7", pillColor: "#D97706" },
+  const rankData = getRank(donor.totalDonations);
+  const rankStyles = {
+    1: { border: "#F59E0B", bg: "rgba(245,158,11,0.04)", barBg: "linear-gradient(135deg, #F59E0B, #D97706)", numBg: "#F59E0B", pillBg: "#FEF3C7", pillColor: "#D97706", crown: "👑" },
+    2: { border: "#9CA3AF", bg: "rgba(156,163,175,0.04)", barBg: "linear-gradient(135deg, #9CA3AF, #6B7280)", numBg: "#6B7280", pillBg: "#F3F4F6", pillColor: "#374151", crown: "" },
+    3: { border: "#D97706", bg: "rgba(217,119,6,0.04)", barBg: "linear-gradient(135deg, #F59E0B, #EA580C)", numBg: "#D97706", pillBg: "#FEF3C7", pillColor: "#D97706", crown: "" },
   };
-  const rc = rankColors[rank];
+  const rs = rankStyles[rank];
 
   return (
-    <div className={`podium-card podium-rank-${rank}`}>
-      <div className="podium-rank-num" style={{ background: rc.numBg }}>
-        {rank}
+    <div className={`podium-card podium-rank-${rank} ${rankData.glow}`}>
+      <div className="podium-rank-num" style={{ background: rs.numBg }}>
+        {rank === 1 ? rs.crown : rank}
       </div>
       <Link to={`/donors/${donor._id}`} style={{ textDecoration: "none" }}>
-        <div className="podium-avatar" style={{ borderColor: rc.border }}>
+        <div className="podium-avatar" style={{ borderColor: rs.border }}>
           {donor.photo ? (
             <img src={donor.photo} alt={donor.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
           ) : (
@@ -105,13 +188,12 @@ function PodiumCard({ donor, rank }) {
         <div className="podium-name">{donor.name}</div>
       </Link>
       <div className="podium-blood" style={{ color: bc.text }}>{donor.bloodGroup}</div>
-      <div className="podium-badge" style={{ background: badge.bg, color: badge.color }}>
-        <Shield size={12} /> {badge.label}
-      </div>
-      <div className="podium-pill" style={{ background: rc.pillBg, color: rc.pillColor }}>
+      <RankBadge rank={rankData} size="sm" />
+      <div className="podium-pill" style={{ background: rs.pillBg, color: rs.pillColor }}>
         {donor.totalDonations} Donations
       </div>
-      <div className="podium-ml-bar" style={{ background: rc.barBg }}>
+      <XpBar rank={rankData} />
+      <div className="podium-ml-bar" style={{ background: rs.barBg }}>
         <Droplets size={14} color="#fff" />
         <span>{ml.toLocaleString()} ml</span>
       </div>
@@ -121,9 +203,9 @@ function PodiumCard({ donor, rank }) {
 
 /* ── Table Row ── */
 function TableRow({ donor, rank, isCurrentUser }) {
-  const badge = getBadge(donor.totalDonations);
   const bc = getBloodGroupColor(donor.bloodGroup);
   const ml = (donor.totalDonations || 0) * ML_PER_DONATION;
+  const rankData = getRank(donor.totalDonations);
 
   const formatDate = (d) => {
     if (!d) return "Never";
@@ -159,9 +241,7 @@ function TableRow({ donor, rank, isCurrentUser }) {
         <span className="lb-donation-ml">{ml.toLocaleString()} ml</span>
       </div>
       <div className="lb-col-badge">
-        <div className="lb-badge-pill" style={{ background: badge.bg, color: badge.color }}>
-          <Shield size={12} /> {badge.label}
-        </div>
+        <RankBadge rank={rankData} size="md" />
       </div>
       <div className="lb-col-date">{formatDate(donor.lastDonationDate)}</div>
     </div>
@@ -170,9 +250,9 @@ function TableRow({ donor, rank, isCurrentUser }) {
 
 /* ── Mobile Card ── */
 function MobileCard({ donor, rank, isCurrentUser }) {
-  const badge = getBadge(donor.totalDonations);
   const bc = getBloodGroupColor(donor.bloodGroup);
   const ml = (donor.totalDonations || 0) * ML_PER_DONATION;
+  const rankData = getRank(donor.totalDonations);
 
   return (
     <div className={`lb-mobile-card ${isCurrentUser ? "lb-row-current" : ""}`}>
@@ -191,15 +271,30 @@ function MobileCard({ donor, rank, isCurrentUser }) {
           </Link>
           <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{donor.district}</div>
         </div>
+        <RankBadge rank={rankData} size="sm" />
       </div>
-      <div className="lb-mobile-bottom">
+      <div className="lb-mobile-stats">
         <span style={{ fontSize: 12, fontWeight: 600, color: bc.text }}>{donor.bloodGroup}</span>
-        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{donor.totalDonations} <span style={{ color: "var(--red)", fontWeight: 600, fontSize: 11 }}>{ml.toLocaleString()} ml</span></span>
-        <div className="lb-badge-pill" style={{ background: badge.bg, color: badge.color, fontSize: 10, padding: "2px 8px" }}>
-          <Shield size={10} /> {badge.label}
-        </div>
+        <span style={{ fontSize: 12, fontWeight: 700 }}>{donor.totalDonations} <span style={{ color: "var(--red)", fontWeight: 600, fontSize: 11 }}>{ml.toLocaleString()} ml</span></span>
       </div>
+      <XpBar rank={rankData} compact />
     </div>
+  );
+}
+
+/* ── Scroll to Top Button ── */
+function ScrollTop() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShow(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  if (!show) return null;
+  return (
+    <button className="lb-scroll-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+      <ChevronUp size={20} />
+    </button>
   );
 }
 
@@ -292,13 +387,24 @@ export default function LeaderboardPage() {
             <div className="lb-header-trophy"><Trophy size={28} color="#EF4444" /></div>
             <div>
               <h1 className="lb-header-title">Blood Donor <span style={{ color: "var(--red)" }}>Leaderboard</span></h1>
-              <p className="lb-header-sub">Honoring our heroes who donate blood and save lives.</p>
+              <p className="lb-header-sub">Level up by donating. Earn ranks. Save lives.</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="container" style={{ padding: "0 20px 48px" }}>
+        {/* ── Rank Legend ── */}
+        <div className="lb-rank-legend">
+          {RANKS.map((r) => (
+            <div key={r.tier} className="lb-rank-legend-item">
+              <span className="lb-rank-legend-icon">{r.icon}</span>
+              <span className="lb-rank-legend-name" style={{ color: r.color }}>{r.label}</span>
+              <span className="lb-rank-legend-req">{r.min}+ donations</span>
+            </div>
+          ))}
+        </div>
+
         {/* ── Podium ── */}
         {top3.length >= 3 && (
           <div className="podium-section">
@@ -313,7 +419,7 @@ export default function LeaderboardPage() {
         {/* ── Stats Row ── */}
         <div className="lb-stats-row">
           <StatCard icon={<Users size={20} color="#EF4444" />} iconBg="rgba(239,68,68,0.1)" value={donors.length} label="Total Donors" sub="Active Donors" delay={0} />
-          <StatCard icon={<Droplets size={20} color="#EF4444" />} iconBg="rgba(239,68,68,0.1)" value={totalDonations} label="Total Donations" sub="This Year" delay={0.1} />
+          <StatCard icon={<Droplets size={20} color="#EF4444" />} iconBg="rgba(239,68,68,0.1)" value={totalDonations} label="Total Donations" sub="All Time" delay={0.1} />
           <StatCard icon={<Heart size={20} color="#EF4444" />} iconBg="rgba(239,68,68,0.1)" value={livesImpacted} label="Lives Impacted" sub="So Far" delay={0.2} />
           {topDonor && (
             <div className="lb-stat-card" style={{ animationDelay: "0.3s" }}>
@@ -331,11 +437,11 @@ export default function LeaderboardPage() {
         <div className="lb-filters">
           <div className="lb-search-wrap">
             <Search size={16} className="lb-search-icon" />
-            <input type="text" placeholder="Search donor by name..." value={search} onChange={(e) => setSearch(e.target.value)} className="lb-search-input" />
+            <input type="text" placeholder="Search donor..." value={search} onChange={(e) => setSearch(e.target.value)} className="lb-search-input" />
             {search && <button onClick={() => setSearch("")} className="lb-search-clear"><X size={14} /></button>}
           </div>
           <select className="input lb-filter-select" value={bloodFilter} onChange={(e) => setBloodFilter(e.target.value)}>
-            <option value="">All Blood Groups</option>
+            <option value="">All Blood</option>
             {BLOOD_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
           </select>
           <select className="input lb-filter-select" value={districtFilter} onChange={(e) => setDistrictFilter(e.target.value)}>
@@ -344,21 +450,21 @@ export default function LeaderboardPage() {
           </select>
           <select className="input lb-filter-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
             <option value="donations">Most Donations</option>
-            <option value="recent">Recent Donation</option>
+            <option value="recent">Recent</option>
             <option value="rank">Rank</option>
           </select>
         </div>
 
-        {/* ── Table ── */}
+        {/* ── Table (Desktop) ── */}
         <div className="lb-table-wrap">
           <div className="lb-table-header">
             <div className="lb-col-rank">Rank</div>
             <div className="lb-col-donor">Donor</div>
-            <div className="lb-col-blood">Blood Group</div>
+            <div className="lb-col-blood">Blood</div>
             <div className="lb-col-district">District</div>
-            <div className="lb-col-donations">Total Donations</div>
-            <div className="lb-col-badge">Badge</div>
-            <div className="lb-col-date">Last Donation</div>
+            <div className="lb-col-donations">Donations</div>
+            <div className="lb-col-badge">Rank</div>
+            <div className="lb-col-date">Last</div>
           </div>
           {paginated.length === 0 ? (
             <div className="empty-state" style={{ padding: "40px 20px" }}>
@@ -396,15 +502,17 @@ export default function LeaderboardPage() {
           <div className="lb-cta-left">
             <div className="lb-cta-icon"><Award size={24} color="#EF4444" /></div>
             <div>
-              <div className="lb-cta-title">Keep donating, keep inspiring!</div>
-              <div className="lb-cta-sub">The more you donate, the higher you rank.</div>
+              <div className="lb-cta-title">Keep donating, keep leveling up!</div>
+              <div className="lb-cta-sub">Every donation earns you XP toward the next rank.</div>
             </div>
           </div>
           <button className="btn btn-primary lb-cta-btn" onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }}>
-            <Share2 size={16} /> Share Your Achievement
+            <Share2 size={16} /> Share
           </button>
         </div>
       </div>
+
+      <ScrollTop />
     </div>
   );
 }
