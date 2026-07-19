@@ -1,0 +1,717 @@
+================================================================================
+                    LIFEDROP — TECHNICAL DOCUMENTATION
+                    Blood Donor Management Platform
+================================================================================
+
+Project by: MD. Eshtiak Ahmed (Lead Developer)
+Team: Towfiqur Rahman, Abdur Rahman, Sabbir Ahmed, Al Yeamin Abir
+Supervisor: [Your Teacher Name]
+Institution: [Your Institution Name]
+Date: July 2026
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1.  Project Overview
+2.  Technology Stack
+3.  System Architecture
+4.  Authentication System
+5.  Database Design (10 Collections)
+6.  API Endpoints (~30 endpoints)
+7.  Real-Time Chat System
+8.  Frontend Features (Page by Page)
+9.  Security Features
+10. Key Technical Concepts
+11. Common Teacher Questions & Answers
+12. How to Run the Project
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+LifeDrop is a full-stack web application that connects blood donors with people
+who need blood donations in Bangladesh. The platform allows users to:
+
+- Search for blood donors by blood group, district, and area
+- Create and manage blood requests
+- Chat in real-time with other donors
+- Send connection requests (friend system) to share phone numbers
+- Earn ranks and XP through a gamified leaderboard
+- Receive email and in-app notifications for blood requests
+
+The problem it solves: In Bangladesh, finding a blood donor during emergencies
+is difficult. People rely on Facebook groups and word-of-mouth. LifeDrop
+provides a structured, searchable platform where donors can be found quickly
+by blood group and location.
+
+বাংলায়: LifeDrop একটি রক্তদাতা খুঁজে পেতে সাহায্য করে। যে কেউ রক্ত খুঁজছে
+সে ব্লাড গ্রুপ এবং জেলা দিয়ে সার্চ করতে পারবে। চ্যাট, কানেকশন রিকোয়েস্ট,
+এবং লিডারবোর্ড ফিচারও আছে।
+
+================================================================================
+2. TECHNOLOGY STACK
+================================================================================
+
+FRONTEND (Client Side):
+-----------------------
+| Technology          | Version  | Purpose                                    |
+|---------------------|----------|--------------------------------------------|
+| React               | 19.2.7   | UI framework (component-based)             |
+| Vite                | 8.1.1    | Build tool and development server          |
+| React Router        | 7.18.1   | Client-side URL routing                    |
+| Axios               | 1.18.1   | HTTP client for API calls                  |
+| Socket.IO Client    | 4.8.3    | Real-time WebSocket connection             |
+| React Hot Toast     | 2.6.0    | Toast notifications (success/error)        |
+| Lucide React        | 1.23.0   | Icon library (500+ icons)                  |
+| React Query         | 5.101.2  | Server-state caching                       |
+| Date-fns            | 4.4.0    | Date formatting utilities                  |
+
+Backend (Server Side):
+----------------------
+| Technology          | Version  | Purpose                                    |
+|---------------------|----------|--------------------------------------------|
+| Express.js          | 4.21.2   | HTTP server framework                      |
+| Mongoose            | 8.9.5    | MongoDB ODM (Object Document Mapper)       |
+| Socket.IO           | 4.8.3    | Real-time WebSocket server                 |
+| JSON Web Token      | 9.0.2    | Authentication tokens                      |
+| bcryptjs            | 3.0.3    | Password hashing                           |
+| Helmet              | 8.0.0    | HTTP security headers                      |
+| CORS                | 2.8.5    | Cross-origin request handling              |
+| Resend              | 6.17.2   | Email sending API (100 free emails/day)    |
+
+Database:
+---------
+| Technology          | Purpose                                          |
+|---------------------|--------------------------------------------------|
+| MongoDB Atlas       | Cloud-hosted NoSQL database (free M0 tier)       |
+
+Deployment:
+-----------
+| Platform            | What is deployed                                 |
+|---------------------|--------------------------------------------------|
+| Vercel              | React frontend (https://blood-drop-jade.vercel.app) |
+| Render              | Express backend (https://blood-drop-server.onrender.com) |
+| GitHub              | Source code (2 separate repositories)            |
+
+================================================================================
+3. SYSTEM ARCHITECTURE
+================================================================================
+
+                    ┌─────────────────────┐
+                    │   React Frontend     │
+                    │   (Vercel)           │
+                    │                      │
+                    │  - 17 Page Components│
+                    │  - 3 Context Providers│
+                    │  - Socket.IO Client  │
+                    └──────────┬──────────┘
+                               │
+                    HTTP Requests (Axios)
+                    WebSocket (Socket.IO)
+                               │
+                    ┌──────────▼──────────┐
+                    │  Express Backend     │
+                    │  (Render)            │
+                    │                      │
+                    │  - 11 Route Groups   │
+                    │  - 10 Mongoose Models│
+                    │  - Socket.IO Server  │
+                    │  - JWT Auth          │
+                    └──────────┬──────────┘
+                               │
+                    Mongoose ODM Queries
+                               │
+                    ┌──────────▼──────────┐
+                    │  MongoDB Atlas       │
+                    │  (Cloud Database)    │
+                    │                      │
+                    │  - 10 Collections    │
+                    │  - 150+ Donors       │
+                    └─────────────────────┘
+
+TWO SEPARATE GITHUB REPOSITORIES:
+- Frontend: github.com/eshtiak23/Blood-Drop
+- Backend:  github.com/eshtiak23/Blood-Drop_Server
+
+Why separate repos? To avoid accidentally pushing server code (with secrets)
+to the client repository. Each repo deploys independently.
+
+================================================================================
+4. AUTHENTICATION SYSTEM
+================================================================================
+
+How Login Works:
+1. User enters email + password on the login page
+2. Frontend sends POST /api/auth/login with credentials
+3. Server finds the user by email in MongoDB
+4. Server compares password using bcrypt (hashed comparison)
+5. If match: server creates a JWT token with user ID, sends it back
+6. Frontend stores token in localStorage under "blooddrop_token"
+7. Frontend stores user data in localStorage under "blooddrop_user"
+8. Every subsequent API request includes the token in the Authorization header
+
+JWT Token Flow:
+  Login → Server creates JWT (expires in 7 days)
+       → Client stores in localStorage
+       → Client attaches "Authorization: Bearer <token>" to every request
+       → Server middleware verifies token on protected routes
+       → If token invalid/expired → 401 → Client redirects to /login
+
+Password Security:
+- Passwords are hashed using bcrypt with 12 salt rounds
+- Raw passwords are NEVER stored in the database
+- The password field has `select: false` in the schema (never returned in queries)
+- bcrypt makes each hash unique even for identical passwords
+
+Code Reference (server/middleware/auth.js):
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findById(decoded.id);
+
+================================================================================
+5. DATABASE DESIGN (10 Collections)
+================================================================================
+
+1. USERS Collection
+   Fields: name, email (unique), password (hashed), phone, age, bloodGroup,
+           gender, district, area, lat, lng, bio, photo (base64), role,
+           isAvailable, totalDonations, lastDonationDate, isVerified, isActive
+   Purpose: Store all user/donor information
+   Note: Password is select:false (never returned in queries by default)
+
+2. REQUESTS Collection
+   Fields: patientName, hospital, patientBloodGroup, unitsRequired,
+           urgency (critical/urgent/normal), dateNeeded, contactNumber,
+           district, area, description, status (open/accepted/completed/
+           cancelled), requester (ref: User), acceptedBy (ref: User)
+   Purpose: Blood donation requests created by users
+
+3. CONVERSATIONS Collection
+   Fields: participants (2 User refs), lastMessage (text, senderId, createdAt),
+           unreadCount (Map: userId → Number)
+   Purpose: Chat conversation between two users (1-on-1)
+
+4. MESSAGES Collection
+   Fields: conversationId (indexed), senderId, receiverId, text (max 5000),
+           image (base64, max 2MB), seen (boolean)
+   Indexes: (conversationId, createdAt), (conversationId, seen, receiverId)
+   Purpose: Individual chat messages
+
+5. NOTIFICATIONS Collection
+   Fields: userId (ref: User), type (enum: blood_request, request_accepted,
+           request_completed, donor_verified, reminder, friend_accepted,
+           friend_request), title, message, isRead
+   Purpose: In-app notifications for various events
+
+6. BOOKMARKS Collection
+   Fields: userId, donorId
+   Unique index: (userId, donorId) — prevents duplicate bookmarks
+   Purpose: Saved/favorited donors
+
+7. DONATION_LOGS Collection
+   Fields: userId, userName, donationDate, hospital, bloodGroup
+   Purpose: History of blood donations per user
+
+8. FEEDBACK Collection
+   Fields: userId, userName, userPhoto, rating (1-5), comment
+   Purpose: User reviews/testimonials (1 per day limit)
+
+9. RATINGS Collection
+   Fields: requestId, raterId, raterName, ratedUserId, rating (1-5), comment
+   Unique index: (requestId, raterId) — one rating per request per user
+   Purpose: Post-donation rating between requester and donor
+
+10. FRIEND_REQUESTS Collection
+    Fields: sender (ref: User), receiver (ref: User), status (pending/
+            accepted/rejected)
+    Unique index: (sender, receiver) — prevents duplicate requests
+    Purpose: Connection system (phone number visibility after acceptance)
+
+Relationships:
+  Request.requester → User._id
+  Request.acceptedBy → User._id
+  Conversation.participants → [User._id, User._id]
+  Message.conversationId → Conversation._id
+  Notification.userId → User._id
+  Bookmark.userId → User._id, Bookmark.donorId → User._id
+
+================================================================================
+6. API ENDPOINTS (~30 Endpoints)
+================================================================================
+
+AUTH (6 endpoints):
+  POST   /api/auth/register       — Create new account
+  POST   /api/auth/login          — Sign in
+  GET    /api/auth/me             — Get current user profile
+  PUT    /api/auth/me             — Update profile
+  GET    /api/auth/users          — List all users (admin only)
+  PATCH  /api/auth/users/:id/verify — Verify a donor (admin only)
+
+DONORS (3 endpoints):
+  GET    /api/donors/search       — Search by blood group, district, geolocation
+  GET    /api/donors/leaderboard  — All donors sorted by donations
+  GET    /api/donors/:id          — Single donor profile
+
+REQUESTS (8 endpoints):
+  GET    /api/requests/search     — Filter by blood group, district, urgency
+  GET    /api/requests/my         — Current user's requests
+  GET    /api/requests            — All requests
+  GET    /api/requests/:id        — Single request details
+  POST   /api/requests            — Create blood request (+ notify matching users)
+  PATCH  /api/requests/:id/accept — Donor accepts request
+  PATCH  /api/requests/:id/complete — Mark as completed
+  DELETE /api/requests/:id        — Delete own request
+
+CHAT (8 endpoints):
+  GET    /api/chat/conversations  — List user's conversations
+  POST   /api/chat/conversation/:userId — Create/get conversation
+  GET    /api/chat/messages/:conversationId — Paginated messages
+  POST   /api/chat/send           — Send message (text/image)
+  PATCH  /api/chat/seen/:conversationId — Mark as seen
+  GET    /api/chat/unread-count   — Total unread messages
+  DELETE /api/chat/message/:messageId — Delete own message
+  DELETE /api/chat/conversation/:conversationId — Delete conversation
+
+FRIENDS (7 endpoints):
+  GET    /api/friends/pending     — Incoming connection requests
+  GET    /api/friends             — All accepted connections
+  GET    /api/friends/status/:userId — Check connection status
+  POST   /api/friends/send/:userId — Send connection request
+  PATCH  /api/friends/accept/:requestId — Accept request
+  PATCH  /api/friends/reject/:requestId — Reject request
+  DELETE /api/friends/:requestId  — Withdraw/remove connection
+
+NOTIFICATIONS (4 endpoints):
+  GET    /api/notifications       — All notifications
+  PATCH  /api/notifications/:id/read — Mark one as read
+  PATCH  /api/notifications/read-all — Mark all as read
+  DELETE /api/notifications/:id   — Delete notification
+
+BOOKMARKS (4 endpoints):
+  GET    /api/bookmarks/check/:donorId — Check if bookmarked
+  GET    /api/bookmarks           — All bookmarks
+  POST   /api/bookmarks           — Add bookmark
+  DELETE /api/bookmarks/:donorId  — Remove bookmark
+
+DONATION LOGS (3 endpoints):
+  GET    /api/donation-logs       — User's donation history
+  POST   /api/donation-logs       — Log a donation (updates totalDonations)
+  DELETE /api/donation-logs/:id   — Delete log
+
+FEEDBACK (4 endpoints):
+  GET    /api/feedback            — All feedback (limit 50)
+  GET    /api/feedback/my         — Current user's feedback
+  POST   /api/feedback            — Submit feedback (1/day limit)
+  DELETE /api/feedback/:id        — Delete own feedback
+
+RATINGS (3 endpoints):
+  GET    /api/ratings/check/:requestId — Check if already rated
+  POST   /api/ratings             — Submit rating (prevents duplicates)
+  GET    /api/ratings/user/:userId — Get ratings for a user
+
+STATS (1 endpoint):
+  GET    /api/stats               — Platform statistics (donors, requests, etc.)
+
+TOTAL: ~41 API endpoints across 11 route groups
+
+================================================================================
+7. REAL-TIME CHAT SYSTEM
+================================================================================
+
+Technology: Socket.IO (WebSocket with polling fallback)
+
+How It Works:
+1. Client connects to server with JWT token for authentication
+2. Server verifies token and registers user as "online"
+3. When user opens a chat, they "join" a conversation room
+4. Messages are emitted to the room for instant delivery
+5. Typing indicators are broadcast in real-time
+6. Read receipts (seen checkmarks) update instantly
+
+Socket Events:
+  Client → Server:
+    chat:join        — Join a conversation room
+    chat:leave       — Leave a conversation room
+    typing:start     — Broadcast typing indicator
+    typing:stop      — Stop typing indicator
+    message:seen     — Mark messages as seen
+
+  Server → Client:
+    user:online      — A user came online
+    user:offline     — A user went offline
+    message:new      — New message received
+    typing:start     — Someone is typing
+    typing:stop      — Someone stopped typing
+    message:seen     — Messages marked as seen
+    message:deleted  — A message was deleted
+    conversation:deleted — A conversation was deleted
+
+Multi-Device Support:
+- Each user can be connected from multiple tabs/devices
+- The system tracks a Set of socketIds per userId
+- User is only shown as "offline" when ALL connections are closed
+
+Online User Tracking:
+  const onlineUsers = new Map(); // userId → Set<socketId>
+  - addSocket(userId, socketId) — adds to the set
+  - removeSocket(userId, socketId) — removes from the set
+  - isUserOnline(userId) — checks if set has any sockets
+
+Code Reference (socket/index.js):
+  io.use(async (socket, next) => {
+    const token = socket.handshake.auth?.token;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = user._id.toString();
+    next();
+  });
+
+================================================================================
+8. FRONTEND FEATURES (Page by Page)
+================================================================================
+
+LANDING PAGE (/):
+  - Hero banner with auto-rotating images (4 banners)
+  - Animated stat counters (donors, requests, lives saved) from API
+  - "How It Works" 3-step cards with 3D effects
+  - Blood compatibility chart (8x8 interactive matrix)
+  - 6 feature cards with 3D glare effects
+  - Blood group grid (links to donor search)
+  - Testimonials from API + static
+  - FAQ accordion
+  - Scroll reveal animations
+
+DONOR SEARCH (/donors):
+  - Filter by blood group, district, area
+  - Geolocation-based radius search
+  - Paginated results (12 per page)
+  - Contact card modal with 3D animated border
+  - Phone number visible only if connected
+  - Chat button, Connect button, Bookmark toggle
+
+BLOOD REQUESTS (/requests):
+  - List with filters (blood group, district, urgency)
+  - Full card click navigation
+  - Status badges (open/accepted/completed/cancelled)
+  - Delete own requests
+  - Request detail: accept, complete, rate, delete
+
+REAL-TIME CHAT (/chat):
+  - Responsive layout (desktop: sidebar + conversation; mobile: one panel)
+  - Online status indicators
+  - Typing indicators
+  - Image sharing (max 2MB)
+  - Emoji picker (100+ emojis)
+  - Delete message (own only) with context menu
+  - Delete conversation
+  - Read receipts (double checkmarks)
+
+CONNECTION SYSTEM (/connect):
+  - Two tabs: Pending Requests, My Connections
+  - Accept/reject connection requests
+  - Phone numbers visible after connection
+  - Chat button for connected users
+  - Badge count in navbar (polls every 30s)
+
+LEADERBOARD (/leaderboard):
+  - RPG rank system: Recruit → Healer → Knight → Champion → Hero → Legend
+  - XP progress bars
+  - Animated glowing podium cards for top 3
+  - Achievement tooltip cards on hover
+  - Search/filter by blood group, district
+  - Mobile card layout with 3D effects
+
+DASHBOARD (/dashboard):
+  - Profile card with stats
+  - Donation logging with hospital and date
+  - Feedback/review submission (1-5 stars, 1/day limit)
+  - Recent requests
+  - Quick actions
+  - 90-day donation cooldown reminder
+
+SETTINGS (/settings):
+  - Profile photo upload (base64)
+  - Edit name, phone, district, area, bio
+  - Theme toggle (light/dark/system)
+  - Logout
+
+ADMIN (/admin):
+  - Platform stats (users, donors, requests)
+  - User list with verify button (admin only)
+
+================================================================================
+9. SECURITY FEATURES
+================================================================================
+
+1. CORS (Cross-Origin Resource Sharing):
+   - Only allows requests from Vercel frontend + localhost
+   - Prevents unauthorized domains from accessing the API
+   Code: app.use(cors({ origin: allowedOrigins, credentials: true }))
+
+2. Helmet:
+   - Sets HTTP security headers automatically
+   - Protects against common web vulnerabilities
+   Code: app.use(helmet())
+
+3. JWT Authentication:
+   - Stateless tokens (no server session needed)
+   - Tokens expire after 7 days
+   - Protected routes check token validity
+   Code: const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+4. Password Hashing:
+   - bcrypt with 12 salt rounds
+   - Each hash is unique even for identical passwords
+   - Raw passwords never stored or transmitted back
+   Code: this.password = await bcrypt.hash(this.password, 12)
+
+5. Input Validation:
+   - Client-side: validate.js with custom validators
+   - Server-side: Same validators mirrored on server
+   - Phone: Bangladeshi format (/^01[3-9]\d{8}$/)
+   - Age: Must be 18-65
+   - Blood group: Must be one of 8 valid types
+
+6. Authorization:
+   - Regular users can only access their own data
+   - Admin routes require role === "admin"
+   - Delete operations check ownership
+   - Message deletion: sender-only
+   - Request deletion: requester-only
+
+7. Rate Limiting:
+   - Email sends: 200ms delay between each
+   - Feedback: 1 per day per user
+   - Ratings: 1 per request per user
+
+8. Data Protection:
+   - Phone numbers hidden from public API responses
+   - Phone only visible after friend connection acceptance
+   - Password field has select:false in schema
+
+================================================================================
+10. KEY TECHNICAL CONCEPTS
+================================================================================
+
+A) MONGODB vs SQL:
+   MongoDB is a NoSQL database that stores data as JSON documents (not tables
+   with rows). It's flexible — each document can have different fields.
+   We chose it because:
+   - Free cloud hosting via MongoDB Atlas
+   - Easy to store complex nested data (like chat messages)
+   - JavaScript-native (JSON format matches JS objects)
+   - Mongoose ODM provides easy schema validation
+
+B) JWT (JSON Web Token):
+   A JWT is a digitally signed token containing user info. It's "stateless" —
+   the server doesn't need to store session data. The token itself contains
+   the user ID and expiration time. Any server can verify it using the secret
+   key (JWT_SECRET).
+
+   Structure: header.payload.signature
+   Example: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiIxMjM0NTYifQ.abc123signature
+
+C) Socket.IO:
+   A library that enables real-time bidirectional communication. It uses
+   WebSockets when available and falls back to HTTP polling. We use it for:
+   - Chat messages (instant delivery)
+   - Typing indicators
+   - Online/offline status
+   - Read receipts
+
+   Unlike regular HTTP (client asks, server responds), Socket.IO allows the
+   server to push data to the client instantly.
+
+D) bcrypt:
+   A password hashing function. "12 rounds" means it computes the hash
+   2^12 = 4096 times, making it slow to brute-force. Each password gets
+   a unique "salt" (random string) before hashing, preventing rainbow
+   table attacks.
+
+E) CORS:
+   Cross-Origin Resource Sharing. Browsers block requests from one domain
+   to another for security. We explicitly allow our Vercel frontend domain
+   to make API requests to our Render backend.
+
+F) React Context API:
+   A way to share data across components without prop-drilling. We use 3
+   contexts: AuthContext (user state), ThemeContext (dark/light mode),
+   ChatContext (conversations, messages, online users).
+
+   Unlike Redux, Context is built into React and is simpler for small-medium
+   apps. We use it with useState and useCallback for performance.
+
+G) Haversine Formula:
+   Used for geolocation-based donor search. Calculates the distance between
+   two GPS coordinates (lat, lng) on Earth's surface. Returns distance in
+   kilometers. We use it to find donors within a specified radius.
+
+H) Base64 Images:
+   Profile photos and chat images are stored as base64 strings directly in
+   MongoDB. This avoids needing a separate file storage service (like AWS S3).
+   Limitation: Increases database size, but acceptable for our scale.
+
+I) XP/Rank System:
+   Gamification to encourage donations:
+   - Recruit: 0+ donations
+   - Healer: 1+ donations
+   - Knight: 5+ donations
+   - Champion: 7+ donations
+   - Hero: 10+ donations
+   - Legend: 12+ donations
+   Each rank has a unique icon, color, and glow effect.
+
+J) 90-Day Donation Cooldown:
+   Based on WHO guidelines, whole blood donors should wait at least 56 days
+   (we use 90 days for extra safety) between donations. The system tracks
+   lastDonationDate and shows a cooldown reminder.
+
+================================================================================
+11. COMMON TEACHER QUESTIONS & ANSWERS
+================================================================================
+
+Q1: Why did you choose MongoDB over MySQL?
+A1: MongoDB stores data as JSON documents which matches our JavaScript code.
+    It's free on Atlas (cloud), scales easily, and doesn't require fixed
+    table schemas. For a rapidly prototyping project, NoSQL is faster.
+
+Q2: How does authentication work?
+A2: We use JWT (JSON Web Token). When a user logs in, the server creates a
+    signed token with the user ID. The client stores it in localStorage and
+    sends it with every request. The server middleware verifies the token
+    before processing protected routes.
+
+Q3: Why Socket.IO instead of regular HTTP polling?
+A3: Socket.IO uses WebSockets for instant, bidirectional communication.
+    Regular HTTP requires the client to constantly ask the server "any new
+    messages?" (polling). Socket.IO lets the server push messages instantly
+    when they arrive, which is essential for real-time chat.
+
+Q4: How do you handle password security?
+A4: Passwords are hashed with bcrypt (12 rounds) before storing. We never
+    store or transmit raw passwords. The password field has select:false in
+    our schema, so it's never returned in API responses.
+
+Q5: What is CORS and why do you need it?
+A5: CORS (Cross-Origin Resource Sharing) is a browser security feature.
+    Since our frontend is on Vercel (different domain) and backend on Render,
+    the browser would block requests without CORS. We explicitly allow our
+    frontend domain.
+
+Q6: How does the geolocation search work?
+A6: We use the Haversine formula to calculate the distance between two GPS
+    coordinates. When a user searches with a radius, we fetch all donors in
+    the district and filter by distance. Each user has lat/lng coordinates.
+
+Q7: Why two separate GitHub repositories?
+A7: Security. The server contains sensitive data (JWT_SECRET, MongoDB URI,
+    API keys). Having separate repos prevents accidentally pushing server
+    code to the public client repo.
+
+Q8: How does the chat system handle offline users?
+A8: Messages are saved to MongoDB even if the receiver is offline. When they
+    come back online, they fetch conversations from the API. The unread count
+    tracks how many messages they haven't seen.
+
+Q9: What happens if a user logs in from multiple devices?
+A9: Socket.IO tracks a Set of socketIds per userId. A user is only shown as
+    "offline" when ALL connections are closed. This supports multi-tab and
+    multi-device usage.
+
+Q10: How are email notifications sent?
+A10: We use the Resend API (resend.com). When a blood request is created,
+     the server finds all users with matching blood group and sends them
+     styled HTML emails. Emails are sent in the background (fire-and-forget)
+     so the API response isn't delayed.
+
+Q11: Why React Context instead of Redux?
+A11: React Context is built into React and sufficient for our state needs.
+     Redux adds complexity (actions, reducers, store) that we don't need.
+     Context with useState and useCallback is simpler and performs well
+     for our application size.
+
+Q12: How does the donation cooldown work?
+A12: WHO recommends at least 56 days between whole blood donations. We use
+     90 days for extra safety. When a user logs a donation, we update their
+     lastDonationDate. The dashboard shows a countdown of remaining days.
+
+Q13: What is the rank/XP system?
+A13: A gamification feature to encourage donations. Users earn ranks based on
+     total donations: Recruit (0+), Healer (1+), Knight (5+), Champion (7+),
+     Hero (10+), Legend (12+). Each rank has unique icons and effects.
+
+Q14: How do you handle real-time read receipts?
+A14: When a user opens a conversation, the client emits "message:seen" via
+     Socket.IO. The server updates the database and notifies the sender.
+     The sender's UI shows double-check marks (like WhatsApp).
+
+Q15: What is the最大 file size for images?
+A15: Chat images: max 2MB (validated on both client and server). Profile
+     photos: stored as base64, no explicit limit but we recommend small
+     images. The JSON body parser limit is 5MB.
+
+Q16: How does the notification system work?
+A16: When a blood request is created, the server finds all users with
+     matching blood group and creates Notification documents for each.
+     The client polls the notification API every 30 seconds and shows a
+     badge count on the bell icon.
+
+Q17: Why base64 images instead of file upload to cloud storage?
+A17: For simplicity. Base64 images are stored directly in MongoDB as strings.
+     This avoids needing AWS S3 or similar services. The trade-off is larger
+     database size, but acceptable for our user scale.
+
+Q18: How do you prevent duplicate actions?
+A18: MongoDB unique compound indexes: (userId, donorId) for bookmarks,
+     (requestId, raterId) for ratings, (sender, receiver) for friend
+     requests. Server-side validation also checks before creating.
+
+Q19: What is "fire-and-forget" email sending?
+A19: The API response is sent immediately to the client, then emails are
+     sent in the background. This prevents slow email delivery from delaying
+     the user experience. If emails fail, the request is still created.
+
+Q20: How does the dark mode work?
+A20: ThemeContext manages light/dark/system theme. It adds/removes a "dark"
+     class on the HTML element. CSS variables change based on this class.
+     Theme choice is persisted in localStorage.
+
+================================================================================
+12. HOW TO RUN THE PROJECT
+================================================================================
+
+Prerequisites:
+- Node.js v18+ installed
+- npm or yarn package manager
+- MongoDB Atlas account (or local MongoDB)
+
+FRONTEND SETUP:
+  cd Blood-Drop/client
+  npm install
+  cp .env.example .env   (or create .env with: VITE_API_URL=http://localhost:5000/api)
+  npm run dev
+  → Opens at http://localhost:5173
+
+BACKEND SETUP:
+  cd Blood-Drop_Server
+  npm install
+  Create .env file with:
+    MONGODB_URI=mongodb+srv://eshtiak23:eshtiak23@cluster0.sz5dmf5.mongodb.net/lifedrop?retryWrites=true&w=majority
+    JWT_SECRET=lifedrop_super_secret_key_2026
+    CLIENT_URL=http://localhost:5173
+    RESEND_API_KEY=re_7smP3m8v_24rmGWH8R4MrsQPhofN1gX7S
+    PORT=5000
+  npm run seed    (seeds 150 donors + demo data)
+  npm start       (starts server on port 5000)
+
+DEMO ACCOUNTS (after seeding):
+  Admin:    admin@blooddrop.com / admin123
+  Regular:  zahidul.islam@blooddrop.com / password123
+
+LIVE URLs:
+  Frontend: https://blood-drop-jade.vercel.app
+  Backend:  https://blood-drop-server.onrender.com
+
+================================================================================
+                         END OF DOCUMENTATION
+================================================================================
