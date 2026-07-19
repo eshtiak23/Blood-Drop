@@ -2154,28 +2154,39 @@ textarea.input { min-height: 100px; resize: vertical; }
   color: var(--text-muted);
 }
 
-/* ── Mobile Cards ── */
+/* ── Mobile Cards (Dev-Card Style Boxes) ── */
 .lb-mobile-wrap {
   display: none;
+}
+.lb-mobile-wrap-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 0 8px;
 }
 .lb-mobile-card {
   position: relative;
   background: var(--bg-card);
-  border-radius: 20px;
-  padding: 18px;
-  margin-bottom: 14px;
+  border-radius: 24px;
+  padding: 48px 28px 28px;
+  width: 100%;
+  text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
+  cursor: default;
   overflow: hidden;
   z-index: 1;
-  animation: lbMobileCardIn 0.4s ease forwards;
+  animation: lbMobileCardIn 0.5s ease forwards;
   opacity: 0;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.06);
 }
 .lb-mobile-card::before {
   content: "";
   position: absolute;
   inset: -2px;
-  border-radius: 22px;
+  border-radius: 26px;
   background: conic-gradient(
     from var(--border-angle, 0deg),
     transparent 30%,
@@ -2191,7 +2202,7 @@ textarea.input { min-height: 100px; resize: vertical; }
   content: "";
   position: absolute;
   inset: 2px;
-  border-radius: 18px;
+  border-radius: 22px;
   background: var(--bg-card);
   z-index: -1;
 }
@@ -2205,8 +2216,10 @@ textarea.input { min-height: 100px; resize: vertical; }
     transparent 80%
   );
 }
+.dark .lb-mobile-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
 .lb-mobile-card:hover {
-  transform: perspective(800px) rotateX(0deg) rotateY(0deg) translateZ(6px);
   box-shadow: 0 20px 50px rgba(124, 58, 237, 0.2), 0 0 30px rgba(236, 72, 153, 0.15);
 }
 .lb-mobile-card.lb-row-current {
@@ -2225,7 +2238,7 @@ textarea.input { min-height: 100px; resize: vertical; }
 .lb-mobile-glare {
   position: absolute;
   inset: 0;
-  border-radius: 20px;
+  border-radius: 24px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -2234,15 +2247,20 @@ textarea.input { min-height: 100px; resize: vertical; }
 .lb-mobile-top {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 .lb-mobile-bottom {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  padding-top: 10px;
+  padding-top: 12px;
+  margin-top: 12px;
   border-top: 1px solid var(--border);
+}
+.lb-mobile-card .lb-mobile-top {
+  justify-content: center;
 }
 @keyframes lbMobileCardIn {
   from { opacity: 0; transform: translateY(16px) scale(0.97); }
@@ -2371,6 +2389,12 @@ textarea.input { min-height: 100px; resize: vertical; }
   }
   .lb-mobile-wrap {
     display: block;
+  }
+  .lb-mobile-wrap-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
   }
   .lb-rank-legend {
     gap: 6px;

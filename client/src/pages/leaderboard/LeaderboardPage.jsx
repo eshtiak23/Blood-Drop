@@ -274,7 +274,7 @@ function MobileCard({ donor, rank, isCurrentUser, index }) {
 
   const handleMouseLeave = (e) => {
     const card = e.currentTarget;
-    card.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) translateZ(0px)";
+    card.style.transform = "";
     card.style.boxShadow = "";
     const glare = card.querySelector(".lb-mobile-glare");
     if (glare) glare.style.opacity = "0";
@@ -283,33 +283,40 @@ function MobileCard({ donor, rank, isCurrentUser, index }) {
   return (
     <div
       className={`lb-mobile-card ${isCurrentUser ? "lb-row-current" : ""}`}
-      style={{ animationDelay: `${(index || 0) * 0.06}s` }}
+      style={{ animationDelay: `${(index || 0) * 0.1}s` }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
       <div className="lb-mobile-glare" />
-      <div className="lb-mobile-top">
-        <span className="lb-rank-num" style={{ width: 28, height: 28, fontSize: 12 }}>{rank}</span>
-        <div className="lb-avatar" style={{ width: 40, height: 40, fontSize: 14 }}>
-          {donor.photo ? (
-            <img src={donor.photo} alt={donor.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
-          ) : (
-            <span>{donor.name?.charAt(0)?.toUpperCase()}</span>
-          )}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <Link to={`/donors/${donor._id}`} style={{ textDecoration: "none", color: "inherit" }}>
-            <div style={{ fontSize: 13, fontWeight: 700 }}>{donor.name} {isCurrentUser && <span className="lb-you-badge">You</span>}</div>
-          </Link>
-          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{donor.district}</div>
-        </div>
+      {/* Rank number */}
+      <div style={{ position: "absolute", top: 12, right: 14, fontSize: 13, fontWeight: 800, color: "var(--text-muted)", zIndex: 5 }}>
+        #{rank}
+      </div>
+      {/* Avatar — centered, large like dev card */}
+      <div style={{ width: 80, height: 80, borderRadius: "50%", margin: "0 auto 14px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {donor.photo ? (
+          <img src={donor.photo} alt={donor.name} style={{ width: 80, height: 80, objectFit: "cover" }} />
+        ) : (
+          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: "var(--red)" }}>
+            {donor.name?.charAt(0)?.toUpperCase()}
+          </div>
+        )}
+      </div>
+      {/* Name + You badge */}
+      <Link to={`/donors/${donor._id}`} style={{ textDecoration: "none", color: "inherit" }}>
+        <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{donor.name} {isCurrentUser && <span className="lb-you-badge">You</span>}</div>
+      </Link>
+      <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 12 }}>{donor.district}</div>
+      {/* Rank badge + Blood group + Donations */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
         <RankBadge rank={rankData} size="sm" />
+        <span style={{ fontSize: 13, fontWeight: 600, color: bc.text, background: bc.bg, padding: "3px 10px", borderRadius: 8 }}>{donor.bloodGroup}</span>
+        <span style={{ fontSize: 13, fontWeight: 700 }}>{donor.totalDonations} <span style={{ color: "var(--red)", fontWeight: 600, fontSize: 12 }}>{ml.toLocaleString()} ml</span></span>
       </div>
-      <div className="lb-mobile-stats">
-        <span style={{ fontSize: 12, fontWeight: 600, color: bc.text }}>{donor.bloodGroup}</span>
-        <span style={{ fontSize: 12, fontWeight: 700 }}>{donor.totalDonations} <span style={{ color: "var(--red)", fontWeight: 600, fontSize: 11 }}>{ml.toLocaleString()} ml</span></span>
+      {/* XP bar */}
+      <div style={{ padding: "0 8px" }}>
+        <XpBar rank={rankData} compact />
       </div>
-      <XpBar rank={rankData} compact />
     </div>
   );
 }
@@ -513,17 +520,19 @@ export default function LeaderboardPage() {
 
         {/* ── Mobile Cards ── */}
         <div className="lb-mobile-wrap">
-          {paginated.length === 0 ? (
-            <div className="empty-state" style={{ padding: "40px 20px" }}>
-              <div className="empty-state-icon"><Trophy size={28} color="var(--red)" /></div>
-              <div className="empty-state-title">No donors found</div>
-              <div className="empty-state-desc">Try adjusting your filters</div>
-            </div>
-          ) : (
-            paginated.map((d, i) => (
-              <MobileCard key={d._id} donor={d} rank={(page - 1) * PER_PAGE + i + 1} isCurrentUser={user?._id === d._id} index={i} />
-            ))
-          )}
+          <div className="lb-mobile-wrap-inner">
+            {paginated.length === 0 ? (
+              <div className="empty-state" style={{ padding: "40px 20px" }}>
+                <div className="empty-state-icon"><Trophy size={28} color="var(--red)" /></div>
+                <div className="empty-state-title">No donors found</div>
+                <div className="empty-state-desc">Try adjusting your filters</div>
+              </div>
+            ) : (
+              paginated.map((d, i) => (
+                <MobileCard key={d._id} donor={d} rank={(page - 1) * PER_PAGE + i + 1} isCurrentUser={user?._id === d._id} index={i} />
+              ))
+            )}
+          </div>
         </div>
 
         {/* ── Pagination ── */}
