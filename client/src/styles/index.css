@@ -2159,18 +2159,77 @@ textarea.input { min-height: 100px; resize: vertical; }
   display: none;
 }
 .lb-mobile-card {
+  position: relative;
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 10px;
-  transition: transform 0.2s;
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 14px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 1;
+  animation: lbMobileCardIn 0.4s ease forwards;
+  opacity: 0;
+}
+.lb-mobile-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 22px;
+  background: conic-gradient(
+    from var(--border-angle, 0deg),
+    transparent 30%,
+    #EC4899 45%,
+    #A78BFA 55%,
+    #7C3AED 65%,
+    transparent 80%
+  );
+  z-index: -1;
+  animation: borderRotate 4s linear infinite;
+}
+.lb-mobile-card::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 18px;
+  background: var(--bg-card);
+  z-index: -1;
+}
+.dark .lb-mobile-card::before {
+  background: conic-gradient(
+    from var(--border-angle, 0deg),
+    transparent 30%,
+    #EF4444 45%,
+    #A855F7 55%,
+    #7C3AED 65%,
+    transparent 80%
+  );
 }
 .lb-mobile-card:hover {
-  transform: translateY(-2px);
+  transform: perspective(800px) rotateX(0deg) rotateY(0deg) translateZ(6px);
+  box-shadow: 0 20px 50px rgba(124, 58, 237, 0.2), 0 0 30px rgba(236, 72, 153, 0.15);
 }
 .lb-mobile-card.lb-row-current {
-  border-left: 3px solid var(--red);
+  border: none;
+}
+.lb-mobile-card.lb-row-current::before {
+  background: conic-gradient(
+    from var(--border-angle, 0deg),
+    transparent 20%,
+    #EF4444 40%,
+    #F59E0B 55%,
+    #EF4444 70%,
+    transparent 85%
+  );
+}
+.lb-mobile-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
 }
 .lb-mobile-top {
   display: flex;
@@ -2184,6 +2243,10 @@ textarea.input { min-height: 100px; resize: vertical; }
   gap: 12px;
   padding-top: 10px;
   border-top: 1px solid var(--border);
+}
+@keyframes lbMobileCardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ── Bottom CTA ── */

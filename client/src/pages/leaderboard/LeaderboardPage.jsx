@@ -249,13 +249,45 @@ function TableRow({ donor, rank, isCurrentUser }) {
 }
 
 /* ── Mobile Card ── */
-function MobileCard({ donor, rank, isCurrentUser }) {
+function MobileCard({ donor, rank, isCurrentUser, index }) {
   const bc = getBloodGroupColor(donor.bloodGroup);
   const ml = (donor.totalDonations || 0) * ML_PER_DONATION;
   const rankData = getRank(donor.totalDonations);
 
+  const handleMouseMove = (e) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -6;
+    const rotateY = ((x - centerX) / centerX) * 6;
+    card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(8px)`;
+    card.style.boxShadow = "0 20px 50px rgba(124, 58, 237, 0.2), 0 0 30px rgba(236, 72, 153, 0.15)";
+    const glare = card.querySelector(".lb-mobile-glare");
+    if (glare) {
+      glare.style.opacity = "1";
+      glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)`;
+    }
+  };
+
+  const handleMouseLeave = (e) => {
+    const card = e.currentTarget;
+    card.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) translateZ(0px)";
+    card.style.boxShadow = "";
+    const glare = card.querySelector(".lb-mobile-glare");
+    if (glare) glare.style.opacity = "0";
+  };
+
   return (
-    <div className={`lb-mobile-card ${isCurrentUser ? "lb-row-current" : ""}`}>
+    <div
+      className={`lb-mobile-card ${isCurrentUser ? "lb-row-current" : ""}`}
+      style={{ animationDelay: `${(index || 0) * 0.06}s` }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="lb-mobile-glare" />
       <div className="lb-mobile-top">
         <span className="lb-rank-num" style={{ width: 28, height: 28, fontSize: 12 }}>{rank}</span>
         <div className="lb-avatar" style={{ width: 40, height: 40, fontSize: 14 }}>
@@ -489,7 +521,7 @@ export default function LeaderboardPage() {
             </div>
           ) : (
             paginated.map((d, i) => (
-              <MobileCard key={d._id} donor={d} rank={(page - 1) * PER_PAGE + i + 1} isCurrentUser={user?._id === d._id} />
+              <MobileCard key={d._id} donor={d} rank={(page - 1) * PER_PAGE + i + 1} isCurrentUser={user?._id === d._id} index={i} />
             ))
           )}
         </div>
