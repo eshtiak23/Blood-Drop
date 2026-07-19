@@ -164,14 +164,43 @@ function PodiumCard({ donor, rank }) {
   const ml = (donor.totalDonations || 0) * ML_PER_DONATION;
   const rankData = getRank(donor.totalDonations);
   const rankStyles = {
-    1: { border: "#F59E0B", bg: "rgba(245,158,11,0.04)", barBg: "linear-gradient(135deg, #F59E0B, #D97706)", numBg: "#F59E0B", pillBg: "#FEF3C7", pillColor: "#D97706", crown: "👑" },
-    2: { border: "#9CA3AF", bg: "rgba(156,163,175,0.04)", barBg: "linear-gradient(135deg, #9CA3AF, #6B7280)", numBg: "#6B7280", pillBg: "#F3F4F6", pillColor: "#374151", crown: "" },
-    3: { border: "#D97706", bg: "rgba(217,119,6,0.04)", barBg: "linear-gradient(135deg, #F59E0B, #EA580C)", numBg: "#D97706", pillBg: "#FEF3C7", pillColor: "#D97706", crown: "" },
+    1: { border: "#F59E0B", bg: "rgba(245,158,11,0.04)", barBg: "linear-gradient(135deg, #F59E0B, #D97706)", numBg: "linear-gradient(135deg, #F59E0B, #D97706)", pillBg: "#FEF3C7", pillColor: "#D97706", crown: "👑" },
+    2: { border: "#9CA3AF", bg: "rgba(156,163,175,0.04)", barBg: "linear-gradient(135deg, #9CA3AF, #6B7280)", numBg: "linear-gradient(135deg, #9CA3AF, #6B7280)", pillBg: "#F3F4F6", pillColor: "#374151", crown: "" },
+    3: { border: "#D97706", bg: "rgba(217,119,6,0.04)", barBg: "linear-gradient(135deg, #F59E0B, #EA580C)", numBg: "linear-gradient(135deg, #D97706, #B45309)", pillBg: "#FEF3C7", pillColor: "#D97706", crown: "" },
   };
   const rs = rankStyles[rank];
 
+  const handleMouseMove = (e) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -6;
+    const rotateY = ((x - centerX) / centerX) * 6;
+    card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(8px)`;
+    const glare = card.querySelector(".podium-glare");
+    if (glare) {
+      glare.style.opacity = "1";
+      glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)`;
+    }
+  };
+
+  const handleMouseLeave = (e) => {
+    const card = e.currentTarget;
+    card.style.transform = "";
+    const glare = card.querySelector(".podium-glare");
+    if (glare) glare.style.opacity = "0";
+  };
+
   return (
-    <div className={`podium-card podium-rank-${rank} ${rankData.glow}`}>
+    <div
+      className={`podium-card podium-rank-${rank} ${rankData.glow}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="podium-glare" />
       <div className="podium-rank-num" style={{ background: rs.numBg }}>
         {rank === 1 ? rs.crown : rank}
       </div>

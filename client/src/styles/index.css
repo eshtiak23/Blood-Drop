@@ -1576,8 +1576,8 @@ textarea.input { min-height: 100px; resize: vertical; }
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 16px;
-  max-width: 720px;
+  gap: 18px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 .podium-card {
@@ -1585,19 +1585,23 @@ textarea.input { min-height: 100px; resize: vertical; }
   flex-direction: column;
   align-items: center;
   background: var(--bg-card);
-  border-radius: 16px;
-  padding: 24px 20px 0;
-  width: 180px;
+  border-radius: 24px;
+  padding: 48px 28px 32px;
+  max-width: 340px;
+  width: 100%;
   border: none;
   position: relative;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   animation: lbFadeIn 0.5s ease both;
+  cursor: default;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.06);
 }
 .podium-card::before {
   content: "";
   position: absolute;
   inset: -2px;
-  border-radius: 18px;
+  border-radius: 26px;
   z-index: -1;
   animation: podiumBorderRotate 3s linear infinite;
 }
@@ -1605,7 +1609,7 @@ textarea.input { min-height: 100px; resize: vertical; }
   content: "";
   position: absolute;
   inset: 2px;
-  border-radius: 14px;
+  border-radius: 22px;
   background: var(--bg-card);
   z-index: -1;
 }
@@ -1614,8 +1618,19 @@ textarea.input { min-height: 100px; resize: vertical; }
   z-index: 1;
 }
 .podium-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 20px 50px rgba(124, 58, 237, 0.2), 0 0 30px rgba(236, 72, 153, 0.15);
+}
+.dark .podium-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+.podium-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
 }
 
 /* Gold rank */
@@ -1843,55 +1858,55 @@ textarea.input { min-height: 100px; resize: vertical; }
 
 .podium-rank-num {
   position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  top: 12px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   color: #fff;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   z-index: 2;
 }
 .podium-avatar {
-  width: 72px;
-  height: 72px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-secondary);
   color: var(--text);
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 800;
-  border: 3px solid;
+  border: none;
   overflow: hidden;
   flex-shrink: 0;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  box-shadow: 0 0 28px rgba(124, 58, 237, 0.15), 0 0 56px rgba(236, 72, 153, 0.08);
 }
 .podium-rank-1 .podium-avatar {
-  width: 88px;
-  height: 88px;
-  font-size: 34px;
+  width: 110px;
+  height: 110px;
+  font-size: 38px;
 }
 .podium-name {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   text-align: center;
   margin-bottom: 4px;
 }
 .podium-blood {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   margin-bottom: 10px;
 }
 .podium-pill {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   padding: 4px 14px;
   border-radius: 20px;
@@ -2338,24 +2353,23 @@ textarea.input { min-height: 100px; resize: vertical; }
     gap: 12px;
   }
   .podium {
-    gap: 8px;
+    gap: 12px;
   }
   .podium-card {
-    width: 140px;
-    padding: 20px 12px 0;
+    padding: 40px 22px 28px;
   }
   .podium-rank-1 .podium-avatar {
-    width: 72px;
-    height: 72px;
-    font-size: 28px;
+    width: 90px;
+    height: 90px;
+    font-size: 32px;
   }
   .podium-avatar {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
+    width: 80px;
+    height: 80px;
+    font-size: 28px;
   }
   .podium-name {
-    font-size: 12px;
+    font-size: 14px;
   }
   .podium-ml-bar {
     width: calc(100% + 24px);
@@ -2423,37 +2437,35 @@ textarea.input { min-height: 100px; resize: vertical; }
   .podium {
     flex-direction: column;
     align-items: center;
+    gap: 16px;
   }
   .podium-card {
-    width: 100%;
-    max-width: 280px;
-    flex-direction: row;
-    padding: 16px;
-    gap: 14px;
+    max-width: 340px;
+    padding: 48px 28px 32px;
   }
   .podium-rank-num {
-    top: -10px;
+    top: 12px;
     left: auto;
-    right: -6px;
+    right: 14px;
     transform: none;
   }
   .podium-avatar {
-    width: 52px;
-    height: 52px;
-    font-size: 20px;
-    margin-bottom: 0;
+    width: 100px;
+    height: 100px;
+    font-size: 34px;
+    margin-bottom: 14px;
   }
   .podium-rank-1 .podium-avatar {
-    width: 52px;
-    height: 52px;
-    font-size: 20px;
+    width: 100px;
+    height: 100px;
+    font-size: 34px;
   }
   .podium-name, .podium-blood, .podium-pill {
     margin-bottom: 0;
   }
   .podium-ml-bar {
-    width: calc(100% + 32px);
-    margin: 0 -16px;
+    width: calc(100% + 56px);
+    margin: 0 -28px;
     padding: 8px 0;
     font-size: 11px;
   }
