@@ -293,11 +293,11 @@ function MobileCard({ donor, rank, isCurrentUser, index }) {
         #{rank}
       </div>
       {/* Avatar — centered, large like dev card */}
-      <div style={{ width: 100, height: 100, borderRadius: "50%", margin: "0 auto 14px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 28px rgba(124,58,237,0.15), 0 0 56px rgba(236,72,153,0.08)" }}>
+      <div style={{ width: 80, height: 80, borderRadius: "50%", margin: "0 auto 14px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
         {donor.photo ? (
-          <img src={donor.photo} alt={donor.name} style={{ width: 100, height: 100, objectFit: "cover" }} />
+          <img src={donor.photo} alt={donor.name} style={{ width: 80, height: 80, objectFit: "cover" }} />
         ) : (
-          <div style={{ width: 100, height: 100, borderRadius: "50%", background: "linear-gradient(135deg, #C4B5FD, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, fontWeight: 800, color: "#fff" }}>
+          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: "var(--red)" }}>
             {donor.name?.charAt(0)?.toUpperCase()}
           </div>
         )}
