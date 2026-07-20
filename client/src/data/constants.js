@@ -33,7 +33,7 @@ export const BLOOD_GROUP_COLORS = {
 /** 15 districts in Bangladesh where donors are located */
 export const DISTRICTS = [
   "Dhaka","Chittagong","Sylhet","Rajshahi","Khulna","Barishal","Rangpur",
-  "Mymensingh","Comilla","Gazipur","Narayanganj","Bogra","Cox's Bazar","Tangail","Dinajpur",
+  "Mymensingh","Comilla","Gazipur","Narayanganj","Bogura","Cox's Bazar","Tangail","Dinajpur",
 ];
 
 /**
@@ -53,7 +53,7 @@ export const AREAS = {
   Comilla: ["Comilla Sadar","Debidwar"],
   Gazipur: ["Gazipur Sadar","Tongi","Konabari","Kaliakair"],
   Narayanganj: ["Narayanganj Sadar","Fatulla","Sonargaon"],
-  Bogra: ["Bogra Sadar","Sherpur","Shajahanpur"],
+  Bogura: ["Bogura Sadar","Sherpur","Shajahanpur","Shibganj"],
   "Cox's Bazar": ["Cox's Bazar Sadar","Chakaria","Teknaf","Ukhia"],
   Tangail: ["Tangail Sadar","Mirzapur","Gopalpur"],
   Dinajpur: ["Dinajpur Sadar","Parbatipur","Birganj"],
