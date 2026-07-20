@@ -22,7 +22,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useChat } from "../../context/ChatContext";
-import { X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus, MessageCircle, Home, Users, AlertCircle, Droplets } from "lucide-react";
+import { X, Bell, Moon, Sun, ChevronDown, LayoutDashboard, Settings, LogOut, Bookmark, LogIn, UserPlus, MessageCircle, Home, Users, AlertCircle, Droplets, Stethoscope } from "lucide-react";
 import api from "../../services/api";
 import * as friendService from "../../services/friendService";
 import toast from "react-hot-toast";
@@ -120,6 +120,7 @@ export default function Navbar() {
     ["/requests", "Requests"],
     ["/connect", "Connect"],
     ["/leaderboard", "Leaderboard"],
+    ["/health-hub", "Health Hub"],
   ];
 
   return (
@@ -269,7 +270,7 @@ export default function Navbar() {
             {/* Navigation links */}
             {navLinks.map(([path, label]) => {
               const active = isActive(path);
-              const iconMap = { "/": Home, "/donors": Users, "/requests": AlertCircle, "/connect": UserPlus };
+              const iconMap = { "/": Home, "/donors": Users, "/requests": AlertCircle, "/connect": UserPlus, "/leaderboard": Users, "/health-hub": Stethoscope };
               const Icon = iconMap[path] || Droplets;
               return (
                 <Link

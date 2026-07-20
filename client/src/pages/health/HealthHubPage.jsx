@@ -194,20 +194,25 @@ function TipCard({ icon: Icon, title, desc, color, delay = 0 }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         padding: 24,
-        borderRadius: "var(--radius-lg)",
-        background: "var(--bg-card)",
-        border: "1px solid var(--border-light)",
-        boxShadow: hovered ? "0 12px 30px rgba(0,0,0,0.08)" : "var(--shadow)",
-        transform: hovered ? "translateY(-4px)" : "translateY(0)",
-        transition: "all 0.3s ease",
-        animationDelay: `${delay}s`,
+        borderRadius: 16,
+        background: `linear-gradient(135deg, ${color}08 0%, ${color}04 100%)`,
+        border: `1px solid ${color}25`,
+        borderLeft: `4px solid ${color}`,
+        boxShadow: hovered ? `0 16px 40px ${color}20, 0 4px 12px ${color}10` : `0 4px 16px ${color}08`,
+        transform: hovered ? "translateY(-6px) rotate(-1deg)" : "translateY(0) rotate(0deg)",
+        transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        animation: `tipSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) ${delay}s both`,
       }}
     >
       <div style={{
-        width: 48, height: 48, borderRadius: 12,
-        background: `${color}15`, color,
+        width: 48, height: 48, borderRadius: 14,
+        background: `linear-gradient(135deg, ${color}20, ${color}35)`,
+        color,
         display: "flex", alignItems: "center", justifyContent: "center",
         marginBottom: 14,
+        transform: hovered ? "scale(1.15) rotate(10deg)" : "scale(1) rotate(0deg)",
+        transition: "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        boxShadow: `0 4px 12px ${color}20`,
       }}>
         <Icon size={22} />
       </div>
@@ -219,12 +224,20 @@ function TipCard({ icon: Icon, title, desc, color, delay = 0 }) {
 
 function ExerciseCard({ items, type }) {
   const isDo = type === "do";
+  const mainColor = isDo ? "#10B981" : "#EF4444";
   return (
-    <div style={{ flex: 1, minWidth: 280 }}>
+    <div style={{
+      flex: 1, minWidth: 280,
+      borderRadius: 16,
+      background: `linear-gradient(160deg, ${mainColor}10, ${mainColor}05)`,
+      border: `1px solid ${mainColor}25`,
+      padding: 20,
+      boxShadow: `0 8px 24px ${mainColor}12`,
+    }}>
       <div style={{
         display: "flex", alignItems: "center", gap: 10, marginBottom: 16,
-        padding: "12px 16px", borderRadius: "var(--radius)",
-        background: isDo ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
+        padding: "12px 16px", borderRadius: 12,
+        background: `linear-gradient(135deg, ${mainColor}15, ${mainColor}25)`,
       }}>
         {isDo ? <CheckCircle size={20} color="#10B981" /> : <XCircle size={20} color="#EF4444" />}
         <h3 style={{ fontSize: 18, fontWeight: 700, color: isDo ? "#10B981" : "#EF4444" }}>
@@ -233,25 +246,46 @@ function ExerciseCard({ items, type }) {
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {items.map((item, i) => (
-          <div key={i} style={{
-            display: "flex", gap: 14, alignItems: "start",
-            padding: 16, borderRadius: "var(--radius)",
-            background: "var(--bg-card)", border: "1px solid var(--border-light)",
-          }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 10,
-              background: isDo ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)",
-              color: isDo ? "#10B981" : "#EF4444",
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}>
-              <item.icon size={16} />
-            </div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{item.title}</div>
-              <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 2, lineHeight: 1.5 }}>{item.desc}</div>
-            </div>
-          </div>
+          <ExerciseItem key={i} item={item} isDo={isDo} index={i} />
         ))}
+      </div>
+    </div>
+  );
+}
+
+function ExerciseItem({ item, isDo, index }) {
+  const [hovered, setHovered] = useState(false);
+  const mainColor = isDo ? "#10B981" : "#EF4444";
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex", gap: 14, alignItems: "start",
+        padding: 16, borderRadius: 12,
+        background: "var(--bg-card)",
+        border: `1px solid ${hovered ? mainColor + "40" : "var(--border-light)"}`,
+        transform: hovered
+          ? (isDo ? "translateX(4px)" : "translateX(-4px) rotate(-0.5deg)")
+          : "translateX(0) rotate(0)",
+        transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        boxShadow: hovered ? `0 6px 20px ${mainColor}15` : "none",
+        animation: `tipSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) ${index * 0.1}s both`,
+      }}
+    >
+      <div style={{
+        width: 36, height: 36, borderRadius: 10,
+        background: `linear-gradient(135deg, ${mainColor}15, ${mainColor}25)`,
+        color: mainColor,
+        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        transform: hovered ? "scale(1.2) rotate(15deg)" : "scale(1)",
+        transition: "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+      }}>
+        <item.icon size={16} />
+      </div>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{item.title}</div>
+        <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 2, lineHeight: 1.5 }}>{item.desc}</div>
       </div>
     </div>
   );
@@ -264,18 +298,24 @@ function BenefitCard({ icon: Icon, title, desc, color, delay = 0 }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        padding: 24, borderRadius: "var(--radius-lg)", textAlign: "center",
-        background: "var(--bg-card)", border: "1px solid var(--border-light)",
-        boxShadow: hovered ? "0 12px 30px rgba(0,0,0,0.08)" : "var(--shadow)",
-        transform: hovered ? "translateY(-4px)" : "translateY(0)",
-        transition: "all 0.3s ease",
+        padding: 24, borderRadius: 16, textAlign: "center",
+        background: `linear-gradient(160deg, ${color}0A, ${color}04)`,
+        border: `1px solid ${color}20`,
+        boxShadow: hovered ? `0 20px 40px ${color}20, 0 0 0 1px ${color}15` : `0 4px 16px ${color}08`,
+        transform: hovered ? "translateY(-8px) scale(1.02)" : "translateY(0) scale(1)",
+        transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        animation: `tipSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) ${delay}s both`,
       }}
     >
       <div style={{
-        width: 56, height: 56, borderRadius: "50%",
-        background: `${color}15`, color,
+        width: 60, height: 60, borderRadius: "50%",
+        background: `linear-gradient(135deg, ${color}20, ${color}35)`,
+        color,
         display: "flex", alignItems: "center", justifyContent: "center",
         margin: "0 auto 14px",
+        transform: hovered ? "scale(1.2) rotate(10deg)" : "scale(1)",
+        transition: "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        boxShadow: `0 4px 16px ${color}25`,
       }}>
         <Icon size={24} />
       </div>
@@ -286,16 +326,29 @@ function BenefitCard({ icon: Icon, title, desc, color, delay = 0 }) {
 }
 
 function SideEffectCard({ icon: Icon, title, severity, desc, color }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <div style={{
-      display: "flex", gap: 14, alignItems: "start",
-      padding: 18, borderRadius: "var(--radius)",
-      background: "var(--bg-card)", border: "1px solid var(--border-light)",
-    }}>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex", gap: 14, alignItems: "start",
+        padding: 18, borderRadius: 14,
+        background: `linear-gradient(135deg, ${color}08, ${color}03)`,
+        border: `1px solid ${color}20`,
+        borderLeft: `3px solid ${color}`,
+        transform: hovered ? "translateX(4px)" : "translateX(0)",
+        boxShadow: hovered ? `0 8px 24px ${color}12` : `0 2px 8px ${color}06`,
+        transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+      }}
+    >
       <div style={{
-        width: 40, height: 40, borderRadius: 10,
-        background: `${color}15`, color,
+        width: 40, height: 40, borderRadius: 12,
+        background: `linear-gradient(135deg, ${color}15, ${color}30)`,
+        color,
         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        transform: hovered ? "scale(1.15) rotate(-10deg)" : "scale(1)",
+        transition: "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
       }}>
         <Icon size={18} />
       </div>
@@ -304,8 +357,9 @@ function SideEffectCard({ icon: Icon, title, severity, desc, color }) {
           <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{title}</span>
           <span style={{
             fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 6,
-            background: severity === "Common" ? "rgba(245,158,11,0.1)" : "rgba(16,185,129,0.1)",
+            background: severity === "Common" ? "rgba(245,158,11,0.12)" : "rgba(16,185,129,0.12)",
             color: severity === "Common" ? "#D97706" : "#10B981",
+            animation: severity === "Common" ? "pulse 2s ease-in-out infinite" : "none",
           }}>{severity}</span>
         </div>
         <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>{desc}</p>
@@ -315,17 +369,26 @@ function SideEffectCard({ icon: Icon, title, severity, desc, color }) {
 }
 
 function EligibilityItem({ rule, met, icon: Icon }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <div style={{
-      display: "flex", alignItems: "center", gap: 12,
-      padding: "14px 16px", borderRadius: "var(--radius-sm)",
-      background: "var(--bg-card)", border: "1px solid var(--border-light)",
-    }}>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex", alignItems: "center", gap: 12,
+        padding: "14px 16px", borderRadius: 12,
+        background: hovered ? `${met ? "rgba(16,185,129,0.06)" : "rgba(239,68,68,0.06)"}` : "var(--bg-card)",
+        border: `1px solid ${hovered ? (met ? "rgba(16,185,129,0.25)" : "rgba(239,68,68,0.25)") : "var(--border-light)"}`,
+        transition: "all 0.3s ease",
+      }}
+    >
       <div style={{
         width: 32, height: 32, borderRadius: "50%",
-        background: met ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)",
+        background: met ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)",
         color: met ? "#10B981" : "#EF4444",
         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        transform: hovered ? (met ? "scale(1.2) rotate(10deg)" : "scale(1.15) rotate(-10deg)") : "scale(1)",
+        transition: "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
       }}>
         {met ? <CheckCircle size={16} /> : <XCircle size={16} />}
       </div>
@@ -339,9 +402,11 @@ function MythFactCard({ myth, fact, index }) {
   const [open, setOpen] = useState(false);
   return (
     <div style={{
-      borderRadius: "var(--radius)", overflow: "hidden",
-      background: "var(--bg-card)", border: "1px solid var(--border-light)",
-      transition: "all 0.3s ease",
+      borderRadius: 14, overflow: "hidden",
+      background: open ? "linear-gradient(135deg, #10B98108, #10B98103)" : "var(--bg-card)",
+      border: `1px solid ${open ? "#10B98130" : "var(--border-light)"}`,
+      transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+      boxShadow: open ? "0 8px 24px #10B98115" : "0 2px 8px rgba(0,0,0,0.04)",
     }}>
       <button
         onClick={() => setOpen(!open)}
@@ -353,10 +418,12 @@ function MythFactCard({ myth, fact, index }) {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
           <div style={{
-            width: 28, height: 28, borderRadius: 8,
-            background: "rgba(239,68,68,0.1)", color: "#EF4444",
+            width: 32, height: 32, borderRadius: 10,
+            background: "linear-gradient(135deg, #EF444420, #EF444430)",
+            color: "#EF4444",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 12, fontWeight: 800, flexShrink: 0,
+            fontSize: 13, fontWeight: 800, flexShrink: 0,
+            boxShadow: "0 2px 8px #EF444415",
           }}>
             {index + 1}
           </div>
@@ -366,22 +433,24 @@ function MythFactCard({ myth, fact, index }) {
           </div>
         </div>
         <div style={{
-          width: 28, height: 28, borderRadius: "50%",
-          background: "var(--bg-secondary)",
+          width: 30, height: 30, borderRadius: "50%",
+          background: open ? "linear-gradient(135deg, #10B981, #059669)" : "var(--bg-secondary)",
+          color: open ? "#fff" : "var(--text-muted)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          transition: "transform 0.3s ease",
-          transform: open ? "rotate(180deg)" : "rotate(0)",
+          transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+          transform: open ? "rotate(180deg) scale(1.1)" : "rotate(0) scale(1)",
+          boxShadow: open ? "0 4px 12px #10B98130" : "none",
         }}>
-          <ChevronDown size={14} color="var(--text-muted)" />
+          <ChevronDown size={14} />
         </div>
       </button>
       {open && (
         <div style={{
-          padding: "0 20px 16px 60px",
-          animation: "fadeIn 0.3s ease",
+          padding: "0 20px 16px 64px",
+          animation: "factSlideDown 0.4s cubic-bezier(0.16,1,0.3,1)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-            <CheckCircle size={14} color="#10B981" />
+            <CheckCircle size={14} color="#10B981" style={{ animation: "factCheckBounce 0.5s ease 0.2s both" }} />
             <span style={{ fontSize: 11, fontWeight: 600, color: "#10B981", textTransform: "uppercase", letterSpacing: 0.5 }}>Fact</span>
           </div>
           <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>{fact}</p>
@@ -392,16 +461,30 @@ function MythFactCard({ myth, fact, index }) {
 }
 
 function EmergencyCard({ icon: Icon, title, action, color }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <div style={{
-      padding: 20, borderRadius: "var(--radius)",
-      background: `${color}08`, border: `1px solid ${color}25`,
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        padding: 22, borderRadius: 16,
+        background: `linear-gradient(145deg, ${color}0C, ${color}05)`,
+        border: `1px solid ${color}30`,
+        borderLeft: `4px solid ${color}`,
+        boxShadow: hovered ? `0 12px 30px ${color}20, 0 0 0 1px ${color}15` : `0 4px 12px ${color}08`,
+        transform: hovered ? "translateY(-4px) scale(1.01)" : "translateY(0) scale(1)",
+        transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
         <div style={{
-          width: 36, height: 36, borderRadius: 10,
-          background: `${color}15`, color,
+          width: 40, height: 40, borderRadius: 12,
+          background: `linear-gradient(135deg, ${color}20, ${color}35)`,
+          color,
           display: "flex", alignItems: "center", justifyContent: "center",
+          transform: hovered ? "scale(1.15) rotate(-8deg)" : "scale(1)",
+          transition: "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+          boxShadow: `0 4px 12px ${color}25`,
         }}>
           <Icon size={18} />
         </div>
@@ -414,11 +497,19 @@ function EmergencyCard({ icon: Icon, title, action, color }) {
 
 function FaqItem({ q, a }) {
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
   return (
-    <div style={{
-      borderRadius: "var(--radius)", overflow: "hidden",
-      background: "var(--bg-card)", border: "1px solid var(--border-light)",
-    }}>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        borderRadius: 14, overflow: "hidden",
+        background: open ? "linear-gradient(135deg, #EF444408, #EF444403)" : "var(--bg-card)",
+        border: `1px solid ${open ? "#EF444425" : hovered ? "#EF444420" : "var(--border-light)"}`,
+        transition: "all 0.3s ease",
+        boxShadow: hovered ? "0 4px 16px rgba(239,68,68,0.06)" : "none",
+      }}
+    >
       <button
         onClick={() => setOpen(!open)}
         style={{
@@ -429,17 +520,20 @@ function FaqItem({ q, a }) {
       >
         <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text)", flex: 1, paddingRight: 12 }}>{q}</span>
         <div style={{
-          width: 28, height: 28, borderRadius: "50%",
-          background: open ? "var(--red)" : "var(--bg-secondary)",
+          width: 30, height: 30, borderRadius: "50%",
+          background: open ? "linear-gradient(135deg, #EF4444, #DC2626)" : "var(--bg-secondary)",
           color: open ? "#fff" : "var(--text-muted)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          transition: "all 0.3s ease", flexShrink: 0,
+          transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+          transform: open ? "rotate(180deg) scale(1.1)" : "rotate(0) scale(1)",
+          flexShrink: 0,
+          boxShadow: open ? "0 4px 12px #EF444430" : (!open ? "0 0 0 2px #EF444430" : "none"),
         }}>
           {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </div>
       </button>
       {open && (
-        <div style={{ padding: "0 20px 16px", animation: "fadeIn 0.3s ease" }}>
+        <div style={{ padding: "0 20px 16px", animation: "factSlideDown 0.4s cubic-bezier(0.16,1,0.3,1)" }}>
           <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.7 }}>{a}</p>
         </div>
       )}
@@ -619,6 +713,29 @@ export default function HealthHubPage() {
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes tipSlideUp {
+          from { opacity: 0; transform: translateY(24px) scale(0.96); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes factSlideDown {
+          from { opacity: 0; transform: translateY(-10px); max-height: 0; }
+          to { opacity: 1; transform: translateY(0); max-height: 200px; }
+        }
+        @keyframes factCheckBounce {
+          0% { transform: scale(0); }
+          50% { transform: scale(1.3); }
+          70% { transform: scale(0.9); }
+          100% { transform: scale(1); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.6; }
+        }
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-2deg); }
+          75% { transform: rotate(2deg); }
         }
         @media (max-width: 480px) {
           .health-hero h1 { font-size: 28px; }
