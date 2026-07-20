@@ -52,6 +52,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import DevelopersPage from "./pages/DevelopersPage";
 import LeaderboardPage from "./pages/leaderboard/LeaderboardPage";
 import ConnectPage from "./pages/connect/ConnectPage";
+import HealthHubPage from "./pages/health/HealthHubPage";
 import LoadingAnimation from "./components/ui/LoadingAnimation";
 
 // React Query client — manages data caching. staleTime=300000 means data is "fresh" for 5 minutes
@@ -147,6 +148,7 @@ function AppContent() {
             <Route path="/donors/:id" element={<DonorProfilePage />} />
             <Route path="/developers" element={<DevelopersPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/health-hub" element={<HealthHubPage />} />
 
             {/* Protected pages — must be logged in */}
             <Route path="/dashboard" element={<Protected><DashboardPage /></Protected>} />

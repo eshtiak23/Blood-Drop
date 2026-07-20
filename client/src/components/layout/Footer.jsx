@@ -70,6 +70,7 @@ export default function Footer() {
                 <Link to="/donors" className="footer-link">Find Donors</Link>
                 <Link to="/requests" className="footer-link">Blood Requests</Link>
                 <Link to="/register" className="footer-link">Become a Donor</Link>
+                <Link to="/health-hub" className="footer-link">Health Hub</Link>
               </div>
             </div>
 
