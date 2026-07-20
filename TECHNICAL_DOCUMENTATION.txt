@@ -23,8 +23,14 @@ TABLE OF CONTENTS
 8.  Frontend Features (Page by Page)
 9.  Security Features
 10. Key Technical Concepts
-11. Common Teacher Questions & Answers
-12. How to Run the Project
+11. How React Components (Functions) Work
+12. How Functions Are Called (Event Handling & Data Flow)
+13. How Pages Are Linked (React Router)
+14. What is the DOM (Document Object Model)
+15. How State Management Works
+16. How API Calls Work (HTTP Request-Response Cycle)
+17. Common Teacher Questions & Answers
+18. How to Run the Project
 
 ================================================================================
 1. PROJECT OVERVIEW
@@ -567,7 +573,736 @@ J) 90-Day Donation Cooldown:
    lastDonationDate and shows a cooldown reminder.
 
 ================================================================================
-11. COMMON TEACHER QUESTIONS & ANSWERS
+11. HOW REACT COMPONENTS (FUNCTIONS) WORK
+================================================================================
+
+In React, EVERY page, button, card, and icon is a "component" — which is just
+a JavaScript function that returns JSX (HTML-like syntax written in JavaScript).
+
+What is JSX?
+  JSX looks like HTML but it's actually JavaScript. When you write:
+    <h1>Hello</h1>
+  React converts it to:
+    React.createElement("h1", null, "Hello")
+  The browser never sees JSX — it only sees the JavaScript output.
+
+A Simple Component Example (TipCard from HealthHubPage.jsx):
+
+  function TipCard({ icon: Icon, title, desc, color }) {
+    const [hovered, setHovered] = useState(false);
+
+    return (
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          background: `${color}08`,
+          transform: hovered ? "translateY(-6px)" : "translateY(0)",
+        }}
+      >
+        <Icon size={22} />
+        <h3>{title}</h3>
+        <p>{desc}</p>
+      </div>
+    );
+  }
+
+How it works step by step:
+  1. "function TipCard" — defines a function called TipCard
+  2. "{ icon: Icon, title, desc, color }" — receives "props" (data from parent)
+     - The parent passes: <TipCard icon={Droplets} title="Stay Hydrated" ... />
+     - Inside the function, "Icon" = Droplets, "title" = "Stay Hydrated", etc.
+  3. "const [hovered, setHovered] = useState(false)" — creates a state variable
+     - "hovered" starts as false
+     - When user's mouse enters, setHovered(true) changes it to true
+     - This triggers the component to RE-RENDER with new styles
+  4. The return statement produces JSX that React turns into real DOM elements
+
+Props (Data Passed from Parent to Child):
+  Props are like function parameters. Parent components pass data down:
+    <TipCard icon={Droplets} title="Stay Hydrated" color="#3B82F6" />
+                          ↑            ↑                ↑
+                    These are props   prop name    prop value
+
+  Inside TipCard, you access them as: title, color, Icon, etc.
+  Props are READ-ONLY — a child component cannot modify its own props.
+
+How a Page Component Works (DonorSearchPage.jsx):
+
+  export default function DonorSearchPage() {
+    const [donors, setDonors] = useState([]);     // list of donors
+    const [loading, setLoading] = useState(true);  // loading spinner
+    const [search, setSearch] = useState("");       // search text
+    const [bloodFilter, setBloodFilter] = useState(""); // blood group filter
+
+    useEffect(() => {
+      api.get("/donors/search").then((res) => {
+        setDonors(res.data.donors);  // update state with API data
+        setLoading(false);            // hide loading spinner
+      });
+    }, []);  // ← empty array = runs once on page load
+
+    if (loading) return <LoadingAnimation />;
+
+    return (
+      <div>
+        <input value={search} onChange={(e) => setSearch(e.target.value)} />
+        {donors.map((d) => <DonorCard key={d._id} donor={d} />)}
+      </div>
+    );
+  }
+
+  Flow:
+    1. Component renders with empty donors array
+    2. useEffect fires → API call to /donors/search
+    3. Response arrives → setDonors(data) updates state
+    4. Component RE-RENDERS with the new donors array
+    5. donors.map() now produces real <DonorCard /> elements
+    6. Browser displays the donor cards
+
+Component Lifecycle (simplified):
+  Mount   → Component first appears on screen (useEffect with [] runs)
+  Update  → State changes → component re-renders
+  Unmount → Component leaves the screen (cleanup function runs)
+
+================================================================================
+12. HOW FUNCTIONS ARE CALLED (Event Handling & Data Flow)
+================================================================================
+
+Event Handlers — How User Actions Trigger Code:
+
+  In React, you attach functions to events using attributes like onClick,
+  onChange, onSubmit. When the event happens, React calls your function.
+
+  Examples:
+    <button onClick={handleSave}>Save</button>
+      → When user clicks, handleSave() runs
+
+    <input onChange={(e) => setName(e.target.value)} />
+      → When user types, the arrow function runs with the event object "e"
+
+    <form onSubmit={handleSubmit}>
+      → When user presses Enter or clicks submit, handleSubmit() runs
+
+The Complete Flow — Settings Page "Save Changes" Button:
+
+  Step 1: User clicks "Save Changes"
+    <button onClick={handleSave}>Save Changes</button>
+
+  Step 2: handleSave() function runs
+    const handleSave = () => {
+      // Step 3: Validate inputs
+      const nameErr = validateName(form.name);
+      const phoneErr = validatePhone(form.phone);
+      if (nameErr || phoneErr) {
+        toast.error("Please fix errors");  // Step 4: Show error
+        return;                            // Stop here
+      }
+
+      // Step 5: Send to server
+      setSaving(true);  // Show loading spinner
+      updateUser(form); // Calls AuthContext function
+    };
+
+  Step 3: updateUser() sends API request (AuthContext.jsx)
+    const updateUser = async (updates) => {
+      const res = await api.put("/auth/me", updates);
+      // ↑ This sends: PUT https://blood-drop-server.onrender.com/api/auth/me
+      //   With body: { name: "Eshtiak", phone: "019...", district: "Rajshahi", ... }
+
+      setUser(res.data.user);  // Step 6: Update React state
+      localStorage.setItem("blooddrop_user", JSON.stringify(res.data.user));
+    };
+
+  Step 4: Server processes the request (routes/auth.js)
+    router.put("/me", auth, async (req, res) => {
+      const allowed = ["name", "nickname", "phone", ...];
+      const updates = {};
+      allowed.forEach((field) => {
+        if (req.body[field] !== undefined) updates[field] = req.body[field];
+      });
+      // updates = { name: "Eshtiak", phone: "019...", district: "Rajshahi" }
+      const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true });
+      res.json({ user: sanitizeUser(user) });
+    });
+
+  Step 5: Response arrives back at the client
+    - api.put() receives the response
+    - setUser() updates React state with new user data
+    - localStorage.setItem() persists the change
+
+  Step 6: React re-renders the UI
+    - Any component using useAuth() gets the updated user
+    - Dashboard greeting changes from "Hi, Old Name" to "Hi, Eshtiak"
+    - Navbar shows updated name/avatar
+
+Arrow Functions — Used Everywhere in React:
+
+  An arrow function is a shorter way to write functions:
+    // Regular function:
+    function handleClick() { console.log("clicked"); }
+
+    // Arrow function (same thing):
+    const handleClick = () => { console.log("clicked"); };
+
+  Common pattern in React — inline arrow functions for events:
+    <input onChange={(e) => setSearch(e.target.value)} />
+                  ↑ anonymous arrow function that receives event "e"
+                  e.target.value = the current text in the input
+                  setSearch() updates the state, triggering re-render
+
+Async/Await — How API Calls Work:
+
+  API calls are "asynchronous" — they take time (network delay).
+  async/await lets us write async code that looks synchronous:
+
+    const fetchDonors = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get("/donors/search");
+        // ↑ Program waits here until server responds
+        //   Meanwhile, other code can run
+        setDonors(res.data.donors);
+      } catch (err) {
+        toast.error("Failed to load");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  Without async/await, you'd use .then() chains:
+    api.get("/donors/search")
+      .then((res) => setDonors(res.data.donors))
+      .catch((err) => toast.error("Failed"))
+      .finally(() => setLoading(false));
+
+================================================================================
+13. HOW PAGES ARE LINKED (React Router)
+================================================================================
+
+Traditional websites: Each page is a separate HTML file. Clicking a link
+loads a NEW page from the server (full page reload, white flash).
+
+React SPA (Single Page Application): Only ONE index.html file. React Router
+changes the URL and swaps which component is shown — WITHOUT reloading.
+
+How It Works:
+
+  1. BrowserRouter wraps the entire app (App.jsx):
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/donors" element={<DonorSearchPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        ...
+      </Routes>
+    </BrowserRouter>
+
+  2. When URL is "/", React renders <LandingPage />
+  3. When URL is "/donors", React renders <DonorSearchPage />
+  4. No server request is made — React just swaps the visible component
+
+Navigation Without Page Reload:
+
+  Using <Link> (like <a> tag but without reload):
+    <Link to="/donors">Find Donors</Link>
+    → Clicking changes URL to /donors
+    → React renders <DonorSearchPage />
+    → No white flash, no page reload
+
+  Using useNavigate (programmatic navigation):
+    const navigate = useNavigate();
+    navigate("/dashboard");   // Go to dashboard
+    navigate(-1);             // Go back one page
+    navigate("/login");       // Redirect to login
+
+  Using <Navigate> (automatic redirect):
+    if (!isAuthenticated) return <Navigate to="/login" />;
+    → If not logged in, automatically redirect to login page
+
+Protected Routes — Only Logged-In Users Can See:
+
+  function Protected({ children }) {
+    const { isAuthenticated, loading } = useAuth();
+    if (loading) return <LoadingAnimation />;
+    return isAuthenticated ? children : <Navigate to="/login" />;
+  }
+
+  Usage in App.jsx:
+    <Route path="/dashboard" element={<Protected><DashboardPage /></Protected>} />
+
+  How it works:
+    1. User clicks /dashboard
+    2. React tries to render <Protected><DashboardPage /></Protected>
+    3. Protected checks: is user logged in?
+    4. If YES → renders <DashboardPage />
+    5. If NO → renders <Navigate to="/login" /> (redirect)
+
+  Three types of route protection:
+    Protected   — Must be logged in (redirects to /login)
+    Public       — Must NOT be logged in (redirects to /dashboard)
+    AdminOnly    — Must be admin (redirects to /dashboard)
+
+Complete Route Map (from App.jsx):
+
+  PUBLIC ROUTES (anyone can visit):
+    /                  → LandingPage
+    /donors            → DonorSearchPage
+    /donors/:id        → DonorProfilePage
+    /developers        → DevelopersPage
+    /leaderboard       → LeaderboardPage
+    /health-hub        → HealthHubPage
+
+  PROTECTED ROUTES (must be logged in):
+    /dashboard         → DashboardPage
+    /notifications     → NotificationsPage
+    /profile           → ProfilePage
+    /settings          → SettingsPage
+    /requests          → RequestListPage
+    /requests/:id      → RequestDetailPage
+    /requests/create   → CreateRequestPage
+    /bookmarks         → BookmarksPage
+    /connect           → ConnectPage
+    /chat              → ChatPage
+    /chat/:userId      → ChatPage (with specific user)
+
+  PUBLIC-ONLY ROUTES (redirect if logged in):
+    /login             → LoginPage
+    /register          → RegisterPage
+
+  ADMIN-ONLY ROUTES:
+    /admin             → AdminDashboardPage
+
+  CATCH-ALL:
+    *                  → NotFoundPage (404)
+
+useLocation — Reading the Current URL:
+
+  const location = useLocation();
+  console.log(location.pathname);  // "/donors"
+  console.log(location.search);    // "?bloodGroup=A+"
+
+  Used in Navbar to highlight the active link:
+    const isActive = (path) => location.pathname.startsWith(path);
+    <Link className={isActive("/donors") ? "active" : ""}>
+
+ScrollToTop — Scroll to Top on Page Change:
+
+  function ScrollToTop() {
+    const { pathname } = useLocation();
+    useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+    return null;
+  }
+
+  Every time the URL changes (user clicks a link), this scrolls to the top.
+  Without this, clicking a link would keep the scroll position from the
+  previous page.
+
+================================================================================
+14. WHAT IS THE DOM (Document Object Model)
+================================================================================
+
+What is the DOM?
+
+  When a browser loads an HTML file, it creates a tree structure in memory
+  called the Document Object Model (DOM). Every HTML element becomes a
+  "node" in this tree.
+
+  Example HTML:
+    <div>
+      <h1>Hello</h1>
+      <p>World</p>
+    </div>
+
+  Becomes this DOM tree:
+    Document
+      └── html
+            └── body
+                  └── div
+                        ├── h1 → "Hello"
+                        └── p  → "World"
+
+  JavaScript can find and modify any node:
+    document.querySelector("h1").textContent = "Hi";  // changes "Hello" to "Hi"
+    document.querySelector("p").style.color = "red";   // makes text red
+
+Traditional JavaScript vs React:
+
+  Traditional (direct DOM manipulation):
+    // Find the button, add a click listener
+    document.getElementById("myButton").addEventListener("click", () => {
+      document.getElementById("myText").textContent = "Clicked!";
+    });
+
+  React (state-driven, indirect DOM updates):
+    function MyComponent() {
+      const [text, setText] = useState("Not clicked");
+      return (
+        <div>
+          <p>{text}</p>
+          <button onClick={() => setText("Clicked!")}>Click me</button>
+        </div>
+      );
+    }
+
+  In React, you NEVER directly touch the DOM. Instead, you change STATE,
+  and React automatically updates the DOM for you.
+
+Virtual DOM — React's Performance Trick:
+
+  Direct DOM manipulation is SLOW because:
+    - Changing the DOM triggers "reflow" (browser recalculates layout)
+    - Multiple changes cause multiple reflows
+
+  React's solution — Virtual DOM:
+    1. React keeps a copy of the DOM in memory (virtual DOM)
+    2. When state changes, React creates a NEW virtual DOM tree
+    3. React COMPARES old vs new virtual DOM (diffing)
+    4. React calculates the MINIMUM changes needed
+    5. React applies only those changes to the real DOM
+
+  This is called "reconciliation" — it's why React is fast even with
+  frequent state updates.
+
+  Example:
+    State changes: count goes from 5 to 6
+    Old virtual DOM: <span>5</span>
+    New virtual DOM: <span>6</span>
+    Diff: Only the text content changed
+    Real DOM update: Only change the text node (not rebuild the whole page)
+
+useRef — Accessing DOM Elements Directly:
+
+  Sometimes you NEED direct DOM access. React provides useRef for this:
+
+    const inputRef = useRef(null);
+
+    // To focus the input:
+    inputRef.current.focus();
+
+    // To read the value:
+    const value = inputRef.current.value;
+
+  Real example — File upload button:
+    const fileInputRef = useRef(null);
+
+    <input ref={fileInputRef} type="file" style={{ display: "none" }} />
+    <button onClick={() => fileInputRef.current.click()}>
+      Upload Photo
+    </button>
+
+    The file input is hidden (display: none). Clicking the visible button
+    programmatically clicks the hidden input using useRef.
+
+createPortal — Rendering Outside the Normal DOM Tree:
+
+  Normally, React components render inside their parent's DOM node.
+  createPortal lets you render a component in a DIFFERENT part of the DOM.
+
+    import { createPortal } from "react-dom";
+
+    {isOpen && createPortal(
+      <div className="modal">...</div>,
+      document.body  // ← Render this modal directly inside <body>
+    )}
+
+  Why? Some CSS properties (like transform, overflow:hidden) on a parent
+  can break child positioning. Modals, dropdowns, and tooltips often use
+  portals to escape these issues.
+
+  Real example — Donor modal in DonorSearchPage:
+    The modal is rendered in document.body to escape the 3D transform
+    context of the parent card, ensuring the modal positions correctly.
+
+================================================================================
+15. HOW STATE MANAGEMENT WORKS
+================================================================================
+
+What is "State"?
+
+  State is data that a component remembers between renders. When you
+  change state, the component re-renders (produces new JSX).
+
+    const [count, setCount] = useState(0);
+    //    ↑ variable   ↑ setter function   ↑ initial value
+
+    // Reading: count = 0
+    // Updating: setCount(1) → component re-renders → count = 1
+    // Updating: setCount(2) → component re-renders → count = 2
+
+  Every time you call setCount(), React:
+    1. Updates the state value
+    2. Triggers a re-render of the component
+    3. The component function runs again with the new state
+    4. New JSX is produced and compared to old JSX
+    5. Only changed parts of the real DOM are updated
+
+Multiple State Variables:
+
+  A component can have multiple independent states:
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+  Each has its own value and setter. Changing one doesn't affect the others.
+
+Lifting State Up — Sharing Data Between Components:
+
+  When two sibling components need the same data, move the state to their
+  PARENT and pass it down as props.
+
+  Before (broken):
+    function SearchPage() {
+      const [query, setQuery] = useState("");  // search lives here
+    }
+    function ResultsList() {
+      // Can't access query — it's in a different component!
+    }
+
+  After (fixed):
+    function SearchPage() {
+      const [query, setQuery] = useState("");  // state moved UP here
+      return (
+        <SearchBar query={query} onSearch={setQuery} />
+        <ResultsList query={query} />  {/* passed DOWN as prop */}
+      );
+    }
+
+Context API — Avoiding Prop Drilling:
+
+  "Prop drilling" = passing props through many levels of components just
+  to reach a deeply nested child. This is tedious and error-prone.
+
+  Before (prop drilling):
+    App → Layout → Sidebar → UserProfile → UserAvatar → user.name
+    (user must be passed through 5 levels!)
+
+  After (Context API):
+    App wraps everything in <AuthProvider>
+    UserAvatar calls useAuth() to get user directly
+    No intermediate components need to know about user
+
+  Our 3 Context Providers (wrapped around the entire app in App.jsx):
+
+  1. AuthContext:
+     Provides: { user, login, logout, updateUser, isAuthenticated }
+     Used by: Every page that needs user info (Dashboard, Settings, Chat, etc.)
+     How: const { user } = useAuth();
+
+  2. ThemeContext:
+     Provides: { theme, setTheme }
+     Used by: Navbar (toggle button), all pages (CSS variables change)
+     How: const { theme, setTheme } = useTheme();
+
+  3. ChatContext:
+     Provides: { conversations, messages, unreadTotal, sendMessage, ... }
+     Used by: ChatPage, Navbar (unread badge)
+     How: const { unreadTotal } = useChat();
+
+How State Flows Through the App:
+
+  1. AuthContext provides "user" to ALL descendants
+  2. Navbar reads user via useAuth() → shows avatar + name
+  3. Dashboard reads user via useAuth() → shows greeting
+  4. Settings reads user via useAuth() → populates form
+  5. When Settings calls updateUser(), AuthContext updates user
+  6. ALL components reading user automatically re-render with new data
+
+  This is "one-way data flow" — data flows DOWN from context to components.
+  Components can only change data by calling context functions (updateUser, etc.).
+
+useState vs useRef — When to Use Which:
+
+  useState:
+    - Data that should TRIGGER a re-render when changed
+    - Examples: form inputs, loading state, modal open/close, search query
+    - Setting value → component re-renders
+
+  useRef:
+    - Data that should NOT trigger a re-render when changed
+    - Examples: DOM element references, timer IDs, previous values
+    - Setting value → component does NOT re-render
+
+  Example:
+    const [count, setCount] = useState(0);  // re-renders on change
+    const renderCount = useRef(0);           // no re-render on change
+
+    useEffect(() => {
+      renderCount.current++;  // tracks how many times component rendered
+    });
+
+================================================================================
+16. HOW API CALLS WORK (HTTP Request-Response Cycle)
+================================================================================
+
+What is an API?
+
+  API (Application Programming Interface) is a way for two programs to
+  communicate. In our case: React frontend talks to Express backend.
+
+  Frontend (React)          Backend (Express)         Database (MongoDB)
+       │                          │                         │
+       │  1. GET /api/donors      │                         │
+       │ ─────────────────────►   │  2. User.find()         │
+       │                          │ ─────────────────────►  │
+       │                          │  3. Returns documents   │
+       │                          │ ◄─────────────────────  │
+       │  4. JSON response        │                         │
+       │ ◄─────────────────────   │                         │
+       │                          │                         │
+
+HTTP Methods — The 4 Operations:
+
+  GET    /api/donors       → READ data (fetch list of donors)
+  POST   /api/requests     → CREATE data (make a new blood request)
+  PUT    /api/auth/me      → UPDATE data (edit profile)
+  DELETE /api/requests/:id → REMOVE data (delete a request)
+
+  These map to CRUD operations: Create, Read, Update, Delete.
+
+How Axios Works:
+
+  Axios is a library that makes HTTP requests easy:
+
+    // Basic GET request:
+    const response = await api.get("/donors/search?bloodGroup=A+");
+    console.log(response.data.donors);  // array of donor objects
+
+    // POST request with body:
+    const response = await api.post("/requests", {
+      patientName: "John",
+      hospital: "Rajshahi Medical",
+      unitsRequired: 2,
+    });
+
+    // PUT request to update:
+    const response = await api.put("/auth/me", { name: "New Name" });
+
+    // DELETE request:
+    await api.delete("/requests/64abc123...");
+
+Axios Interceptor — Automatic Token Attachment:
+
+  Our api instance has an interceptor that adds the JWT token to every
+  request automatically:
+
+    const api = axios.create({ baseURL: import.meta.env.VITE_API_URL });
+
+    api.interceptors.request.use((config) => {
+      const token = localStorage.getItem("blooddrop_token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+  This means we never have to manually add the token — axios does it.
+
+The Complete Request-Response Cycle (Donor Search):
+
+  1. User opens /donors page
+  2. DonorSearchPage mounts → useEffect fires
+  3. useEffect calls fetchDonors():
+       const res = await api.get("/donors/search");
+  4. Axios builds the HTTP request:
+       GET https://blood-drop-server.onrender.com/api/donors/search
+       Headers: { Authorization: "Bearer eyJhbG..." }
+  5. Request travels over the internet to Render server
+  6. Express receives the request at routes/donors.js
+  7. Auth middleware verifies the JWT token
+  8. Route handler runs: User.find({}).select("-phone")
+  9. Mongoose queries MongoDB Atlas
+  10. MongoDB returns matching documents
+  11. Express sends JSON response:
+        { donors: [{ _id: "...", name: "Eshtiak", bloodGroup: "A+", ... }] }
+  12. Response travels back to the browser
+  13. Axios resolves: response.data.donors = [...]
+  14. React state updates: setDonors(data.donors)
+  15. Component re-renders with donor cards
+  16. Browser displays the donor list
+
+Loading States — Showing Spinners While Data Loads:
+
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState(null);
+
+    useEffect(() => {
+      api.get("/donors").then((res) => {
+        setData(res.data);
+        setLoading(false);   // hide spinner
+      });
+    }, []);
+
+    if (loading) return <Loader2 className="animate-spin" />;
+    return <div>{data.map(...)}</div>;
+
+  Flow: loading=true → spinner shown → API call → loading=false → data shown
+
+Error Handling — What Happens When Things Fail:
+
+    try {
+      const res = await api.get("/donors/search");
+      setDonors(res.data.donors);
+    } catch (err) {
+      // err.response.status = HTTP status code (404, 500, etc.)
+      // err.response.data.error = error message from server
+      if (err.response?.status === 500) {
+        toast.error("Server is waking up. Try again.");
+      } else {
+        toast.error("Failed to load donors.");
+      }
+    } finally {
+      setLoading(false);  // always hide spinner, even on error
+    }
+
+Optimistic Updates — Updating UI Before Server Confirms:
+
+  For better UX, sometimes we update the UI immediately, then sync
+  with the server in the background:
+
+    // Delete request — optimistic approach
+    const handleDelete = async () => {
+      setRequests(requests.filter((r) => r._id !== id));  // remove from UI
+      try {
+        await api.delete(`/requests/${id}`);  // delete on server
+        toast.success("Deleted!");
+      } catch (err) {
+        setRequests([...requests, deletedRequest]);  // revert on error
+        toast.error("Delete failed");
+      }
+    };
+
+  The user sees instant feedback. If the server fails, we revert.
+
+Fire-and-Forget — Background Operations:
+
+  Some operations don't need to wait for a response:
+    // Send emails — don't wait for delivery
+    api.post("/requests", requestData).then(() => {
+      // Request created — don't wait for emails to send
+      // Emails are sent in the background by the server
+    });
+
+  This prevents slow email delivery from delaying the user experience.
+
+Base URL Handling — Our Defensive Approach:
+
+  Our api.js handles different deployment environments:
+
+    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+    // Ensure baseURL always ends with /api
+    const api = axios.create({
+      baseURL: baseURL.endsWith("/api") ? baseURL : `${baseURL}/api`,
+    });
+
+  This prevents common deployment bugs where the API URL might be:
+    - "http://localhost:5000/api"     (local dev)
+    - "https://blood-drop-server.onrender.com/api"  (production)
+    - "http://localhost:5000"          (missing /api — auto-fixed)
+
+================================================================================
+17. COMMON TEACHER QUESTIONS & ANSWERS
 ================================================================================
 
 Q1: Why did you choose MongoDB over MySQL?
@@ -677,7 +1412,7 @@ A20: ThemeContext manages light/dark/system theme. It adds/removes a "dark"
      Theme choice is persisted in localStorage.
 
 ================================================================================
-12. HOW TO RUN THE PROJECT
+18. HOW TO RUN THE PROJECT
 ================================================================================
 
 Prerequisites:
