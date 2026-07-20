@@ -37,7 +37,7 @@ const DEVELOPERS = [
   },
   {
     name: "Abdur Rahman",
-    role: "Project Presenter",
+    role: "Project Cordinator",
     roleColor: "#7C3AED",
     desc: "Presents and represents the LifeDrop platform to stakeholders and teachers.",
     initials: "AR",
@@ -50,7 +50,7 @@ const DEVELOPERS = [
   },
   {
     name: "Sabbir Ahmed",
-    role: "Dead_Weight",
+    role: "Designer",
     roleColor: "#EC4899",
     desc: "Designs beautiful and intuitive experiences for users.",
     initials: "SA",
@@ -78,7 +78,7 @@ const DEVELOPERS = [
     name: "Md. Aliul Islam",
     role: "Frontend Developer",
     roleColor: "#F59E0B",
-    desc: "Handles server-side logic, database management and API integration.",
+    desc: "Builds responsive and interactive user interfaces with precision.",
     initials: "RA",
     photo: "",
     gradient: "linear-gradient(135deg, #FDE68A, #F59E0B)",

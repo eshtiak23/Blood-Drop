@@ -484,7 +484,7 @@ export default function LeaderboardPage() {
                 </div>
               </div>
               <div className="lb-header-rank-info">
-                <span className="lb-header-rank-name">{user?.name?.split(" ")[0]}</span>
+                <span className="lb-header-rank-name">{user?.nickname || user?.name?.split(" ")[0]}</span>
                 <span className="lb-header-rank-badge">
                   {getRank(myRank.donor.totalDonations).icon} {getRank(myRank.donor.totalDonations).label}
                 </span>
@@ -555,10 +555,10 @@ export default function LeaderboardPage() {
                     )}
                   </div>
                   <div className="lb-your-rank-info">
-                    <div className="lb-your-rank-name">
-                      {myRank.donor.name}
-                      <span className="lb-you-badge">You</span>
-                    </div>
+            <div className="lb-your-rank-name">
+              {myRank.donor.nickname || myRank.donor.name}
+              <span className="lb-you-badge">You</span>
+            </div>
                     <div className="lb-your-rank-meta">
                       <span style={{ color: bc.text }}>{myRank.donor.bloodGroup}</span>
                       {myRank.donor.district && <><span className="lb-your-rank-dot">·</span> {myRank.donor.district}</>}

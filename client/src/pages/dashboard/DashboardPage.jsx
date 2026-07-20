@@ -172,7 +172,7 @@ export default function DashboardPage() {
             {/* Name, Blood Group, Verified */}
             <div style={{ flex: 1, minWidth: 200 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <h1 style={{ fontSize: 22, fontWeight: 800 }}>Hi, {user?.name} 👋</h1>
+                <h1 style={{ fontSize: 22, fontWeight: 800 }}>Hi, {user?.nickname || user?.name?.split(" ")[0]} 👋</h1>
                 {user?.isVerified && <span className="badge badge-green"><Shield size={10} /> Verified</span>}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, flexWrap: "wrap" }}>

@@ -29,6 +29,7 @@ export default function SettingsPage() {
   // Profile editing form — initialized with current user data
   const [form, setForm] = useState({
     name: user?.name || "",
+    nickname: user?.nickname || "",
     phone: user?.phone || "",
     district: user?.district || "",
     area: user?.area || "",
@@ -154,13 +155,17 @@ export default function SettingsPage() {
               {fieldErrors.name && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.name}</div>}
             </div>
             <div className="input-group">
-              <label style={{ fontSize: 13, fontWeight: 500 }}>Phone <span style={{ color: "var(--red)" }}>*</span></label>
-              <input className="input" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
-              {fieldErrors.phone && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.phone}</div>}
+              <label style={{ fontSize: 13, fontWeight: 500 }}>Nickname</label>
+              <input className="input" value={form.nickname} onChange={(e) => set("nickname", e.target.value)} placeholder="What should we call you?" />
             </div>
           </div>
 
           <div className="grid grid-2" style={{ marginBottom: 16 }}>
+            <div className="input-group">
+              <label style={{ fontSize: 13, fontWeight: 500 }}>Phone <span style={{ color: "var(--red)" }}>*</span></label>
+              <input className="input" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+              {fieldErrors.phone && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.phone}</div>}
+            </div>
             <div className="input-group">
               <label style={{ fontSize: 13, fontWeight: 500 }}>District <span style={{ color: "var(--red)" }}>*</span></label>
               <select className="input" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, area: "" })}>
@@ -169,6 +174,9 @@ export default function SettingsPage() {
               </select>
               {fieldErrors.district && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.district}</div>}
             </div>
+          </div>
+
+          <div className="grid grid-2" style={{ marginBottom: 16 }}>
             <div className="input-group">
               <label style={{ fontSize: 13, fontWeight: 500 }}>Area <span style={{ color: "var(--red)" }}>*</span></label>
               <select className="input" value={form.area} onChange={(e) => set("area", e.target.value)} disabled={!form.district}>
@@ -177,11 +185,10 @@ export default function SettingsPage() {
               </select>
               {fieldErrors.area && <div style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{fieldErrors.area}</div>}
             </div>
-          </div>
-
-          <div className="input-group" style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 13, fontWeight: 500 }}>Bio (optional)</label>
-            <textarea className="input" value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={3} placeholder="Tell others about yourself..." />
+            <div className="input-group">
+              <label style={{ fontSize: 13, fontWeight: 500 }}>Bio (optional)</label>
+              <textarea className="input" value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={3} placeholder="Tell others about yourself..." />
+            </div>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
