@@ -420,6 +420,20 @@ export default function LeaderboardPage() {
   const livesImpacted = Math.round(totalDonations * 1.3);
   const topDonor = donors[0];
 
+  // Find current user's rank in the full (unfiltered) sorted list
+  const myRank = useMemo(() => {
+    if (!user) return null;
+    const idx = donors.findIndex((d) => d._id === user._id);
+    if (idx === -1) return null;
+    return { position: idx + 1, donor: donors[idx] };
+  }, [donors, user]);
+
+  // Check if user is already visible on the current paginated page
+  const myAlreadyVisible = useMemo(() => {
+    if (!myRank || !user) return false;
+    return paginated.some((d) => d._id === user._id);
+  }, [paginated, myRank, user]);
+
   useEffect(() => { setPage(1); }, [search, bloodFilter, districtFilter, sortBy]);
 
   if (loading) {
@@ -500,6 +514,54 @@ export default function LeaderboardPage() {
             </div>
           )}
         </div>
+
+        {/* ── Your Ranking ── */}
+        {myRank && !myAlreadyVisible && (() => {
+          const bc = getBloodGroupColor(myRank.donor.bloodGroup);
+          const ml = (myRank.donor.totalDonations || 0) * ML_PER_DONATION;
+          const rankData = getRank(myRank.donor.totalDonations);
+          return (
+            <div className="lb-your-rank">
+              <div className="lb-your-rank-inner">
+                <div className="lb-your-rank-left">
+                  <div className="lb-your-rank-pos">
+                    <span className="lb-your-rank-hash">#</span>
+                    <span className="lb-your-rank-num">{myRank.position}</span>
+                  </div>
+                  <div className="lb-your-rank-avatar">
+                    {myRank.donor.photo ? (
+                      <img src={myRank.donor.photo} alt={myRank.donor.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                    ) : (
+                      <span>{myRank.donor.name?.charAt(0)?.toUpperCase()}</span>
+                    )}
+                  </div>
+                  <div className="lb-your-rank-info">
+                    <div className="lb-your-rank-name">
+                      {myRank.donor.name}
+                      <span className="lb-you-badge">You</span>
+                    </div>
+                    <div className="lb-your-rank-meta">
+                      <span style={{ color: bc.text }}>{myRank.donor.bloodGroup}</span>
+                      {myRank.donor.district && <><span className="lb-your-rank-dot">·</span> {myRank.donor.district}</>}
+                    </div>
+                  </div>
+                </div>
+                <div className="lb-your-rank-right">
+                  <div className="lb-your-rank-stats">
+                    <RankBadge rank={rankData} size="md" />
+                    <div className="lb-your-rank-donations">
+                      <span className="lb-your-rank-count">{myRank.donor.totalDonations}</span>
+                      <span className="lb-your-rank-ml">{ml.toLocaleString()} ml</span>
+                    </div>
+                  </div>
+                  <div className="lb-your-rank-xp">
+                    <XpBar rank={rankData} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── Filters ── */}
         <div className="lb-filters">
