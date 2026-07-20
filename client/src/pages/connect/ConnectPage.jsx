@@ -9,23 +9,36 @@
  * - Stats banner (total, pending, connected counts)
  * - Animated tab switching
  * - Phone reveal only for connected users
+ * - Click connected person to view info modal
+ * - Disconnect button to remove connections
  * - Empty state illustrations
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { createPortal } from "react-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Users, UserPlus, Phone, MessageCircle, Check, X as XIcon, Clock, Search, Sparkles } from "lucide-react";
+import { Users, UserPlus, Phone, MessageCircle, Check, X as XIcon, Clock, Search, Sparkles, Droplets, MapPin, Unlink, X } from "lucide-react";
 import * as friendService from "../../services/friendService";
 import toast from "react-hot-toast";
 
+const BLOOD_GROUP_COLORS = {
+  "A+": { bg: "#FEE2E2", text: "#DC2626" }, "A-": { bg: "#FEF3C7", text: "#D97706" },
+  "B+": { bg: "#DBEAFE", text: "#2563EB" }, "B-": { bg: "#E0E7FF", text: "#4F46E5" },
+  "AB+": { bg: "#F3E8FF", text: "#7C3AED" }, "AB-": { bg: "#FCE7F3", text: "#DB2777" },
+  "O+": { bg: "#ECFDF5", text: "#059669" }, "O-": { bg: "#F0FDF4", text: "#15803D" },
+};
+
 export default function ConnectPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("pending");
   const [pending, setPending] = useState([]);
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState(null);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -43,6 +56,16 @@ export default function ConnectPage() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (selectedFriend) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [selectedFriend]);
 
   const handleAccept = async (requestId) => {
     setActionId(requestId);
@@ -74,6 +97,22 @@ export default function ConnectPage() {
       toast.error("Failed to reject");
     } finally {
       setActionId(null);
+    }
+  };
+
+  const handleDisconnect = async (requestId) => {
+    if (disconnecting) return;
+    setDisconnecting(true);
+    try {
+      await friendService.withdrawRequest(requestId);
+      setFriends((prev) => prev.filter((f) => f._id !== requestId));
+      setSelectedFriend(null);
+      window.dispatchEvent(new Event("friendsUpdated"));
+      toast.success("Connection removed");
+    } catch {
+      toast.error("Failed to disconnect");
+    } finally {
+      setDisconnecting(false);
     }
   };
 
@@ -226,7 +265,11 @@ export default function ConnectPage() {
                 return (
                 <div key={f._id} className="connect-friend-card">
                   <div className="connect-card-left">
-                    <div className="connect-avatar">
+                    <div
+                      className="connect-avatar"
+                      onClick={() => setSelectedFriend({ ...friend, requestId: f._id })}
+                      style={{ cursor: "pointer" }}
+                    >
                       {friend.photo ? (
                         <img src={friend.photo} alt={friend.name} />
                       ) : (
@@ -235,7 +278,13 @@ export default function ConnectPage() {
                       <span className="connect-blood-badge">{friend.bloodGroup}</span>
                     </div>
                     <div className="connect-card-info">
-                      <div className="connect-card-name">{friend.name}</div>
+                      <div
+                        className="connect-card-name"
+                        onClick={() => setSelectedFriend({ ...friend, requestId: f._id })}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {friend.name}
+                      </div>
                       <div className="connect-card-meta">
                         {friend.district}{friend.area ? `, ${friend.area}` : ""}
                       </div>
@@ -258,6 +307,88 @@ export default function ConnectPage() {
           )
         )}
       </div>
+
+      {/* ---- Friend Info Modal ---- */}
+      {selectedFriend && createPortal(
+        <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px" }} onClick={() => setSelectedFriend(null)}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }} />
+          {(() => {
+            const sc = BLOOD_GROUP_COLORS[selectedFriend.bloodGroup] || { bg: "#FEE2E2", text: "#DC2626" };
+            return (
+              <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 420, maxHeight: "90vh", overflowY: "auto", background: "var(--bg-card)", borderRadius: "var(--radius-lg)", boxShadow: "0 25px 60px rgba(0,0,0,0.25)" }}>
+                {/* Close */}
+                <button onClick={() => setSelectedFriend(null)} style={{ position: "absolute", top: 10, right: 10, zIndex: 10, width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+                  <X size={14} />
+                </button>
+
+                {/* Header */}
+                <div style={{ padding: "24px 20px 16px", textAlign: "center", background: `linear-gradient(135deg, ${sc.bg}, ${sc.bg}cc)` }}>
+                  <div style={{ width: 60, height: 60, borderRadius: "50%", background: sc.text, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800, margin: "0 auto 10px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)", border: "3px solid rgba(255,255,255,0.5)" }}>
+                    {selectedFriend.photo ? (
+                      <img src={selectedFriend.photo} alt="" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
+                    ) : (
+                      selectedFriend.name?.charAt(0)?.toUpperCase()
+                    )}
+                  </div>
+                  <div style={{ fontSize: 17, fontWeight: 800, color: "var(--text)" }}>{selectedFriend.name}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
+                    <MapPin size={11} /> {selectedFriend.area}{selectedFriend.district ? `, ${selectedFriend.district}` : ""}
+                  </div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 8, padding: "4px 14px", borderRadius: 20, fontSize: 14, fontWeight: 700, background: sc.bg, color: sc.text }}>
+                    <Droplets size={13} /> {selectedFriend.bloodGroup}
+                  </div>
+                </div>
+
+                {/* Info */}
+                <div style={{ padding: "14px 20px" }}>
+                  {selectedFriend.phone && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10, background: "var(--bg-secondary)", marginBottom: 8 }}>
+                      <Phone size={16} color="var(--green)" />
+                      <div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5 }}>Phone</div>
+                        <a href={`tel:${selectedFriend.phone}`} style={{ fontSize: 14, fontWeight: 600, color: "var(--green)", textDecoration: "none" }}>{selectedFriend.phone}</a>
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10, background: "var(--bg-secondary)", marginBottom: 8 }}>
+                    <MapPin size={16} color="var(--red)" />
+                    <div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5 }}>Location</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>{selectedFriend.area}{selectedFriend.district ? `, ${selectedFriend.district}` : ""}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10, background: "var(--bg-secondary)" }}>
+                    <Droplets size={16} color={sc.text} />
+                    <div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5 }}>Blood Group</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: sc.text }}>{selectedFriend.bloodGroup}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: 10, padding: "8px 20px 16px", borderTop: "1px solid var(--border-light)" }}>
+                  <Link to={`/chat/${selectedFriend._id}`} onClick={() => setSelectedFriend(null)} className="btn btn-primary" style={{ flex: 1, padding: "11px 0", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                    <MessageCircle size={15} /> Chat
+                  </Link>
+                  <button
+                    onClick={() => handleDisconnect(selectedFriend.requestId)}
+                    disabled={disconnecting}
+                    className="btn"
+                    style={{
+                      flex: 1, padding: "11px 0", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      background: "#FEE2E2", color: "#DC2626", border: "none", borderRadius: "var(--radius-sm)", fontWeight: 600, cursor: disconnecting ? "not-allowed" : "pointer", opacity: disconnecting ? 0.6 : 1,
+                    }}
+                  >
+                    <Unlink size={15} /> {disconnecting ? "Removing..." : "Disconnect"}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
