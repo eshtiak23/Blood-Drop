@@ -11,10 +11,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { searchRequests, addDonationLog, getDonationLogs, addFeedback, getAllFeedback, getMyFeedback, deleteFeedback, getDonationCooldown } from "../../services/localStore";
+import { searchRequests, addDonationLog, getDonationLogs, addFeedback, getAllFeedback, getMyFeedback, deleteFeedback, getDonationCooldown, getDonationHistory } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS } from "../../data/constants";
 import {
-  Droplets, Heart, AlertCircle, Search, Plus, Users, MapPin, Phone, Mail,
+  Droplets, Heart, AlertCircle, Search, Plus, MapPin, Phone, Mail,
   Shield, Clock, TrendingUp, Activity, ArrowRight, Calendar, Star,
   Building2, MessageSquare, Trash2, CheckCircle, Loader2, X, Bell
 } from "lucide-react";
@@ -50,6 +50,10 @@ export default function DashboardPage() {
   // Cooldown reminder
   const [cooldown, setCooldown] = useState(null);
 
+  // Donation history state
+  const [donationHistory, setDonationHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+
   useEffect(() => {
     if (!user) return;
 
@@ -59,7 +63,8 @@ export default function DashboardPage() {
       getDonationLogs(),
       getAllFeedback(),
       user._id ? getMyFeedback() : Promise.resolve([]),
-    ]).then(([allRequests, logs, allFeedback, myFb]) => {
+      getDonationHistory(),
+    ]).then(([allRequests, logs, allFeedback, myFb, history]) => {
       // Count open requests per blood group
       const stock = {};
       BLOOD_GROUPS.forEach((g) => { stock[g] = 0; });
@@ -74,6 +79,7 @@ export default function DashboardPage() {
       setDonationLogs(logs);
       setFeedbackList(allFeedback.slice(0, 10));
       setMyFeedback(myFb);
+      setDonationHistory(history);
       setCooldown(getDonationCooldown(user));
     }).catch((err) => { console.error(err); toast.error("Failed to load dashboard data"); });
   }, [user]);
@@ -269,7 +275,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Stats Grid ── */}
-      <div className="grid dash-stats" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 24 }}>
+      <div className="grid dash-stats" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 24 }}>
         <StatCard icon={<Heart size={20} color="var(--red)" />} label="Donations" value={user?.totalDonations || 0} />
         <StatCard
           icon={<Activity size={20} color={user?.isAvailable ? "var(--green)" : "var(--text-muted)"} />}
@@ -278,10 +284,7 @@ export default function DashboardPage() {
           valueColor={user?.isAvailable ? "var(--green)" : "var(--text-muted)"}
         />
         {stats && (
-          <>
-            <StatCard icon={<AlertCircle size={20} color="var(--red)" />} label="Open Requests" value={Object.values(stats).reduce((a, b) => a + b, 0)} />
-            <StatCard icon={<Users size={20} color="var(--blue)" />} label="Blood Groups" value={Object.values(stats).filter((v) => v > 0).length} />
-          </>
+          <StatCard icon={<AlertCircle size={20} color="var(--red)" />} label="Open Requests" value={Object.values(stats).reduce((a, b) => a + b, 0)} />
         )}
       </div>
 
@@ -472,6 +475,79 @@ export default function DashboardPage() {
           </div>
         </div>
 
+      {/* ── Donation History ── */}
+      {donationHistory.length > 0 && (
+        <div className="card" style={{ marginTop: 24 }}>
+          <div className="card-body">
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                width: "100%", background: "none", border: "none", cursor: "pointer", padding: 0,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <TrendingUp size={18} color="var(--red)" />
+                <h2 style={{ fontSize: 16, fontWeight: 700, textAlign: "left" }}>Donation History</h2>
+                <span style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>({donationHistory.length})</span>
+              </div>
+              <div style={{
+                width: 28, height: 28, borderRadius: "50%", background: "var(--bg-secondary)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "transform 0.3s ease", transform: showHistory ? "rotate(180deg)" : "rotate(0deg)",
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+              </div>
+            </button>
+
+            {showHistory && (
+              <div style={{ marginTop: 16, borderTop: "1px solid var(--border-light)", paddingTop: 12 }}>
+                {donationHistory.map((req) => {
+                  const rc = BLOOD_GROUP_COLORS[req.patientBloodGroup] || {};
+                  const isDark = document.documentElement.classList.contains("dark");
+                  const date = req.updatedAt ? new Date(req.updatedAt) : new Date(req.createdAt);
+                  return (
+                    <Link key={req._id} to={`/requests/${req._id}`} style={{
+                      display: "flex", alignItems: "center", gap: 12, padding: "12px",
+                      borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)",
+                      textDecoration: "none", transition: "all 0.2s", marginBottom: 8,
+                    }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--red)"; e.currentTarget.style.background = "var(--red-light)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-light)"; e.currentTarget.style.background = "transparent"; }}
+                    >
+                      <div style={{
+                        width: 40, height: 40, borderRadius: "50%", overflow: "hidden", flexShrink: 0,
+                        background: isDark ? rc.darkBg : rc.bg, display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 13, fontWeight: 700, color: isDark ? rc.darkText : rc.text,
+                      }}>
+                        {req.requester?.photo ? (
+                          <img src={req.requester.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          req.requester?.name?.charAt(0)?.toUpperCase() || "?"
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
+                          Donated to {req.requester?.name || "Unknown"}
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                          <Building2 size={11} /> {req.hospital}
+                          <span>·</span>
+                          <span style={{ color: isDark ? rc.darkText : rc.text, fontWeight: 600 }}>{req.patientBloodGroup}</span>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", flexShrink: 0, textAlign: "right" }}>
+                        {date.toLocaleDateString("en-BD", { day: "numeric", month: "short", year: "numeric" })}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Responsive: stack on mobile */}
       <style>{`
         @keyframes orbit {
@@ -479,7 +555,7 @@ export default function DashboardPage() {
           100% { transform: rotate(360deg) translateX(36px) rotate(-360deg); }
         }
         @media(max-width:768px){
-          .dash-stats{grid-template-columns:repeat(2,1fr) !important;}
+          .dash-stats{grid-template-columns:repeat(3,1fr) !important;}
           .dash-two-col{grid-template-columns:1fr !important;}
           .dash-quick-actions{display:grid !important; grid-template-columns:repeat(3,1fr) !important; justify-items:center;}
           .orbit-drop{display:none !important;}

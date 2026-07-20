@@ -131,6 +131,14 @@ export async function deleteDonationLog(logId) {
   await api.delete(`/donation-logs/${logId}`);
 }
 
+// ── Donation History (requests user donated to) ──
+
+/** Get completed requests the current user accepted/donated to */
+export async function getDonationHistory() {
+  const res = await api.get("/requests/donation-history");
+  return res.data.requests;
+}
+
 // ── Feedback / Reviews ──
 
 /** Get all feedback entries */
