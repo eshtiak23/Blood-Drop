@@ -472,6 +472,25 @@ export default function LeaderboardPage() {
               <p className="lb-header-sub">Level up by donating. Earn ranks. Save lives.</p>
             </div>
           </div>
+
+          {/* ── Compact "Your Rank" card ── */}
+          {myRank && (
+            <div className="lb-header-rank-card">
+              <div style={{ textAlign: "center" }}>
+                <div className="lb-header-rank-label">Your rank</div>
+                <div className="lb-header-rank-pos">
+                  <span className="lb-header-rank-hash">#</span>
+                  {myRank.position}
+                </div>
+              </div>
+              <div className="lb-header-rank-info">
+                <span className="lb-header-rank-name">{user?.name?.split(" ")[0]}</span>
+                <span className="lb-header-rank-badge">
+                  {getRank(myRank.donor.totalDonations).icon} {getRank(myRank.donor.totalDonations).label}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
