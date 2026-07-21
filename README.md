@@ -28,53 +28,91 @@ A complete blood donor management system built with React, Express, and MongoDB 
 - MongoDB Atlas (Database)
 - JWT Authentication
 - Lucide React (icons)
+- Leaflet / OpenStreetMap (location)
 
 ## Getting Started
 
-```bash
-# Install client dependencies
-cd client
-npm install
+### Prerequisites
 
-# Run development server
-npm run dev
+- Node.js v18+
+- MongoDB Atlas account (or local MongoDB)
 
-# Build for production
-npm run build
-```
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/blood-drop.git
+   cd blood-drop
+   ```
+
+2. **Install server dependencies**
+   ```bash
+   cd Blood-Drop_Server
+   npm install
+   ```
+
+3. **Install client dependencies**
+   ```bash
+   cd ../client
+   npm install
+   ```
+
+4. **Configure environment variables**
+
+   Create `.env` in `Blood-Drop_Server/`:
+   ```
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_secret_key
+   PORT=5000
+   CLIENT_URL=http://localhost:5173
+   RESEND_API_KEY=your_resend_api_key
+   ```
+
+5. **Run the server**
+   ```bash
+   cd Blood-Drop_Server
+   node server.js
+   ```
+
+6. **Run the client**
+   ```bash
+   cd client
+   npm run dev
+   ```
 
 ## Project Structure
 
 ```
 Blood Link/
-├── Logo.png
-├── vercel.json
+├── Blood-Drop_Server/
+│   ├── models/          # Mongoose schemas
+│   ├── routes/          # API routes
+│   ├── middleware/       # Auth middleware
+│   ├── utils/           # Helpers
+│   └── server.js        # Entry point
 ├── client/
-│   ├── public/Logo.png
-│   └── src/
-│       ├── components/layout/   (Navbar, Footer)
-│       ├── context/             (Auth, Theme)
-│       ├── data/                (constants, donors.json)
-│       ├── pages/               (all page components)
-│       ├── services/            (API service)
-│       └── styles/              (CSS)
-└── server/
-    ├── config/db.js
-    ├── middleware/
-    ├── models/                  (Mongoose schemas)
-    ├── routes/                  (API endpoints)
-    └── server.js
+│   ├── src/
+│   │   ├── pages/       # React pages
+│   │   ├── components/  # Reusable components
+│   │   ├── services/    # API services
+│   │   ├── context/     # Context providers
+│   │   └── App.jsx      # Router setup
+│   └── index.html
+├── PROJECT_REPORT.md    # Academic report (Bangla)
+└── README.md
 ```
 
 ## API Endpoints
 
-- `POST /api/auth/register` — Register new user
-- `POST /api/auth/login` — Login
-- `GET /api/donors/search` — Search donors
-- `GET /api/requests` — Get blood requests
-- `POST /api/requests` — Create blood request
-- `GET /api/notifications` — Get notifications
-- `GET /api/stats` — Public stats
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | Login |
+| GET | `/api/donors` | Search donors |
+| POST | `/api/requests` | Create blood request |
+| PATCH | `/api/requests/:id/accept` | Accept request |
+| PATCH | `/api/requests/:id/complete` | Mark complete |
+| POST | `/api/messages/:id` | Send message |
 
 ## License
 

@@ -6,7 +6,7 @@
 Project by: MD. Eshtiak Ahmed (Lead Developer)
 Team: Towfiqur Rahman, Abdur Rahman, Sabbir Ahmed, Al Yeamin Abir
 Supervisor: [Your Teacher Name]
-Institution: [Your Institution Name]
+Institution: Rajshahi Polytecnic Institute
 Date: July 2026
 
 ================================================================================
