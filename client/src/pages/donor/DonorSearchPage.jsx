@@ -12,7 +12,7 @@ import { MessageCircle } from "lucide-react";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, AREAS } from "../../data/constants";
 import api from "../../services/api";
 import * as friendService from "../../services/friendService";
-import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, User, Clock, CheckCircle, SlidersHorizontal, Loader2, UserPlus, Check, Clock3, X } from "lucide-react";
+import { Search, MapPin, Droplets, Calendar, Shield, UserSearch, Locate, Navigation, User, Clock, CheckCircle, SlidersHorizontal, Loader2, UserPlus, Check, Clock3, X, Mail } from "lucide-react";
 import toast from "react-hot-toast";
 import Pagination from "../../components/ui/Pagination";
 
@@ -342,6 +342,11 @@ export default function DonorSearchPage() {
                   <div className="contact-card-location">
                     <MapPin size={13} /> {d.area}, {d.district}
                   </div>
+                  {d.email && (
+                    <div className="contact-card-location">
+                      <Mail size={13} /> {d.email}
+                    </div>
+                  )}
                   <div className="contact-card-stats">
                     <span className="contact-card-stat"><Droplets size={13} /> {d.totalDonations || 0} donations</span>
                     <span className="contact-card-stat"><Calendar size={13} /> {d.lastDonationDate ? new Date(d.lastDonationDate).toLocaleDateString() : "Never"}</span>
@@ -439,6 +444,15 @@ export default function DonorSearchPage() {
                     <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Status</div>
                   </div>
                 </div>
+
+                {/* Email */}
+                {selectedDonor.email && (
+                  <div style={{ padding: "6px 20px" }}>
+                    <a href={`mailto:${selectedDonor.email}`} style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--red)", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>
+                      <Mail size={14} /> {selectedDonor.email}
+                    </a>
+                  </div>
+                )}
 
                 {/* Connect section */}
                 <div style={{ padding: "10px 20px" }}>

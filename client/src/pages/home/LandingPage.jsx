@@ -522,6 +522,11 @@ export default function LandingPage() {
                 <span style={{ fontSize: 12, fontWeight: 700, color: "var(--red)" }}>Universal Recipient: AB+</span>
               </div>
             </div>
+
+            {/* Disclaimer */}
+            <p style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginTop: 16, padding: "10px 16px", borderRadius: 8, background: "var(--bg-secondary)", lineHeight: 1.5 }}>
+              ⚠️ Educational Note: This compatibility information is based on standard theoretical RBC transfusion guidelines (ABO & Rh). Actual transfusions require professional medical assessment and compatibility testing.
+            </p>
           </div>
         </div>,
         document.body

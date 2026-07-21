@@ -9,7 +9,7 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import { acceptRequest, completeRequest, addRating, hasRated, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS, URGENCY } from "../../data/constants";
-import { MapPin, Phone, Calendar, Clock, Hospital, CheckCircle, ArrowLeft, Star, Trash2, Loader2 } from "lucide-react";
+import { MapPin, Phone, Calendar, Clock, Hospital, CheckCircle, ArrowLeft, Star, Trash2, Loader2, Mail } from "lucide-react";
 import toast from "react-hot-toast";
 
 function getBloodGroupColor(bloodGroup) {
@@ -175,6 +175,9 @@ export default function RequestDetailPage() {
             {user?._id === request.requester?._id && (
               <span style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)" }}><Phone size={14} /> {request.contactNumber}</span>
             )}
+            {request.requester?.email && (
+              <a href={`mailto:${request.requester.email}`} style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--red)", textDecoration: "none", fontWeight: 600 }}><Mail size={14} /> {request.requester.email}</a>
+            )}
             {request.description && <div style={{ background: "var(--red-light)", padding: 12, borderRadius: 8, fontSize: 14 }}>{request.description}</div>}
             <div className="separator" />
             <div>
@@ -194,6 +197,11 @@ export default function RequestDetailPage() {
                     <div className="avatar avatar-sm" style={{ background: "#ECFDF5", color: "#059669" }}>{request.acceptedBy.name?.charAt(0)}</div>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: 14 }}>{request.acceptedBy.name}</div>
+                      {request.acceptedBy.email && (
+                        <a href={`mailto:${request.acceptedBy.email}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--red)", textDecoration: "none", fontSize: 13, fontWeight: 600, marginTop: 2 }}>
+                          <Mail size={12} /> {request.acceptedBy.email}
+                        </a>
+                      )}
                       {request.acceptedBy.phone && (
                         <a href={`tel:${request.acceptedBy.phone}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--red)", textDecoration: "none", fontSize: 13, fontWeight: 600, marginTop: 2 }}>
                           <Phone size={12} /> {request.acceptedBy.phone}
@@ -214,6 +222,11 @@ export default function RequestDetailPage() {
                     <div className="avatar avatar-sm" style={{ background: "#EFF6FF", color: "#2563EB" }}>{request.requester?.name?.charAt(0)}</div>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: 14 }}>{request.requester?.name}</div>
+                      {request.requester?.email && (
+                        <a href={`mailto:${request.requester.email}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--red)", textDecoration: "none", fontSize: 13, fontWeight: 600, marginTop: 2 }}>
+                          <Mail size={12} /> {request.requester.email}
+                        </a>
+                      )}
                       {request.contactNumber && (
                         <a href={`tel:${request.contactNumber}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--red)", textDecoration: "none", fontSize: 13, fontWeight: 600, marginTop: 2 }}>
                           <Phone size={12} /> {request.contactNumber}

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getBookmarks, removeBookmark } from "../../services/localStore";
 import { BLOOD_GROUP_COLORS } from "../../data/constants";
-import { Bookmark, MapPin, Droplets, Trash2, Calendar } from "lucide-react";
+import { Bookmark, MapPin, Droplets, Trash2, Calendar, Mail } from "lucide-react";
 import toast from "react-hot-toast";
 
 /** Returns blood group badge colors based on dark/light theme */
@@ -91,6 +91,11 @@ export default function BookmarksPage() {
                   <div className="contact-card-location">
                     <MapPin size={13} /> {d.area}, {d.district}
                   </div>
+                  {d.email && (
+                    <div className="contact-card-location">
+                      <Mail size={13} /> {d.email}
+                    </div>
+                  )}
                   <div className="contact-card-stats">
                     <span className="contact-card-stat"><Droplets size={13} /> {d.totalDonations || 0} donations</span>
                     <span className="contact-card-stat"><Calendar size={13} /> {d.lastDonationDate ? new Date(d.lastDonationDate).toLocaleDateString() : "Never"}</span>

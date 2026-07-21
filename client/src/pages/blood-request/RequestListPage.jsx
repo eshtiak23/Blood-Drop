@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { searchRequests, deleteRequest } from "../../services/localStore";
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS, DISTRICTS, URGENCY } from "../../data/constants";
-import { MapPin, Clock, Plus, AlertCircle, Trash2, MessageCircle, Droplets, Loader2, X } from "lucide-react";
+import { MapPin, Clock, Plus, AlertCircle, Trash2, MessageCircle, Droplets, Loader2, X, Mail } from "lucide-react";
 import toast from "react-hot-toast";
 
 function getBloodGroupColor(bloodGroup) {
@@ -150,6 +150,11 @@ export default function RequestListPage() {
                   <div className="contact-card-location">
                     <MapPin size={13} /> {r.area}, {r.district}
                   </div>
+                  {r.requester?.email && (
+                    <div className="contact-card-location">
+                      <Mail size={13} /> {r.requester.email}
+                    </div>
+                  )}
                   <div className="contact-card-stats">
                     <span className="contact-card-stat"><Droplets size={13} /> {r.unitsRequired} unit(s)</span>
                     <span className="contact-card-stat"><Clock size={13} /> {r.dateNeeded ? new Date(r.dateNeeded).toLocaleDateString() : "ASAP"}</span>

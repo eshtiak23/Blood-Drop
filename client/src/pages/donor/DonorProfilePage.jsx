@@ -9,7 +9,7 @@ import { BLOOD_GROUP_COLORS } from "../../data/constants";
 import { addBookmark, isBookmarked, removeBookmark } from "../../services/localStore";
 import * as friendService from "../../services/friendService";
 import api from "../../services/api";
-import { MapPin, Calendar, Droplets, Shield, Bookmark, ArrowLeft, MessageCircle, Loader2, UserPlus, Check, Clock3 } from "lucide-react";
+import { MapPin, Calendar, Droplets, Shield, Bookmark, ArrowLeft, MessageCircle, Loader2, UserPlus, Check, Clock3, Mail } from "lucide-react";
 import toast from "react-hot-toast";
 
 /** Returns blood group badge colors based on dark/light theme */
@@ -95,6 +95,11 @@ export default function DonorProfilePage() {
             <div>
               <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Contact</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14, color: "var(--text-secondary)" }}>
+                {donor.email && (
+                  <a href={`mailto:${donor.email}`} style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--red)", textDecoration: "none", fontWeight: 600 }}>
+                    <Mail size={14} /> {donor.email}
+                  </a>
+                )}
                 <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {friendStatus?.status === "accepted"
                     ? <>Phone available in your connections</>
